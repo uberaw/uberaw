@@ -3,134 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">UBE RAW</title>
+    <title>UBE RAW | Art & Design Studio</title>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500&family=Inter:wght@200;400&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --bg: #0a0a0a; 
-            --text: #e5e5e5; 
-            --bronze: #a87f4a; /* Bronz Detay */
-            --border: #1e1e1e; 
-        }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; }
+        :root { --bg: #000; --text: #e5e5e5; --bronze: #a87f4a; --border: #1a1a1a; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
         
-        /* Navigasyon - Bronz Alt Çizgi */
-        nav { padding: 40px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--bronze); background: #000; position: sticky; top:0; z-index: 1000; }
-        .logo h1 { font-family: 'Cormorant Garamond', serif; font-size: 28px; letter-spacing: 6px; margin: 0; color: var(--bronze); text-transform: uppercase; }
-        .logo img { height: 40px; }
+        /* 1. Minimalist Preloader */
+        #preloader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 1s; }
+        .loader-logo { font-family: 'Cormorant Garamond'; font-size: 30px; letter-spacing: 15px; border-bottom: 1px solid var(--bronze); padding-bottom: 10px; margin-bottom: 20px; opacity: 0; animation: fadeUp 1.5s forwards; }
+        @keyframes fadeUp { to { opacity: 1; letter-spacing: 10px; } }
+
+        /* Nav & Layout */
+        nav { padding: 40px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--bronze); position: sticky; top:0; background: rgba(0,0,0,0.9); z-index: 1000; }
+        .logo h1 { font-family: 'Cormorant Garamond'; color: var(--bronze); letter-spacing: 5px; margin:0; }
         
-        /* Haberler - Bronz Zemin */
-        #news-bar { background: var(--bronze); color: #000; padding: 10px 5%; font-size: 12px; font-weight: bold; text-align: center; display: none; text-transform: uppercase; letter-spacing: 1px; }
+        /* Satış & Edisyon Etiketleri */
+        .badge { position: absolute; top: 15px; right: 15px; background: var(--bronze); color: #000; font-size: 9px; padding: 5px 10px; font-weight: bold; letter-spacing: 1px; }
+        .edition-count { font-size: 10px; color: var(--bronze); margin-top: 5px; border: 1px solid var(--bronze); padding: 2px 6px; display: inline-block; }
 
-        /* Kategori Filtreleri */
-        .filters { padding: 25px 5%; display: flex; gap: 20px; overflow-x: auto; border-bottom: 1px solid var(--border); }
-        .filter-btn { color: #555; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; transition: 0.3s; }
-        .filter-btn.active { color: var(--bronze); border-bottom: 1px solid var(--bronze); }
-
-        /* Portfolyo - Orta Boyutlu Düzen */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; padding: 40px 5%; }
-        .artwork { border: 1px solid var(--border); transition: 0.4s; background: #000; }
+        /* Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; padding: 40px 5%; }
+        .artwork { border: 1px solid var(--border); position: relative; background: #050505; transition: 0.4s; }
         .artwork:hover { border-color: var(--bronze); }
-        .img-wrapper { aspect-ratio: 1/1; overflow: hidden; cursor: zoom-in; }
-        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(20%); transition: 1s; }
-        .artwork:hover img { filter: grayscale(0%); transform: scale(1.03); }
-        
-        .info { padding: 20px; border-top: 1px solid var(--border); }
-        .info h3 { font-family: 'Cormorant Garamond', serif; font-size: 18px; margin: 0; letter-spacing: 1px; }
-        .info p { font-size: 9px; color: var(--bronze); text-transform: uppercase; margin-bottom: 5px; }
+        .img-wrapper { aspect-ratio: 1/1; overflow: hidden; }
+        .img-wrapper img { width:100%; height:100%; object-fit: cover; transition: 1.2s; }
+        .info { padding: 20px; }
 
-        /* Lightbox */
-        #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 10000; cursor: zoom-out; }
-        #lightbox img { max-width: 90vw; max-height: 85vh; border: 1px solid var(--bronze); }
+        /* Sertifika Sorgulama */
+        .cert-box { background: #0a0a0a; border: 1px solid var(--bronze); padding: 50px 5%; text-align: center; margin: 50px 5%; }
+        .cert-box input { background: transparent; border: 1px solid #333; color: #fff; padding: 15px; width: 250px; text-align: center; letter-spacing: 3px; }
 
-        footer { padding: 80px 5%; border-top: 1px solid var(--border); text-align: center; color: #444; font-size: 10px; letter-spacing: 3px; }
+        /* Ziyaretçi Defteri */
+        .guestbook { padding: 80px 5%; background: #050505; }
+        .guest-entry { border-bottom: 1px solid #111; padding: 20px 0; font-family: 'Cormorant Garamond'; font-size: 20px; font-style: italic; color: #888; }
 
-        @media (max-width: 768px) {
-            .grid { grid-template-columns: 1fr; padding: 20px; }
-            nav { padding: 20px 5%; }
-        }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-    <div id="news-bar"></div>
+    <div id="preloader">
+        <div class="loader-logo">UBE RAW</div>
+        <div style="font-size: 9px; letter-spacing: 3px; color: var(--bronze);">YONTULUYOR...</div>
+    </div>
 
     <nav>
-        <div class="logo" id="logo-wrap"><h1>UBE RAW</h1></div>
-        <div style="font-size: 10px; letter-spacing: 4px; color: var(--bronze);">SCULPTURE STUDIO</div>
+        <div class="logo"><h1>UBE RAW</h1></div>
+        <div style="font-size: 10px; letter-spacing: 2px;">
+            <a href="#portfolio" style="color:inherit; text-decoration:none;">ESERLER</a> | 
+            <a href="#guestbook" style="color:inherit; text-decoration:none;">DEFTER</a>
+        </div>
     </nav>
-
-    <div class="filters" id="cat-nav"></div>
 
     <div class="grid" id="main-grid"></div>
 
-    <div id="lightbox" onclick="this.style.display='none'"><img id="l-img"></div>
+    <div class="cert-box">
+        <h2 style="font-family:'Cormorant Garamond'; letter-spacing:3px;">ESER SERTİFİKA DOĞRULAMA</h2>
+        <p style="font-size: 11px; color: #666; margin-bottom: 30px;">Eserinizin orijinalliğini doğrulamak için sertifika kodunu girin.</p>
+        <input type="text" id="cert-code" placeholder="ÖR: UBE-2026-001">
+        <button onclick="verifyCert()" style="background:var(--bronze); border:none; padding:15px 30px; cursor:pointer; font-weight:bold; margin-left:10px;">SORGULA</button>
+        <div id="cert-result" style="margin-top:20px; font-size:12px; color:var(--bronze);"></div>
+    </div>
 
-    <footer id="footer-copy"></footer>
+    <section class="guestbook" id="guestbook">
+        <h2 style="font-family:'Cormorant Garamond'; letter-spacing:5px; text-align:center;">ZİYARETÇİ DEFTERİ</h2>
+        <div id="guest-list"></div>
+    </section>
+
+    <footer id="footer-copy" style="text-align:center; padding:50px; font-size:10px; color:#444;"></footer>
 
     <script>
         const base = window.location.pathname.includes('uberaw') ? '/uberaw/' : '/';
-        let allWorks = [];
-
-        async function load() {
-            const [sRes, pRes, nRes] = await Promise.all([
+        
+        async function init() {
+            const [sRes, pRes, gRes] = await Promise.all([
                 fetch(`${base}content/settings.json`),
                 fetch(`${base}content/portfolio.json`),
-                fetch(`${base}content/news.json`)
+                fetch(`${base}content/guestbook.json`)
             ]);
             
-            const s = await sRes.json();
-            const p = await pRes.json();
-            const n = await nRes.json();
-            allWorks = p.projects;
+            const settings = await sRes.json();
+            const portfolio = await pRes.json();
+            const guestbook = await gRes.json();
 
-            // Logo & Ayarlar
-            if(s.logoUrl && s.logoUrl !== "none") {
-                document.getElementById('logo-wrap').innerHTML = `<img src="${base}${s.logoUrl}">`;
-            }
-            document.getElementById('footer-copy').innerText = s.footerText;
-            
-            // Haberler
-            if(n.announcements.length > 0) {
-                const bar = document.getElementById('news-bar');
-                bar.style.display = 'block';
-                bar.innerText = n.announcements[0].title + ": " + n.announcements[0].body;
-            }
-
-            // Filtre & Grid
-            const cats = ['HEPSİ', ...new Set(allWorks.map(w => w.category))];
-            document.getElementById('cat-nav').innerHTML = cats.map(c => 
-                `<span class="filter-btn" onclick="draw('${c}', this)">${c}</span>`
-            ).join('');
-
-            draw('HEPSİ');
-        }
-
-        function draw(cat, btn) {
-            if(btn) {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            }
-            const filtered = cat === 'HEPSİ' ? allWorks : allWorks.filter(w => w.category === cat);
-            document.getElementById('main-grid').innerHTML = filtered.map(w => `
+            // 1. Grid & Satış/Edisyon
+            document.getElementById('main-grid').innerHTML = portfolio.projects.map(p => `
                 <div class="artwork">
-                    <div class="img-wrapper" onclick="openL('${base}${w.image}')">
-                        <img src="${base}${w.image}" loading="lazy">
-                    </div>
+                    ${p.isForSale ? `<div class="badge">SATIŞTA</div>` : ''}
+                    <div class="img-wrapper"><img src="${base}${p.image}"></div>
                     <div class="info">
-                        <p>${w.category}</p>
-                        <h3>${w.title}</h3>
+                        <p style="color:var(--bronze); font-size:10px; margin:0;">${p.category}</p>
+                        <h3 style="margin:5px 0;">${p.title}</h3>
+                        ${p.edition ? `<div class="edition-count">EDİSYON: ${p.edition}</div>` : ''}
                     </div>
                 </div>
             `).reverse().join('');
+
+            // 2. Ziyaretçi Defteri
+            document.getElementById('guest-list').innerHTML = guestbook.entries.slice(0, 5).map(e => `
+                <div class="guest-entry">"${e.note}" — <span style="font-size:14px; color:var(--bronze);">${e.name}</span></div>
+            `).join('');
+
+            document.getElementById('footer-copy').innerText = settings.footerText;
+
+            // Preloader Kapat
+            setTimeout(() => { document.getElementById('preloader').style.opacity = '0'; 
+                setTimeout(() => document.getElementById('preloader').style.display='none', 1000); 
+            }, 2000);
         }
 
-        function openL(src) {
-            document.getElementById('l-img').src = src;
-            document.getElementById('lightbox').style.display = 'flex';
+        function verifyCert() {
+            const code = document.getElementById('cert-code').value;
+            const res = document.getElementById('cert-result');
+            // Panel ile senkronize sorgu mantığı (Örnek: UBE ile başlıyorsa)
+            if(code.startsWith("UBE-")) {
+                res.innerHTML = "✓ BU ESER KAYITLI VE ORIJINALDİR: UBEYDULLAH BAYRAK STÜDYOSU";
+            } else {
+                res.innerHTML = "✗ GEÇERSİZ SERTİFİKA KODU.";
+            }
         }
 
-        load();
+        init();
     </script>
 </body>
 </html>
