@@ -2,69 +2,158 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>UBE RAW | Admin Studio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UBE RAW | Studio Panel</title>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; padding: 50px; }
-        .panel { background: #111; padding: 30px; border: 1px solid #333; width: 400px; }
-        h1 { font-weight: 300; letter-spacing: 5px; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        input, textarea, button { width: 100%; margin: 10px 0; padding: 10px; background: #222; border: 1px solid #444; color: #fff; box-sizing: border-box; }
-        button { background: #fff; color: #000; font-weight: bold; cursor: pointer; border: none; text-transform: uppercase; }
-        button:hover { background: #ccc; }
-        #status { font-size: 12px; color: #888; margin-top: 10px; }
+        :root { --bg: #0a0a0a; --card: #141414; --text: #eee; --accent: #fff; --border: #333; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .container { width: 90%; max-width: 800px; margin-top: 50px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 30px; }
+        h1 { letter-spacing: 4px; font-weight: 300; margin: 0; }
+        .card { background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 4px; margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-size: 13px; color: #888; text-transform: uppercase; }
+        input, textarea, select { width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 12px; margin-bottom: 15px; box-sizing: border-box; border-radius: 4px; }
+        button { background: var(--accent); color: #000; border: none; padding: 12px 25px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        button:hover { background: #bbb; }
+        .logout-btn { background: transparent; color: #ff4444; border: 1px solid #ff4444; padding: 5px 10px; font-size: 11px; }
+        #login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 100; }
+        .status { font-size: 13px; padding: 10px; border-radius: 4px; display: none; margin-bottom: 15px; }
     </style>
 </head>
 <body>
-    <div class="panel">
-        <h1>UBE<br>RAW</h1>
-        <input type="password" id="token" placeholder="GitHub Token (ghp_...)" />
-        <input type="text" id="fileName" placeholder="Eser Adı (Örn: heykel-01.jpg)" />
-        <input type="file" id="fileInput" accept="image/*" />
-        <button onclick="uploadImage()">Eseri Yükle</button>
-        <div id="status"></div>
+
+<div id="login-screen">
+    <div class="card" style="width: 350px; text-align: center;">
+        <h1>UBE RAW</h1>
+        <p style="color: #666; font-size: 14px; margin-bottom: 25px;">Stüdyo Erişimi</p>
+        <input type="password" id="passkey" placeholder="GitHub Erişim Anahtarı (ghp_...)">
+        <button onclick="login()">GİRİŞ YAP</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="header">
+        <h1>UBE RAW <span style="font-size: 14px; color: #666;">STUDIO</span></h1>
+        <button class="logout-btn" onclick="logout()">Çıkış</button>
     </div>
 
-    <script>
-        async function uploadImage() {
-            const token = document.getElementById('token').value;
-            const fileInput = document.getElementById('fileInput');
-            const fileName = document.getElementById('fileName').value;
-            const status = document.getElementById('status');
+    <div id="msg" class="status"></div>
 
-            if (!token || !fileInput.files[0] || !fileName) {
-                status.innerText = "Lütfen tüm alanları doldurun.";
-                return;
-            }
+    <div class="card">
+        <h3 style="margin-top: 0;">Yeni Eser Yükle</h3>
+        <label>Görsel Seç</label>
+        <input type="file" id="fileInput" accept="image/*">
+        <label>Dosya Adı (Örn: heykel-01.jpg)</label>
+        <input type="text" id="fileName" placeholder="heykel_v1.jpg">
+        <button onclick="uploadFile()">Yükle ve Yayınla</button>
+    </div>
 
-            status.innerText = "Rize'den yükleniyor...";
-            const file = fileInput.files[0];
-            const reader = new FileReader();
+    <div class="card">
+        <h3 style="margin-top: 0;">Metin Düzenleme</h3>
+        <label>Düzenlenecek Dosya Yolu (Örn: index.html veya hakkimda.md)</label>
+        <input type="text" id="editPath" placeholder="index.html">
+        <button onclick="fetchContent()">Dosyayı Getir</button>
+        <div id="edit-area" style="display:none; margin-top: 20px;">
+            <label>İçerik Editörü</label>
+            <textarea id="fileContent" rows="15" style="font-family: monospace;"></textarea>
+            <button onclick="saveContent()" style="background: #28a745; color: white;">Değişiklikleri Kaydet</button>
+        </div>
+    </div>
+</div>
 
-            reader.onload = async (e) => {
-                const content = e.target.result.split(',')[1]; // Base64 kısmı
-                const path = `images/uploads/${fileName}`;
-                
-                // GitHub API ile doğrudan dosya gönderme
-                const response = await fetch(`https://api.github.com/repos/ubey53/uberaw/contents/${path}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: `Yeni eser yüklendi: ${fileName}`,
-                        content: content,
-                        branch: 'main'
-                    })
-                });
+<script>
+    const repo = "ubey53/uberaw";
+    let currentSHA = "";
 
-                if (response.ok) {
-                    status.innerText = "Başarıyla yüklendi! Sitede görebilirsiniz.";
-                } else {
-                    status.innerText = "Hata oluştu. Token'ı kontrol edin.";
-                }
-            };
-            reader.readAsDataURL(file);
+    // GİRİŞ KONTROLÜ
+    window.onload = () => {
+        const savedToken = localStorage.getItem('uberaw_token');
+        if (savedToken) {
+            document.getElementById('login-screen').style.display = 'none';
         }
-    </script>
+    };
+
+    function login() {
+        const token = document.getElementById('passkey').value;
+        if (token.startsWith('ghp_')) {
+            localStorage.setItem('uberaw_token', token);
+            document.getElementById('login-screen').style.display = 'none';
+        } else {
+            alert("Geçersiz anahtar!");
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('uberaw_token');
+        location.reload();
+    }
+
+    function showStatus(text, isError = false) {
+        const msg = document.getElementById('msg');
+        msg.innerText = text;
+        msg.style.display = 'block';
+        msg.style.background = isError ? '#441111' : '#114411';
+        setTimeout(() => msg.style.display = 'none', 5000);
+    }
+
+    // DOSYA YÜKLEME (API)
+    async function uploadFile() {
+        const token = localStorage.getItem('uberaw_token');
+        const file = document.getElementById('fileInput').files[0];
+        const name = document.getElementById('fileName').value;
+
+        if(!file || !name) return alert("Dosya ve isim seçin!");
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const content = e.target.result.split(',')[1];
+            const res = await fetch(`https://api.github.com/repos/${repo}/contents/images/uploads/${name}`, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${token}` },
+                body: JSON.stringify({ message: "Panelden yüklendi", content, branch: "main" })
+            });
+            if(res.ok) showStatus("Görsel başarıyla yüklendi!");
+            else showStatus("Hata! Dosya zaten var olabilir.", true);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // İÇERİK DÜZENLEME (API)
+    async function fetchContent() {
+        const token = localStorage.getItem('uberaw_token');
+        const path = document.getElementById('editPath').value;
+        const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+            headers: { 'Authorization': `token ${token}` }
+        });
+        const data = await res.json();
+        if(res.ok) {
+            currentSHA = data.sha;
+            document.getElementById('fileContent').value = atob(data.content);
+            document.getElementById('edit-area').style.display = 'block';
+            showStatus("Dosya yüklendi.");
+        } else {
+            showStatus("Dosya bulunamadı!", true);
+        }
+    }
+
+    async function saveContent() {
+        const token = localStorage.getItem('uberaw_token');
+        const path = document.getElementById('editPath').value;
+        const content = btoa(unescape(encodeURIComponent(document.getElementById('fileContent').value)));
+        
+        const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+            method: 'PUT',
+            headers: { 'Authorization': `token ${token}` },
+            body: JSON.stringify({
+                message: "Panelden düzenlendi",
+                content,
+                sha: currentSHA,
+                branch: "main"
+            })
+        });
+        if(res.ok) showStatus("Değişiklikler kaydedildi!");
+        else showStatus("Kaydetme hatası!", true);
+    }
+</script>
 </body>
 </html>
