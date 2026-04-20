@@ -88,7 +88,6 @@
 
     <div id="tab-config" class="tab">
         <h3>Gelişmiş Site Ayarları</h3>
-        
         <div class="card">
             <div class="section-title">1. BAKIM MODU</div>
             <div class="toggle-box">
@@ -118,7 +117,19 @@
 
 <script>
     const REPO = "uberaw/uberaw"; 
-    let currentData = { projects: [] };
+
+    // TÜRKÇE KARAKTER DOSTU BASE64 FONKSİYONLARI
+    function utf8_to_b64(str) {
+        return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+            return String.fromCharCode('0x' + p1);
+        }));
+    }
+
+    function b64_to_utf8(str) {
+        return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+    }
 
     async function ghAction(path, method = 'GET', data = null, sha = null) {
         const token = localStorage.getItem('uber_t');
@@ -129,16 +140,17 @@
         if (data) {
             options.body = JSON.stringify({
                 message: "Admin update",
-                content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
+                content: utf8_to_b64(JSON.stringify(data, null, 2)),
                 sha: sha
             });
         }
-        const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, options);
+        const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}?v=${Math.random()}`, options);
         return await r.json();
     }
 
     async function auth() {
         const t = document.getElementById('token').value || localStorage.getItem('uber_t');
+        if(!t) return;
         localStorage.setItem('uber_t', t);
         try {
             const test = await ghAction('content/settings.json');
@@ -146,13 +158,18 @@
                 document.getElementById('login').style.display = 'none';
                 refreshAll();
                 loadSettings();
+            } else {
+                throw new Error();
             }
-        } catch(e) { alert("Bağlantı başarısız. Token'ı kontrol edin."); }
+        } catch(e) { 
+            alert("Bağlantı başarısız. Token'ı kontrol edin."); 
+            localStorage.removeItem('uber_t');
+        }
     }
 
     async function loadSettings() {
         const d = await ghAction('content/settings.json');
-        const s = JSON.parse(atob(d.content));
+        const s = JSON.parse(b64_to_utf8(d.content));
         document.getElementById('s-footer').value = s.footerText || "";
         document.getElementById('s-instagram').value = s.instagram || "";
         document.getElementById('s-whatsapp').value = s.whatsapp || "";
@@ -165,7 +182,7 @@
 
     async function handleSettingsUpdate() {
         const d = await ghAction('content/settings.json');
-        const s = JSON.parse(atob(d.content));
+        const s = JSON.parse(b64_to_utf8(d.content));
         
         s.footerText = document.getElementById('s-footer').value;
         s.instagram = document.getElementById('s-instagram').value;
@@ -182,7 +199,8 @@
 
     async function refreshAll() {
         const d = await ghAction('content/portfolio.json');
-        currentData = JSON.parse(atob(d.content));
+        const portfolioData = JSON.parse(b64_to_utf8(d.content));
+        currentData = portfolioData;
         document.getElementById('inventory-list').innerHTML = currentData.projects.map((x, i) => `
             <div class="item-row">
                 <span>${x.title}</span>
@@ -207,8 +225,9 @@
                 body: JSON.stringify({ message: "Upload Img", content: e.target.result.split(',')[1] })
             });
             const d = await ghAction('content/portfolio.json');
-            currentData.projects.push({ title, category: cat, image: fileName, isSale: false });
-            await ghAction('content/portfolio.json', 'PUT', currentData, d.sha);
+            let pData = JSON.parse(b64_to_utf8(d.content));
+            pData.projects.push({ title, category: cat, image: fileName, isSale: false });
+            await ghAction('content/portfolio.json', 'PUT', pData, d.sha);
             alert("Eser başarıyla eklendi!");
             refreshAll();
         };
@@ -219,19 +238,21 @@
         const idx = document.getElementById('sale-select').value;
         if(idx === "") return;
         const d = await ghAction('content/portfolio.json');
-        currentData.projects[idx].price = document.getElementById('edit-price').value;
-        currentData.projects[idx].edition = document.getElementById('edit-edition').value;
-        currentData.projects[idx].certCode = document.getElementById('edit-cert').value;
-        currentData.projects[idx].isSale = true;
-        await ghAction('content/portfolio.json', 'PUT', currentData, d.sha);
+        let pData = JSON.parse(b64_to_utf8(d.content));
+        pData.projects[idx].price = document.getElementById('edit-price').value;
+        pData.projects[idx].edition = document.getElementById('edit-edition').value;
+        pData.projects[idx].certCode = document.getElementById('edit-cert').value;
+        pData.projects[idx].isSale = true;
+        await ghAction('content/portfolio.json', 'PUT', pData, d.sha);
         alert("Satış bilgileri güncellendi!");
     }
 
     async function handleDelete(idx) {
         if(!confirm("Emin misiniz?")) return;
         const d = await ghAction('content/portfolio.json');
-        currentData.projects.splice(idx, 1);
-        await ghAction('content/portfolio.json', 'PUT', currentData, d.sha);
+        let pData = JSON.parse(b64_to_utf8(d.content));
+        pData.projects.splice(idx, 1);
+        await ghAction('content/portfolio.json', 'PUT', pData, d.sha);
         refreshAll();
     }
 
@@ -239,7 +260,7 @@
         const title = document.getElementById('n-title').value.trim();
         const body = document.getElementById('n-body').value.trim();
         const d = await ghAction('content/news.json');
-        let nData = JSON.parse(atob(d.content));
+        let nData = JSON.parse(b64_to_utf8(d.content));
         if (!title) {
             if(!confirm("Duyuruyu kaldırmak istiyor musunuz?")) return;
             nData.announcements = []; 
@@ -255,7 +276,7 @@
         const message = document.getElementById('manual-msg').value.trim();
         if(!name || !message) return alert("Eksik bilgi!");
         const d = await ghAction('content/news.json');
-        let nData = JSON.parse(atob(d.content));
+        let nData = JSON.parse(b64_to_utf8(d.content));
         if(!nData.guestbook) nData.guestbook = [];
         nData.guestbook.push({ name, message, date: new Date().toLocaleDateString('tr-TR') });
         await ghAction('content/news.json', 'PUT', nData, d.sha);
@@ -265,7 +286,7 @@
 
     async function refreshGuestbook() {
         const d = await ghAction('content/news.json');
-        const nData = JSON.parse(atob(d.content));
+        const nData = JSON.parse(b64_to_utf8(d.content));
         const list = nData.guestbook || [];
         document.getElementById('guest-list').innerHTML = list.map((g, i) => `
             <div class="item-row">
@@ -278,7 +299,7 @@
     async function handleGuestDelete(idx) {
         if(!confirm("Silinsin mi?")) return;
         const d = await ghAction('content/news.json');
-        let nData = JSON.parse(atob(d.content));
+        let nData = JSON.parse(b64_to_utf8(d.content));
         nData.guestbook.splice(idx, 1);
         await ghAction('content/news.json', 'PUT', nData, d.sha);
         refreshGuestbook();
