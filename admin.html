@@ -68,9 +68,10 @@
     <div id="tab-news" class="tab">
         <h3>Site Duyurusu (News Bar)</h3>
         <div class="card">
-            <input type="text" id="n-title" placeholder="Duyuru Başlığı (Örn: Yeni Sergi)">
-            <textarea id="n-body" rows="3" placeholder="Duyuru İçeriği (Kısa bir cümle)"></textarea>
+            <input type="text" id="n-title" placeholder="Duyuru Başlığı (Silmek için boş bırakın)">
+            <textarea id="n-body" rows="3" placeholder="Duyuru İçeriği"></textarea>
             <button onclick="handleNewsUpdate()">DUYURUYU GÜNCELLE</button>
+            <p style="font-size:10px; color:#666; margin-top:10px;">* Başlığı boş bırakıp kaydederseniz duyuru siteden kalkar.</p>
         </div>
     </div>
 
@@ -192,19 +193,28 @@
         refreshAll();
     }
 
+    // GÜNCELLENMİŞ DUYURU FONKSİYONU
     async function handleNewsUpdate() {
-        const title = document.getElementById('n-title').value;
-        const body = document.getElementById('n-body').value;
-        if(!title) return alert("Başlık boş olamaz.");
+        const title = document.getElementById('n-title').value.trim();
+        const body = document.getElementById('n-body').value.trim();
 
         const d = await ghAction('content/news.json');
         let nData = JSON.parse(atob(d.content));
-        nData.announcements = [{ title, body, date: new Date().toLocaleDateString('tr-TR') }];
+        
+        if (!title) {
+            if(!confirm("Duyuruyu tamamen kaldırmak istiyor musunuz?")) return;
+            nData.announcements = []; 
+        } else {
+            nData.announcements = [{ title, body, date: new Date().toLocaleDateString('tr-TR') }];
+        }
+        
         await ghAction('content/news.json', 'PUT', nData, d.sha);
-        alert("Duyuru güncellendi!");
+        alert(title ? "Duyuru güncellendi!" : "Duyuru kaldırıldı!");
+        
+        document.getElementById('n-title').value = "";
+        document.getElementById('n-body').value = "";
     }
 
-    // --- Ziyaretçi Defteri Onaylama Fonksiyonu ---
     async function approveMessage() {
         const name = document.getElementById('manual-name').value.trim();
         const message = document.getElementById('manual-msg').value.trim();
