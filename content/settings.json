@@ -8,5 +8,6 @@
   "siteDesc": "",
   "bio": "Tarzımız.",
   "analyticsId": "",
-  "maintenanceMode": false
+  "maintenanceMode": false,
+  "themeColor": "#ff0000"
 }
