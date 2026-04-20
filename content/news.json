@@ -2,9 +2,15 @@
   "announcements": [
     {
       "title": "Yeni!",
-      "body": "Yeni Heykeller Yakında!",
+      "body": "Yeni Heykeller YakÄ±nda!",
       "date": "21.04.2026"
     }
   ],
-  "guestbook": []
+  "guestbook": [
+    {
+      "name": "zasda",
+      "message": "asdasd",
+      "date": "21.04.2026"
+    }
+  ]
 }
