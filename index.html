@@ -43,6 +43,17 @@
         #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 10000; cursor: zoom-out; }
         #lightbox img { max-width: 90vw; max-height: 85vh; border: 1px solid var(--bronze); }
 
+        /* Satış ve Edisyon Etiketleri */
+.sale-tag { background: var(--bronze); color: #000; font-size: 9px; padding: 2px 8px; position: absolute; top: 10px; right: 10px; font-weight: bold; }
+.edition-count { color: var(--bronze); font-size: 10px; letter-spacing: 1px; margin-top: 5px; display: block; }
+
+/* Ziyaretçi Defteri Alanı */
+.guestbook-sec { background: #050505; border-top: 1px solid var(--bronze); padding: 60px 5%; text-align: center; }
+.guest-entry { border-bottom: 1px solid #1a1a1a; padding: 15px; margin-bottom: 10px; font-style: italic; color: #888; }
+
+/* Sertifika Sorgu Kutusu */
+.cert-box { margin-top: 40px; padding: 20px; border: 1px dashed var(--bronze); display: inline-block; }
+        
         footer { padding: 80px 5%; border-top: 1px solid var(--border); text-align: center; color: #444; font-size: 10px; letter-spacing: 3px; }
 
         @media (max-width: 768px) {
@@ -65,6 +76,20 @@
     <div class="grid" id="main-grid"></div>
 
     <div id="lightbox" onclick="this.style.display='none'"><img id="l-img"></div>
+
+    <section id="cert-sec" style="text-align: center;">
+    <div class="cert-box">
+        <p style="font-size: 11px; letter-spacing: 2px;">ESER SERTİFİKA SORGULAMA</p>
+        <input type="text" id="cert-input" placeholder="Kod Giriniz (Örn: UBE-001)" style="background:none; border:1px solid #333; color:white; padding:10px; text-align:center;">
+        <button onclick="checkCert()" style="background:var(--bronze); border:none; padding:10px 20px; cursor:pointer;">SORGULA</button>
+        <div id="cert-result" style="margin-top:15px; font-size:12px;"></div>
+    </div>
+</section>
+
+<section class="guestbook-sec">
+    <h2 class="sec-title">ZİYARETÇİ DEFTERİ</h2>
+    <div id="guestbook-list"></div>
+</section>
 
     <footer id="footer-copy"></footer>
 
