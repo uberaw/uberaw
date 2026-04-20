@@ -4,7 +4,10 @@
       "title": "Portre",
       "category": "Karakalem",
       "image": "images/uploads/1776725158059_Gemini_Generated_Image_rsltyyrsltyyrslt.png",
-      "isSale": false
+      "isSale": true,
+      "price": "2500",
+      "edition": "1/1",
+      "certCode": "1-111-111-111"
     }
   ]
 }
