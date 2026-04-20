@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>UBE RAW | Admin Studio</title>
+    <style>
+        body { background: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; padding: 50px; }
+        .panel { background: #111; padding: 30px; border: 1px solid #333; width: 400px; }
+        h1 { font-weight: 300; letter-spacing: 5px; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        input, textarea, button { width: 100%; margin: 10px 0; padding: 10px; background: #222; border: 1px solid #444; color: #fff; box-sizing: border-box; }
+        button { background: #fff; color: #000; font-weight: bold; cursor: pointer; border: none; text-transform: uppercase; }
+        button:hover { background: #ccc; }
+        #status { font-size: 12px; color: #888; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="panel">
+        <h1>UBE<br>RAW</h1>
+        <input type="password" id="token" placeholder="GitHub Token (ghp_...)" />
+        <input type="text" id="fileName" placeholder="Eser Adı (Örn: heykel-01.jpg)" />
+        <input type="file" id="fileInput" accept="image/*" />
+        <button onclick="uploadImage()">Eseri Yükle</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        async function uploadImage() {
+            const token = document.getElementById('token').value;
+            const fileInput = document.getElementById('fileInput');
+            const fileName = document.getElementById('fileName').value;
+            const status = document.getElementById('status');
+
+            if (!token || !fileInput.files[0] || !fileName) {
+                status.innerText = "Lütfen tüm alanları doldurun.";
+                return;
+            }
+
+            status.innerText = "Rize'den yükleniyor...";
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async (e) => {
+                const content = e.target.result.split(',')[1]; // Base64 kısmı
+                const path = `images/uploads/${fileName}`;
+                
+                // GitHub API ile doğrudan dosya gönderme
+                const response = await fetch(`https://api.github.com/repos/ubey53/uberaw/contents/${path}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Yeni eser yüklendi: ${fileName}`,
+                        content: content,
+                        branch: 'main'
+                    })
+                });
+
+                if (response.ok) {
+                    status.innerText = "Başarıyla yüklendi! Sitede görebilirsiniz.";
+                } else {
+                    status.innerText = "Hata oluştu. Token'ı kontrol edin.";
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>
