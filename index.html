@@ -24,9 +24,15 @@
         .info p { font-size: 9px; color: var(--bronze); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 2px; }
         .sale-tag { background: var(--bronze); color: #000; font-size: 10px; padding: 5px 12px; position: absolute; top: 15px; right: 15px; font-weight: bold; }
         .cert-sec { padding: 60px 5%; background: #050505; border-top: 1px solid var(--border); text-align: center; }
-        .cert-box { max-width: 500px; margin: 0 auto; border: 1px dashed var(--bronze); padding: 40px; }
-        input { background: #000; border: 1px solid #333; color: #fff; padding: 12px; width: 70%; text-align: center; margin-bottom: 15px; }
-        .btn-bronze { background: var(--bronze); border: none; padding: 12px 30px; color: #000; font-weight: bold; cursor: pointer; }
+        .cert-box { max-width: 500px; margin: 0 auto; border: 1px dashed var(--bronze); padding: 40px; margin-bottom: 40px; }
+        input, textarea { background: #000; border: 1px solid #333; color: #fff; padding: 12px; width: 80%; text-align: center; margin-bottom: 15px; font-family: inherit; }
+        .btn-bronze { background: var(--bronze); border: none; padding: 12px 30px; color: #000; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 11px; }
+        
+        /* Ziyaretçi Defteri Stili */
+        .guestbook-sec { padding: 40px 5%; border-top: 1px solid var(--border); text-align: center; max-width: 800px; margin: 0 auto; }
+        .guest-entry { padding: 20px; border-bottom: 1px solid #111; margin-bottom: 10px; font-size: 14px; line-height: 1.6; }
+        .guest-entry small { color: var(--bronze); display: block; margin-top: 5px; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; }
+
         #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.98); display: none; justify-content: center; align-items: center; z-index: 10000; }
         #lightbox img { max-width: 95vw; max-height: 90vh; border: 1px solid var(--bronze); }
         footer { padding: 40px 5%; text-align: center; color: #444; font-size: 10px; letter-spacing: 4px; border-top: 1px solid var(--border); }
@@ -44,13 +50,24 @@
 
 <section class="cert-sec">
     <div class="cert-box">
-        <h2 style="font-family:'Cormorant Garamond'; color:var(--bronze);">VERIFICATION</h2>
+        <h2 style="font-family:'Cormorant Garamond'; color:var(--bronze); letter-spacing: 3px;">VERIFICATION</h2>
         <input type="text" id="cert-input" placeholder="SERTİFİKA KODU">
         <br>
         <button class="btn-bronze" onclick="checkCert()">SORGULA</button>
         <div id="cert-result" style="margin-top:20px;"></div>
     </div>
+
+    <div class="cert-box" style="border-style: solid; border-width: 1px;">
+        <h2 style="font-family:'Cormorant Garamond'; color:var(--bronze); letter-spacing: 3px;">GUESTBOOK</h2>
+        <input type="text" id="g-name" placeholder="İSMİNİZ">
+        <textarea id="g-msg" rows="3" placeholder="MESAJINIZ"></textarea>
+        <br>
+        <button class="btn-bronze" id="send-btn" onclick="sendGuest()">MESAJI GÖNDER</button>
+    </div>
 </section>
+
+<div class="guestbook-sec" id="guestbook-list">
+    </div>
 
 <div id="lightbox" onclick="this.style.display='none'"><img id="l-img"></div>
 <footer id="footer-copy">UBE RAW ART & DESIGN</footer>
@@ -59,17 +76,15 @@
     const base = "/uberaw/";
     let allWorks = [];
 
-    // Güvenli veri çekme fonksiyonu
     async function fetchData(fileName) {
         try {
             const r = await fetch(`${base}${fileName}?v=${Math.random()}`);
             if (!r.ok) return null;
             const text = await r.text();
-            // JSON içindeki gizli karakterleri ve fazlalıkları temizle
             const cleanText = text.trim().replace(/\n/g, '').replace(/\r/g, '');
             return JSON.parse(cleanText);
         } catch (e) {
-            console.warn(`${fileName} okunamadı, boş geçiliyor.`, e);
+            console.warn(`${fileName} okunamadı.`, e);
             return null;
         }
     }
@@ -77,16 +92,28 @@
     async function init() {
         const settings = await fetchData('content/settings.json') || { footerText: "UBE RAW © 2026" };
         const portfolio = await fetchData('content/portfolio.json') || { projects: [] };
-        const news = await fetchData('content/news.json') || { announcements: [] };
+        const news = await fetchData('content/news.json') || { announcements: [], guestbook: [] };
 
         allWorks = portfolio.projects || [];
 
-        // Arayüzü Giydir
+        // UI Giydirme
         document.getElementById('footer-copy').innerText = settings.footerText;
         if(news.announcements?.length) {
             const nb = document.getElementById('news-bar');
             nb.style.display = 'block';
             nb.innerText = news.announcements[0].title + ": " + news.announcements[0].body;
+        }
+
+        // Ziyaretçi Defterini Listele
+        if(news.guestbook?.length) {
+            document.getElementById('guestbook-list').innerHTML = `
+                <h3 style="font-family:'Cormorant Garamond'; color:#666; font-size:14px; letter-spacing:4px; margin-bottom:30px;">THOUGHTS</h3>
+                ` + news.guestbook.map(g => `
+                <div class="guest-entry">
+                    "${g.message}"
+                    <small>— ${g.name}</small>
+                </div>
+            `).reverse().join('');
         }
 
         // Filtreler
@@ -123,6 +150,36 @@
                 </div>
             </div>
         `).reverse().join('');
+    }
+
+    // Ziyaretçi Mesaj Gönderme (GitHub API üzerinden)
+    async function sendGuest() {
+        const name = document.getElementById('g-name').value.trim();
+        const msg = document.getElementById('g-msg').value.trim();
+        const btn = document.getElementById('send-btn');
+
+        if(!name || !msg) return alert("Lütfen isim ve mesaj alanını doldurun.");
+        
+        btn.innerText = "GÖNDERİLİYOR...";
+        btn.disabled = true;
+
+        try {
+            // Admin panelinde kullandığımız token'ı burada kullanamayız (güvenlik için)
+            // Bu yüzden mesajları doğrudan GitHub API'ye anonim gönderemeyiz.
+            // ÇÖZÜM: Mesajı şimdilik bir mail linkine veya WhatsApp'a yönlendirebiliriz 
+            // VEYA Token kullanmadan GitHub'a yazmak imkansız olduğu için en mantıklısı:
+            
+            const text = encodeURIComponent(`Selam Ubeydullah, UBE RAW sitesinden bir mesaj var:\n\nİsim: ${name}\nMesaj: ${msg}`);
+            window.location.href = `mailto:ubeydbayrak@gmail.com?subject=UBE RAW Ziyaretçi Mesajı&body=${text}`;
+            
+            btn.innerText = "MESAJ GÖNDER";
+            btn.disabled = false;
+            alert("Mesajınız e-posta taslağı olarak hazırlandı. Lütfen gönder butonuna basın.");
+
+        } catch (e) {
+            alert("Bir hata oluştu.");
+            btn.disabled = false;
+        }
     }
 
     function openL(s) { document.getElementById('l-img').src = s; document.getElementById('lightbox').style.display = 'flex'; }
