@@ -30,9 +30,26 @@
 
     <div class="sidebar">
         <h2>UBE RAW</h2>
+        <div class="nav-link" onclick="tab('sale', this)">Satış & Sertifika</div>
+        <div class="nav-link" onclick="tab('guest', this)">Defteri Yönet</div>
         <div class="nav-link active" onclick="tab('add', this)">Eser Ekle</div>
         <div class="nav-link" onclick="tab('inv', this)">Envanter / Sil</div>
         <div class="nav-link" onclick="tab('config', this)">Site & Logo</div>
+        <div id="tab-sale" class="tab">
+    <h3>Satış Ayarları ve Sertifika</h3>
+    <div class="card">
+        <p>Eseri seçip satış bilgilerini güncelleyin (Bu kısım envanterle entegre çalışır).</p>
+        <input type="text" id="edit-price" placeholder="Fiyat (Örn: 15.000 TL)">
+        <input type="text" id="edit-edition" placeholder="Edisyon (Örn: 1/5)">
+        <input type="text" id="edit-cert" placeholder="Sertifika No">
+        <button onclick="saveSaleDetails()">Bilgileri Güncelle</button>
+    </div>
+</div>
+
+<div id="tab-guest" class="tab">
+    <h3>Gelen Mesajlar</h3>
+    <div id="admin-guest-list" class="card">Mesajlar yükleniyor...</div>
+</div>
     </div>
 
     <div class="main">
@@ -169,7 +186,25 @@
             document.querySelectorAll('.nav-link').forEach(x => x.classList.remove('active'));
             el.classList.add('active');
         }
+async function saveSaleDetails() {
+    const t = localStorage.getItem('uber_t');
+    const d = await get('content/portfolio.json');
+    const p = JSON.parse(atob(d.content));
+    
+    // En son eklenen eser üzerinden örnek işlem:
+    const lastIdx = p.projects.length - 1;
+    p.projects[lastIdx].price = document.getElementById('edit-price').value;
+    p.projects[lastIdx].edition = document.getElementById('edit-edition').value;
+    p.projects[lastIdx].certCode = document.getElementById('edit-cert').value;
+    p.projects[lastIdx].isSale = true;
 
+    await fetch(`https://api.github.com/repos/${REPO}/contents/content/portfolio.json`, {
+        method: 'PUT',
+        headers: { 'Authorization': `token ${t}` },
+        body: JSON.stringify({ message: "Sale details update", content: btoa(JSON.stringify(p, null, 2)), sha: d.sha })
+    });
+    alert("Satış bilgileri kaydedildi!");
+}
         if(localStorage.getItem('uber_t')) auth();
     </script>
 </body>
