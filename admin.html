@@ -12,9 +12,11 @@
         .main { margin-left: 300px; padding: 60px; width: 100%; max-width: 800px; }
         .tab { display: none; } .tab.active { display: block; }
         .card { background: #0d0d0d; border: 1px solid #1a1a1a; padding: 25px; margin-bottom: 20px; }
+        .section-title { color: #a87f4a; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 20px 0 10px 0; border-bottom: 1px solid #222; padding-bottom: 5px; }
         input, select, textarea { width: 100%; background: #000; border: 1px solid #222; color: #fff; padding: 12px; margin: 10px 0; box-sizing: border-box; font-family: inherit; }
         button { background: #a87f4a; color: #000; border: none; padding: 15px; width: 100%; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
         .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #111; font-size: 13px; }
+        .toggle-box { display: flex; align-items: center; gap: 10px; background: #111; padding: 15px; border-radius: 5px; margin: 10px 0; }
         #login { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -71,28 +73,45 @@
             <input type="text" id="n-title" placeholder="Duyuru Başlığı (Silmek için boş bırakın)">
             <textarea id="n-body" rows="3" placeholder="Duyuru İçeriği"></textarea>
             <button onclick="handleNewsUpdate()">DUYURUYU GÜNCELLE</button>
-            <p style="font-size:10px; color:#666; margin-top:10px;">* Başlığı boş bırakıp kaydederseniz duyuru siteden kalkar.</p>
         </div>
     </div>
 
     <div id="tab-guest" class="tab">
         <h3>Ziyaretçi Defteri Yönetimi</h3>
         <div class="card" style="border: 1px solid #a87f4a;">
-            <h4 style="margin-top:0; color:#a87f4a;">Mesaj Onayla & Yayınla</h4>
             <input type="text" id="manual-name" placeholder="Ziyaretçi İsmi">
             <textarea id="manual-msg" rows="3" placeholder="Ziyaretçi Mesajı"></textarea>
             <button onclick="approveMessage()">BU MESAJI SİTEDE YAYINLA</button>
         </div>
-        <h3>Yayındaki Mesajlar</h3>
         <div id="guest-list" class="card">Yükleniyor...</div>
     </div>
 
     <div id="tab-config" class="tab">
-        <h3>Genel Ayarlar</h3>
+        <h3>Gelişmiş Site Ayarları</h3>
+        
         <div class="card">
-            <label style="font-size: 11px; color:#666;">Site Alt Metni (Footer)</label>
-            <input type="text" id="s-footer">
-            <button onclick="handleSettingsUpdate()">AYARLARI KAYDET</button>
+            <div class="section-title">1. BAKIM MODU</div>
+            <div class="toggle-box">
+                <input type="checkbox" id="s-maintenance" style="width: auto; margin: 0;">
+                <label for="s-maintenance">Siteyi "Bakım Moduna" al (Ziyaretçilere kapat)</label>
+            </div>
+
+            <div class="section-title">2. SOSYAL MEDYA & İLETİŞİM</div>
+            <input type="text" id="s-instagram" placeholder="Instagram Linki (https://...)">
+            <input type="text" id="s-whatsapp" placeholder="WhatsApp Numarası (Örn: 90532...)">
+
+            <div class="section-title">3. SEO (GOOGLE AYARLARI)</div>
+            <input type="text" id="s-title" placeholder="Site Başlığı (Google'da görünen)">
+            <textarea id="s-desc" rows="2" placeholder="Site Açıklaması (Arama sonuçlarındaki kısa yazı)"></textarea>
+
+            <div class="section-title">4. HAKKIMDA / BIO</div>
+            <textarea id="s-bio" rows="4" placeholder="Stüdyo veya Sanatçı Biyografisi"></textarea>
+
+            <div class="section-title">5. ANALYTICS & FOOTER</div>
+            <input type="text" id="s-analytics" placeholder="Google Analytics ID (UA-XXXXX veya G-XXXXX)">
+            <input type="text" id="s-footer" placeholder="Footer Metni">
+
+            <button onclick="handleSettingsUpdate()" style="background: #4CAF50; color: white;">TÜM AYARLARI KAYDET</button>
         </div>
     </div>
 </div>
@@ -126,22 +145,50 @@
             if(test.sha) {
                 document.getElementById('login').style.display = 'none';
                 refreshAll();
-                document.getElementById('s-footer').value = JSON.parse(atob(test.content)).footerText;
+                loadSettings();
             }
         } catch(e) { alert("Bağlantı başarısız. Token'ı kontrol edin."); }
+    }
+
+    async function loadSettings() {
+        const d = await ghAction('content/settings.json');
+        const s = JSON.parse(atob(d.content));
+        document.getElementById('s-footer').value = s.footerText || "";
+        document.getElementById('s-instagram').value = s.instagram || "";
+        document.getElementById('s-whatsapp').value = s.whatsapp || "";
+        document.getElementById('s-title').value = s.siteTitle || "";
+        document.getElementById('s-desc').value = s.siteDesc || "";
+        document.getElementById('s-bio').value = s.bio || "";
+        document.getElementById('s-analytics').value = s.analyticsId || "";
+        document.getElementById('s-maintenance').checked = s.maintenanceMode || false;
+    }
+
+    async function handleSettingsUpdate() {
+        const d = await ghAction('content/settings.json');
+        const s = JSON.parse(atob(d.content));
+        
+        s.footerText = document.getElementById('s-footer').value;
+        s.instagram = document.getElementById('s-instagram').value;
+        s.whatsapp = document.getElementById('s-whatsapp').value;
+        s.siteTitle = document.getElementById('s-title').value;
+        s.siteDesc = document.getElementById('s-desc').value;
+        s.bio = document.getElementById('s-bio').value;
+        s.analyticsId = document.getElementById('s-analytics').value;
+        s.maintenanceMode = document.getElementById('s-maintenance').checked;
+
+        await ghAction('content/settings.json', 'PUT', s, d.sha);
+        alert("Tüm site ayarları başarıyla güncellendi!");
     }
 
     async function refreshAll() {
         const d = await ghAction('content/portfolio.json');
         currentData = JSON.parse(atob(d.content));
-        
         document.getElementById('inventory-list').innerHTML = currentData.projects.map((x, i) => `
             <div class="item-row">
                 <span>${x.title}</span>
                 <span style="color:#ff4444; cursor:pointer; font-size:10px;" onclick="handleDelete(${i})">SİL</span>
             </div>
         `).reverse().join('');
-
         document.getElementById('sale-select').innerHTML = '<option value="">Eser Seçin</option>' + 
             currentData.projects.map((x, i) => `<option value="${i}">${x.title}</option>`).join('');
     }
@@ -151,22 +198,17 @@
         const title = document.getElementById('f-title').value;
         const cat = document.getElementById('f-cat').value;
         if(!file || !title) return alert("Eksik alan!");
-
         const reader = new FileReader();
         reader.onload = async (e) => {
             const fileName = `images/uploads/${Date.now()}_${file.name}`;
             const token = localStorage.getItem('uber_t');
-            
             await fetch(`https://api.github.com/repos/${REPO}/contents/${fileName}`, {
-                method: 'PUT',
-                headers: { 'Authorization': `token ${token}` },
+                method: 'PUT', headers: { 'Authorization': `token ${token}` },
                 body: JSON.stringify({ message: "Upload Img", content: e.target.result.split(',')[1] })
             });
-
             const d = await ghAction('content/portfolio.json');
             currentData.projects.push({ title, category: cat, image: fileName, isSale: false });
             await ghAction('content/portfolio.json', 'PUT', currentData, d.sha);
-            
             alert("Eser başarıyla eklendi!");
             refreshAll();
         };
@@ -193,50 +235,31 @@
         refreshAll();
     }
 
-    // GÜNCELLENMİŞ DUYURU FONKSİYONU
     async function handleNewsUpdate() {
         const title = document.getElementById('n-title').value.trim();
         const body = document.getElementById('n-body').value.trim();
-
         const d = await ghAction('content/news.json');
         let nData = JSON.parse(atob(d.content));
-        
         if (!title) {
-            if(!confirm("Duyuruyu tamamen kaldırmak istiyor musunuz?")) return;
+            if(!confirm("Duyuruyu kaldırmak istiyor musunuz?")) return;
             nData.announcements = []; 
         } else {
             nData.announcements = [{ title, body, date: new Date().toLocaleDateString('tr-TR') }];
         }
-        
         await ghAction('content/news.json', 'PUT', nData, d.sha);
         alert(title ? "Duyuru güncellendi!" : "Duyuru kaldırıldı!");
-        
-        document.getElementById('n-title').value = "";
-        document.getElementById('n-body').value = "";
     }
 
     async function approveMessage() {
         const name = document.getElementById('manual-name').value.trim();
         const message = document.getElementById('manual-msg').value.trim();
-        
-        if(!name || !message) return alert("İsim ve mesaj alanlarını doldurun.");
-
+        if(!name || !message) return alert("Eksik bilgi!");
         const d = await ghAction('content/news.json');
         let nData = JSON.parse(atob(d.content));
-        
         if(!nData.guestbook) nData.guestbook = [];
-        
-        nData.guestbook.push({
-            name: name,
-            message: message,
-            date: new Date().toLocaleDateString('tr-TR')
-        });
-
+        nData.guestbook.push({ name, message, date: new Date().toLocaleDateString('tr-TR') });
         await ghAction('content/news.json', 'PUT', nData, d.sha);
-        alert("Mesaj onaylandı ve yayına alındı!");
-        
-        document.getElementById('manual-name').value = "";
-        document.getElementById('manual-msg').value = "";
+        alert("Yayınlandı!");
         refreshGuestbook();
     }
 
@@ -244,19 +267,16 @@
         const d = await ghAction('content/news.json');
         const nData = JSON.parse(atob(d.content));
         const list = nData.guestbook || [];
-        
-        document.getElementById('guest-list').innerHTML = list.length > 0 
-            ? list.map((g, i) => `
-                <div class="item-row">
-                    <span><b>${g.name}:</b> ${g.message}</span>
-                    <span style="color:#ff4444; cursor:pointer; font-size:10px;" onclick="handleGuestDelete(${i})">SİL</span>
-                </div>
-            `).reverse().join('')
-            : "Henüz yayınlanmış mesaj yok.";
+        document.getElementById('guest-list').innerHTML = list.map((g, i) => `
+            <div class="item-row">
+                <span><b>${g.name}:</b> ${g.message}</span>
+                <span style="color:#ff4444; cursor:pointer;" onclick="handleGuestDelete(${i})">SİL</span>
+            </div>
+        `).reverse().join('');
     }
 
     async function handleGuestDelete(idx) {
-        if(!confirm("Mesaj silinsin mi?")) return;
+        if(!confirm("Silinsin mi?")) return;
         const d = await ghAction('content/news.json');
         let nData = JSON.parse(atob(d.content));
         nData.guestbook.splice(idx, 1);
@@ -264,22 +284,14 @@
         refreshGuestbook();
     }
 
-    async function handleSettingsUpdate() {
-        const d = await ghAction('content/settings.json');
-        const s = JSON.parse(atob(d.content));
-        s.footerText = document.getElementById('s-footer').value;
-        await ghAction('content/settings.json', 'PUT', s, d.sha);
-        alert("Site ayarları güncellendi!");
-    }
-
     function switchTab(n, el) {
         document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
         document.getElementById('tab-'+n).classList.add('active');
         document.querySelectorAll('.nav-link').forEach(x => x.classList.remove('active'));
         el.classList.add('active');
-        
         if(n === 'guest') refreshGuestbook();
         if(n === 'inv') refreshAll();
+        if(n === 'config') loadSettings();
     }
 
     function fillSaleFields(i) {
