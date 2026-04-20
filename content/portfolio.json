@@ -5,5 +5,11 @@
     "Karakalem",
     "Heykel"
   ],
-  "projects": []
+  "projects": [
+    {
+      "title": "Portre",
+      "category": "Karakalem",
+      "image": "images/uploads/1776719240929_Gemini_Generated_Image_rsltyyrsltyyrslt.png"
+    }
+  ]
 }
