@@ -1,5 +1,0 @@
-backend:
-  name: gitlab 
-  repo: uberaw/ube # GitLab kullanıcı adınız ve proje adınız
-  auth_type: implicit # GitLab'da giriş yapmayı en çok kolaylaştıran yöntem
-  app_id: BURAYA_GELECEK_KOD # Birazdan alacağız
