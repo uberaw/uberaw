@@ -12,8 +12,8 @@
         .main { margin-left: 300px; padding: 60px; width: 100%; max-width: 800px; }
         .tab { display: none; } .tab.active { display: block; }
         .card { background: #0d0d0d; border: 1px solid #1a1a1a; padding: 25px; margin-bottom: 20px; }
-        input, select { width: 100%; background: #000; border: 1px solid #222; color: #fff; padding: 12px; margin: 10px 0; box-sizing: border-box; }
-        button { background: #a87f4a; color: #000; border: none; padding: 15px; width: 100%; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        input, select, textarea { width: 100%; background: #000; border: 1px solid #222; color: #fff; padding: 12px; margin: 10px 0; box-sizing: border-box; font-family: inherit; }
+        button { background: #a87f4a; color: #000; border: none; padding: 15px; width: 100%; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
         .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #111; font-size: 13px; }
         #login { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
     </style>
@@ -33,6 +33,8 @@
     <div class="nav-link active" onclick="switchTab('add', this)">Eser Ekle</div>
     <div class="nav-link" onclick="switchTab('inv', this)">Envanter / Sil</div>
     <div class="nav-link" onclick="switchTab('sale', this)">Satış & Sertifika</div>
+    <div class="nav-link" onclick="switchTab('news', this)">Duyuru Yönetimi</div>
+    <div class="nav-link" onclick="switchTab('guest', this)">Ziyaretçi Defteri</div>
     <div class="nav-link" onclick="switchTab('config', this)">Site Ayarları</div>
 </div>
 
@@ -61,6 +63,21 @@
             <input type="text" id="edit-cert" placeholder="Sertifika No (Örn: UBE-001)">
             <button onclick="handleSaleUpdate()">BİLGİLERİ KAYDET</button>
         </div>
+    </div>
+
+    <div id="tab-news" class="tab">
+        <h3>Site Duyurusu (News Bar)</h3>
+        <div class="card">
+            <input type="text" id="n-title" placeholder="Duyuru Başlığı (Örn: Yeni Sergi)">
+            <textarea id="n-body" rows="3" placeholder="Duyuru İçeriği (Kısa bir cümle)"></textarea>
+            <button onclick="handleNewsUpdate()">DUYURUYU GÜNCELLE</button>
+            <p style="font-size:10px; color:#666; margin-top:10px;">* Sitede en üstteki bronz bantta görünecektir.</p>
+        </div>
+    </div>
+
+    <div id="tab-guest" class="tab">
+        <h3>Gelen Mesajlar</h3>
+        <div id="guest-list" class="card">Yükleniyor...</div>
     </div>
 
     <div id="tab-config" class="tab">
@@ -111,7 +128,6 @@
         const d = await ghAction('content/portfolio.json');
         currentData = JSON.parse(atob(d.content));
         
-        // Envanter
         document.getElementById('inventory-list').innerHTML = currentData.projects.map((x, i) => `
             <div class="item-row">
                 <span>${x.title}</span>
@@ -119,7 +135,6 @@
             </div>
         `).reverse().join('');
 
-        // Seçim listesi
         document.getElementById('sale-select').innerHTML = '<option value="">Eser Seçin</option>' + 
             currentData.projects.map((x, i) => `<option value="${i}">${x.title}</option>`).join('');
     }
@@ -135,14 +150,12 @@
             const fileName = `images/uploads/${Date.now()}_${file.name}`;
             const token = localStorage.getItem('uber_t');
             
-            // 1. Resmi yükle
             await fetch(`https://api.github.com/repos/${REPO}/contents/${fileName}`, {
                 method: 'PUT',
                 headers: { 'Authorization': `token ${token}` },
                 body: JSON.stringify({ message: "Upload Img", content: e.target.result.split(',')[1] })
             });
 
-            // 2. JSON'ı güncelle
             const d = await ghAction('content/portfolio.json');
             currentData.projects.push({ title, category: cat, image: fileName, isSale: false });
             await ghAction('content/portfolio.json', 'PUT', currentData, d.sha);
@@ -166,11 +179,51 @@
     }
 
     async function handleDelete(idx) {
-        if(!confirm("Bu eser kalıcı olarak silinecek. Emin misiniz?")) return;
+        if(!confirm("Emin misiniz?")) return;
         const d = await ghAction('content/portfolio.json');
         currentData.projects.splice(idx, 1);
         await ghAction('content/portfolio.json', 'PUT', currentData, d.sha);
         refreshAll();
+    }
+
+    // Duyuru Güncelleme Fonksiyonu
+    async function handleNewsUpdate() {
+        const title = document.getElementById('n-title').value;
+        const body = document.getElementById('n-body').value;
+        if(!title) return alert("Başlık boş olamaz.");
+
+        const d = await ghAction('content/news.json');
+        let nData = JSON.parse(atob(d.content));
+        
+        nData.announcements = [{ title, body, date: new Date().toLocaleDateString('tr-TR') }];
+        
+        await ghAction('content/news.json', 'PUT', nData, d.sha);
+        alert("Duyuru başarıyla yayınlandı!");
+    }
+
+    // Ziyaretçi Defteri Yenileme
+    async function refreshGuestbook() {
+        const d = await ghAction('content/news.json');
+        const nData = JSON.parse(atob(d.content));
+        const list = nData.guestbook || [];
+        
+        document.getElementById('guest-list').innerHTML = list.length > 0 
+            ? list.map((g, i) => `
+                <div class="item-row">
+                    <span><b>${g.name}:</b> ${g.message}</span>
+                    <span style="color:#ff4444; cursor:pointer; font-size:10px;" onclick="handleGuestDelete(${i})">SİL</span>
+                </div>
+            `).reverse().join('')
+            : "Henüz mesaj bırakılmamış.";
+    }
+
+    async function handleGuestDelete(idx) {
+        if(!confirm("Mesaj silinsin mi?")) return;
+        const d = await ghAction('content/news.json');
+        let nData = JSON.parse(atob(d.content));
+        nData.guestbook.splice(idx, 1);
+        await ghAction('content/news.json', 'PUT', nData, d.sha);
+        refreshGuestbook();
     }
 
     async function handleSettingsUpdate() {
@@ -186,6 +239,9 @@
         document.getElementById('tab-'+n).classList.add('active');
         document.querySelectorAll('.nav-link').forEach(x => x.classList.remove('active'));
         el.classList.add('active');
+        
+        if(n === 'guest') refreshGuestbook();
+        if(n === 'inv') refreshAll();
     }
 
     function fillSaleFields(i) {
