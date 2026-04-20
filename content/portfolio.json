@@ -2,6 +2,13 @@
   "projects": [
     {
       "title": "Portre",
+      "category": "Heykel",
+      "image": "images/uploads/1776729446798_Gemini_Generated_Image_k2on20k2on20k2on.png",
+      "mapLink": "",
+      "date": "2026-04-20T23:57:31.177Z"
+    },
+    {
+      "title": "Portre",
       "category": "Karakalem",
       "image": "images/uploads/1776725158059_Gemini_Generated_Image_rsltyyrsltyyrslt.png",
       "isSale": true,
