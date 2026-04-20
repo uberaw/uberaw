@@ -3,97 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">UBE RAW</title>
+    <title>UBE RAW | Art & Design Studio</title>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500&family=Inter:wght@200;400&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --bg: #0a0a0a; 
-            --text: #e5e5e5; 
-            --bronze: #a87f4a; 
-            --border: #1e1e1e; 
-        }
+        :root { --bg: #0a0a0a; --text: #e5e5e5; --bronze: #a87f4a; --border: #1e1e1e; }
         body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; scroll-behavior: smooth; }
-        
-        /* Navigasyon */
         nav { padding: 40px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--bronze); background: #000; position: sticky; top:0; z-index: 1000; }
         .logo h1 { font-family: 'Cormorant Garamond', serif; font-size: 28px; letter-spacing: 6px; margin: 0; color: var(--bronze); text-transform: uppercase; cursor: pointer; }
-        .logo img { height: 40px; }
-        
-        #news-bar { background: var(--bronze); color: #000; padding: 10px 5%; font-size: 12px; font-weight: bold; text-align: center; display: none; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* Filtreler */
+        #news-bar { background: var(--bronze); color: #000; padding: 10px 5%; font-size: 11px; font-weight: bold; text-align: center; display: none; text-transform: uppercase; }
         .filters { padding: 25px 5%; display: flex; gap: 20px; overflow-x: auto; border-bottom: 1px solid var(--border); }
-        .filter-btn { color: #555; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; transition: 0.3s; white-space: nowrap; }
+        .filter-btn { color: #555; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; transition: 0.3s; white-space: nowrap; }
         .filter-btn.active { color: var(--bronze); border-bottom: 1px solid var(--bronze); }
-
-        /* Grid Sistemi */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; padding: 40px 5%; }
         .artwork { border: 1px solid var(--border); transition: 0.4s; background: #000; position: relative; }
         .artwork:hover { border-color: var(--bronze); }
         .img-wrapper { aspect-ratio: 1/1; overflow: hidden; cursor: zoom-in; }
         .img-wrapper img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(20%); transition: 1s; }
         .artwork:hover img { filter: grayscale(0%); transform: scale(1.03); }
-        
         .info { padding: 20px; border-top: 1px solid var(--border); }
         .info h3 { font-family: 'Cormorant Garamond', serif; font-size: 18px; margin: 0; letter-spacing: 1px; }
         .info p { font-size: 9px; color: var(--bronze); text-transform: uppercase; margin-bottom: 5px; }
-
-        /* Yeni Etiketler */
-        .sale-tag { background: var(--bronze); color: #000; font-size: 9px; padding: 4px 10px; position: absolute; top: 15px; right: 15px; font-weight: bold; z-index: 10; }
+        .sale-tag { background: var(--bronze); color: #000; font-size: 9px; padding: 4px 10px; position: absolute; top: 15px; right: 15px; font-weight: bold; }
         .edition-count { color: var(--bronze); font-size: 10px; letter-spacing: 1px; margin-top: 8px; display: block; border-top: 1px solid #111; padding-top: 8px; }
-
-        /* Lightbox */
-        #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 10000; cursor: zoom-out; }
-        #lightbox img { max-width: 90vw; max-height: 85vh; border: 1px solid var(--bronze); }
-
-        /* Sertifika & Ziyaretçi Defteri */
         .cert-box { margin: 60px auto; padding: 40px 20px; border: 1px dashed var(--bronze); max-width: 500px; text-align: center; }
         .guestbook-sec { background: #050505; border-top: 1px solid var(--bronze); padding: 80px 5%; text-align: center; }
-        .guest-entry { border-bottom: 1px solid #1a1a1a; padding: 20px; margin-bottom: 10px; font-style: italic; color: #888; max-width: 600px; margin: 0 auto; }
-        
-        input[type="text"] { background:none; border:1px solid #333; color:white; padding:12px; text-align:center; outline: none; transition: 0.3s; }
-        input[type="text"]:focus { border-color: var(--bronze); }
-        .btn-bronze { background: var(--bronze); border: none; padding: 12px 25px; color: #000; font-weight: bold; cursor: pointer; letter-spacing: 1px; transition: 0.3s; }
-        .btn-bronze:hover { opacity: 0.8; }
-
+        .guest-entry { border-bottom: 1px solid #1a1a1a; padding: 20px; color: #888; font-style: italic; font-size: 13px; }
         footer { padding: 80px 5%; border-top: 1px solid var(--border); text-align: center; color: #444; font-size: 10px; letter-spacing: 3px; }
-
-        @media (max-width: 768px) {
-            .grid { grid-template-columns: 1fr; padding: 20px; }
-            nav { padding: 20px 5%; flex-direction: column; gap: 15px; }
-        }
+        #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 10000; }
+        #lightbox img { max-width: 90vw; max-height: 85vh; border: 1px solid var(--bronze); }
+        input[type="text"] { background:none; border:1px solid #333; color:white; padding:12px; text-align:center; }
+        .btn-bronze { background: var(--bronze); border: none; padding: 12px 25px; color: #000; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
-
     <div id="news-bar"></div>
-
     <nav>
         <div class="logo" id="logo-wrap" onclick="location.reload()"><h1>UBE RAW</h1></div>
         <div style="font-size: 10px; letter-spacing: 4px; color: var(--bronze);">SCULPTURE STUDIO</div>
     </nav>
-
     <div class="filters" id="cat-nav"></div>
-
     <div class="grid" id="main-grid"></div>
-
-    <section id="cert-sec">
-        <div class="cert-box">
-            <h2 style="font-family:'Cormorant Garamond'; color:var(--bronze); letter-spacing:3px;">ORİJİNALLİK DOĞRULAMA</h2>
-            <p style="font-size: 10px; letter-spacing: 2px; margin-bottom:20px; color:#666;">ESER SERTİFİKA NUMARASINI GİRİNİZ</p>
-            <input type="text" id="cert-input" placeholder="Örn: UBE-001">
-            <button class="btn-bronze" onclick="checkCert()">SORGULA</button>
-            <div id="cert-result" style="margin-top:20px; font-size:13px; min-height: 20px;"></div>
-        </div>
+    <section class="cert-box">
+        <h2 style="font-family:'Cormorant Garamond'; color:var(--bronze);">SERTİFİKA DOĞRULAMA</h2>
+        <input type="text" id="cert-input" placeholder="Kod Giriniz">
+        <button class="btn-bronze" onclick="checkCert()">SORGULA</button>
+        <div id="cert-result" style="margin-top:20px;"></div>
     </section>
-
     <section class="guestbook-sec">
-        <h2 style="font-family:'Cormorant Garamond'; color:var(--bronze); font-size:30px; letter-spacing:5px;">ZİYARETÇİ DEFTERİ</h2>
-        <div id="guestbook-list" style="margin-top:40px;"></div>
+        <h2 style="font-family:'Cormorant Garamond'; color:var(--bronze); letter-spacing:5px;">ZİYARETÇİ DEFTERİ</h2>
+        <div id="guestbook-list"></div>
     </section>
-
     <div id="lightbox" onclick="this.style.display='none'"><img id="l-img"></div>
-
     <footer id="footer-copy"></footer>
 
     <script>
@@ -102,47 +62,33 @@
 
         async function load() {
             try {
-                const [sRes, pRes, nRes] = await Promise.all([
-                    fetch(`${base}content/settings.json`),
-                    fetch(`${base}content/portfolio.json`),
-                    fetch(`${base}content/news.json`)
+                const [sR, pR, nR] = await Promise.all([
+                    fetch(`${base}content/settings.json?v=${Date.now()}`),
+                    fetch(`${base}content/portfolio.json?v=${Date.now()}`),
+                    fetch(`${base}content/news.json?v=${Date.now()}`)
                 ]);
+                const s = await sR.json();
+                const p = await pR.json();
+                const n = await nR.json();
                 
-                const s = await sRes.json();
-                const p = await pRes.json();
-                const n = await nRes.json();
-                allWorks = p.projects;
-
-                // Ayarlar
-                if(s.logoUrl && s.logoUrl !== "none") {
-                    document.getElementById('logo-wrap').innerHTML = `<img src="${base}${s.logoUrl}">`;
-                }
+                allWorks = p.projects || [];
                 document.getElementById('footer-copy').innerText = s.footerText;
+                if(s.logoUrl && s.logoUrl !== "none") document.getElementById('logo-wrap').innerHTML = `<img src="${base}${s.logoUrl}" height="40">`;
                 
-                // Haberler
-                if(n.announcements && n.announcements.length > 0) {
-                    const bar = document.getElementById('news-bar');
-                    bar.style.display = 'block';
-                    bar.innerText = n.announcements[0].title + ": " + n.announcements[0].body;
+                if(n.announcements?.length) {
+                    const b = document.getElementById('news-bar');
+                    b.style.display = 'block';
+                    b.innerText = n.announcements[0].title + ": " + n.announcements[0].body;
                 }
 
-                // Ziyaretçi Defteri
-                if(n.guestbook && n.guestbook.length > 0) {
-                    document.getElementById('guestbook-list').innerHTML = n.guestbook.map(g => `
-                        <div class="guest-entry">"${g.message}" <br><small style="color:var(--bronze);">- ${g.name}</small></div>
-                    `).join('');
-                } else {
-                    document.getElementById('guestbook-list').innerHTML = "<p style='color:#444;'>Henüz not bırakılmamış.</p>";
+                if(n.guestbook?.length) {
+                    document.getElementById('guestbook-list').innerHTML = n.guestbook.map(g => `<div class="guest-entry">"${g.message}" - <b>${g.name}</b></div>`).join('');
                 }
 
-                // Filtreler
                 const cats = ['HEPSİ', ...new Set(allWorks.map(w => w.category))];
-                document.getElementById('cat-nav').innerHTML = cats.map(c => 
-                    `<span class="filter-btn" onclick="draw('${c}', this)">${c}</span>`
-                ).join('');
-
+                document.getElementById('cat-nav').innerHTML = cats.map(c => `<span class="filter-btn" onclick="draw('${c}', this)">${c}</span>`).join('');
                 draw('HEPSİ');
-            } catch(e) { console.error("Yükleme hatası:", e); }
+            } catch(e) { console.error("Yükleme Hatası:", e); }
         }
 
         function draw(cat, btn) {
@@ -154,9 +100,7 @@
             document.getElementById('main-grid').innerHTML = filtered.map(w => `
                 <div class="artwork">
                     ${w.isSale ? `<div class="sale-tag">${w.price || 'Fiyat Alınız'}</div>` : ''}
-                    <div class="img-wrapper" onclick="openL('${base}${w.image}')">
-                        <img src="${base}${w.image}" loading="lazy">
-                    </div>
+                    <div class="img-wrapper" onclick="openL('${base}${w.image}')"><img src="${base}${w.image}" loading="lazy"></div>
                     <div class="info">
                         <p>${w.category}</p>
                         <h3>${w.title}</h3>
@@ -166,30 +110,14 @@
             `).reverse().join('');
         }
 
-        // Sertifika Sorgulama Fonksiyonu
         function checkCert() {
             const code = document.getElementById('cert-input').value.trim().toUpperCase();
-            const resultDiv = document.getElementById('cert-result');
-            
-            if(!code) {
-                resultDiv.innerHTML = "Lütfen bir kod girin.";
-                return;
-            }
-
-            const match = allWorks.find(w => w.certCode && w.certCode.toUpperCase() === code);
-            
-            if(match) {
-                resultDiv.innerHTML = `<span style="color:#4CAF50;">✔ DOĞRULANDI:</span> <b>${match.title}</b> eseri orijinal bir UBE RAW ürünüdür.`;
-            } else {
-                resultDiv.innerHTML = `<span style="color:#f44336;">✘ KAYIT BULUNAMADI:</span> Bu sertifika numarası sistemimizde kayıtlı değil.`;
-            }
+            const res = document.getElementById('cert-result');
+            const match = allWorks.find(w => w.certCode?.toUpperCase() === code);
+            res.innerHTML = match ? `<span style="color:#4CAF50;">✔ DOĞRULANDI: ${match.title}</span>` : `<span style="color:#f44336;">✘ GEÇERSİZ KOD</span>`;
         }
 
-        function openL(src) {
-            document.getElementById('l-img').src = src;
-            document.getElementById('lightbox').style.display = 'flex';
-        }
-
+        function openL(src) { document.getElementById('l-img').src = src; document.getElementById('lightbox').style.display = 'flex'; }
         load();
     </script>
 </body>
