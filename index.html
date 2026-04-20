@@ -9,115 +9,87 @@
         :root { --bg: #000; --text: #fff; --grey: #666; --border: #1a1a1a; }
         body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; }
         
-        /* Navigasyon */
-        nav { padding: 50px 5%; display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--border); }
-        .brand h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(30px, 5vw, 45px); font-weight: 300; letter-spacing: 12px; margin: 0; text-transform: uppercase; }
-        
-        /* Filtreler */
-        .filters { padding: 30px 5%; display: flex; gap: 20px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--grey); overflow-x: auto; }
-        .filter-btn { cursor: pointer; transition: 0.3s; white-space: nowrap; }
-        .filter-btn:hover, .filter-btn.active { color: #fff; }
+        nav { padding: 40px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top:0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 100; }
+        .logo img { height: 30px; filter: invert(1); }
+        .nav-links a { color: var(--grey); text-decoration: none; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-left: 30px; transition: 0.3s; }
+        .nav-links a:hover { color: #fff; }
 
-        /* Galeri */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 50px; padding: 20px 5%; }
-        .artwork { opacity: 0; transform: translateY(20px); transition: 1s all ease; }
-        .artwork.visible { opacity: 1; transform: translateY(0); }
-        .img-wrapper { aspect-ratio: 4/5; overflow: hidden; background: #111; cursor: zoom-in; }
-        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: 1.5s transform; }
-        .artwork:hover img { transform: scale(1.08); }
-        .info { margin-top: 15px; }
-        .info h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; margin: 0; letter-spacing: 1px; }
-        .info p { font-size: 10px; color: var(--grey); text-transform: uppercase; letter-spacing: 2px; margin: 5px 0; }
+        section { padding: 80px 5%; }
+        .section-title { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 300; margin-bottom: 50px; letter-spacing: 5px; text-align: center; }
 
-        /* Lightbox (Resim Zoom) */
-        #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 1000; cursor: zoom-out; }
-        #lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 40px; }
+        .artwork { border: 1px solid var(--border); transition: 0.5s; overflow: hidden; }
+        .artwork img { width: 100%; height: 400px; object-fit: cover; transition: 1s; }
+        .artwork:hover img { transform: scale(1.05); }
+        .artwork-info { padding: 20px; text-align: center; }
+        .artwork-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; }
 
-        footer { padding: 100px 5%; border-top: 1px solid var(--border); text-align: center; font-size: 10px; letter-spacing: 3px; color: var(--grey); }
-        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+        #about { max-width: 800px; margin: 0 auto; line-height: 2; text-align: center; color: #ccc; }
+        footer { padding: 60px; border-top: 1px solid var(--border); text-align: center; font-size: 10px; color: var(--grey); letter-spacing: 2px; }
+
+        @media (max-width: 768px) { .nav-links { display: none; } .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
     <nav>
-        <div class="brand">
-            <h1 id="site-name">UBE RAW</h1>
+        <div id="site-logo-container"><h1 style="font-family:'Cormorant Garamond'; letter-spacing:5px; font-size:24px; margin:0;">UBE RAW</h1></div>
+        <div class="nav-links">
+            <a href="#portfolio">Portfolyo</a>
+            <a href="#about-sec">Hakkımda</a>
+            <a href="#contact">İletişim</a>
         </div>
-        <div id="logo-place"></div>
     </nav>
 
-    <div class="filters" id="filter-bar">
-        <span class="filter-btn active" onclick="filterGrid('All')">Hepsi</span>
-    </div>
+    <section id="portfolio">
+        <h2 class="section-title">SEÇKİLER</h2>
+        <div class="grid" id="main-grid"></div>
+    </section>
 
-    <div class="grid" id="main-grid"></div>
+    <section id="about-sec" style="background: #050505;">
+        <h2 class="section-title">MANIFESTO</h2>
+        <div id="about"></div>
+    </section>
 
-    <div id="lightbox" onclick="this.style.display='none'"><img id="l-img"></div>
+    <section id="contact">
+        <h2 class="section-title">İLETİŞİM</h2>
+        <div id="contact-info" style="text-align: center; letter-spacing: 2px;"></div>
+    </section>
 
     <footer id="footer-text"></footer>
 
     <script>
         const base = window.location.pathname.includes('uberaw') ? '/uberaw/' : '/';
-        let allProjects = [];
 
-        async function start() {
-            try {
-                const [sRes, pRes] = await Promise.all([
-                    fetch(`${base}content/settings.json`),
-                    fetch(`${base}content/portfolio.json`)
-                ]);
-                
-                const settings = await sRes.json();
-                const port = await pRes.json();
-                allProjects = port.projects;
-
-                document.getElementById('site-name').innerText = settings.siteTitle;
-                document.getElementById('footer-text').innerText = settings.footerText;
-                
-                // Kategorileri oluştur
-                const cats = ['All', ...new Set(allProjects.map(p => p.category))];
-                document.getElementById('filter-bar').innerHTML = cats.map(c => 
-                    `<span class="filter-btn ${c==='All'?'active':''}" onclick="filterGrid('${c}', this)">${c}</span>`
-                ).join('');
-
-                filterGrid('All');
-            } catch(e) { console.error("Hata:", e); }
-        }
-
-        function filterGrid(cat, btn) {
-            if(btn) {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            }
-            const grid = document.getElementById('main-grid');
-            const filtered = cat === 'All' ? allProjects : allProjects.filter(p => p.category === cat);
+        async function loadSite() {
+            const [sRes, pRes] = await Promise.all([
+                fetch(`${base}content/settings.json`),
+                fetch(`${base}content/portfolio.json`)
+            ]);
             
-            grid.innerHTML = filtered.map(p => `
+            const settings = await sRes.json();
+            const port = await pRes.json();
+
+            // Ayarları Yerleştir
+            if(settings.logoUrl && settings.logoUrl.includes('http')) {
+                document.getElementById('site-logo-container').innerHTML = `<img src="${settings.logoUrl}" style="height:30px;">`;
+            }
+            document.getElementById('about').innerText = settings.aboutText;
+            document.getElementById('contact-info').innerText = settings.contactInfo;
+            document.getElementById('footer-text').innerText = settings.footerText;
+
+            // Portfolyoyu Yerleştir
+            document.getElementById('main-grid').innerHTML = port.projects.map(p => `
                 <div class="artwork">
-                    <div class="img-wrapper" onclick="openLight('${base}${p.image}')">
-                        <img src="${base}${p.image}" loading="lazy">
-                    </div>
-                    <div class="info">
-                        <p>${p.category}</p>
-                        <h3>${p.title}</h3>
+                    <img src="${base}${p.image}" loading="lazy">
+                    <div class="artwork-info">
+                        <div class="artwork-title">${p.title}</div>
+                        <div style="font-size:10px; color:#666; text-transform:uppercase; margin-top:5px;">${p.category}</div>
                     </div>
                 </div>
             `).reverse().join('');
-
-            // Animasyon tetikle
-            setTimeout(() => {
-                document.querySelectorAll('.artwork').forEach((el, i) => {
-                    setTimeout(() => el.classList.add('visible'), i * 100);
-                });
-            }, 100);
         }
-
-        function openLight(src) {
-            document.getElementById('l-img').src = src;
-            document.getElementById('lightbox').style.display = 'flex';
-        }
-
-        start();
+        loadSite();
     </script>
 </body>
 </html>
