@@ -3,122 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">UBE RAW | Art & Design</title>
+    <title id="page-title">UBE RAW</title>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500&family=Inter:wght@200;400&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #050505; --text: #ffffff; --grey: #777; --border: #1a1a1a; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
+        :root { --bg: #000; --text: #fff; --grey: #666; --border: #1a1a1a; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; }
         
-        /* Loading Animasyonu */
-        .fade-in { animation: fadeIn 1.5s ease forwards; opacity: 0; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Navigation */
-        nav { padding: 60px 5% 40px; display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--border); }
-        .brand { flex: 1; }
-        .brand h1 { font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 300; letter-spacing: 12px; margin: 0; text-transform: uppercase; }
-        .brand p { font-size: 10px; letter-spacing: 5px; color: var(--grey); margin: 10px 0 0; text-transform: uppercase; }
-
-        /* News Section (Daha Minimal) */
-        #news-bar { background: #0a0a0a; padding: 20px 5%; border-bottom: 1px solid var(--border); display: none; font-size: 13px; letter-spacing: 1px; }
-        .news-tag { color: var(--grey); font-size: 10px; margin-bottom: 5px; display: block; }
-
-        /* Portfolio Grid */
-        .container { padding: 60px 5%; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 60px; }
+        /* Navigasyon */
+        nav { padding: 50px 5%; display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--border); }
+        .brand h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(30px, 5vw, 45px); font-weight: 300; letter-spacing: 12px; margin: 0; text-transform: uppercase; }
         
-        .artwork { position: relative; cursor: pointer; }
-        .img-container { overflow: hidden; background: #111; aspect-ratio: 4/5; }
-        .artwork img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s cubic-bezier(0.19, 1, 0.22, 1); }
-        .artwork:hover img { transform: scale(1.05); }
+        /* Filtreler */
+        .filters { padding: 30px 5%; display: flex; gap: 20px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--grey); overflow-x: auto; }
+        .filter-btn { cursor: pointer; transition: 0.3s; white-space: nowrap; }
+        .filter-btn:hover, .filter-btn.active { color: #fff; }
 
-        .artwork-info { margin-top: 20px; text-align: left; }
-        .artwork-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 500; letter-spacing: 1px; }
-        .artwork-cat { font-size: 11px; color: var(--grey); text-transform: uppercase; letter-spacing: 3px; margin-top: 8px; }
+        /* Galeri */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 50px; padding: 20px 5%; }
+        .artwork { opacity: 0; transform: translateY(20px); transition: 1s all ease; }
+        .artwork.visible { opacity: 1; transform: translateY(0); }
+        .img-wrapper { aspect-ratio: 4/5; overflow: hidden; background: #111; cursor: zoom-in; }
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: 1.5s transform; }
+        .artwork:hover img { transform: scale(1.08); }
+        .info { margin-top: 15px; }
+        .info h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; margin: 0; letter-spacing: 1px; }
+        .info p { font-size: 10px; color: var(--grey); text-transform: uppercase; letter-spacing: 2px; margin: 5px 0; }
 
-        /* Footer */
-        footer { padding: 100px 5% 60px; border-top: 1px solid var(--border); text-align: center; }
-        .footer-text { font-size: 10px; letter-spacing: 4px; color: var(--grey); text-transform: uppercase; }
+        /* Lightbox (Resim Zoom) */
+        #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 1000; cursor: zoom-out; }
+        #lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; }
 
-        /* Mobil Düzen */
-        @media (max-width: 768px) {
-            nav { flex-direction: column; align-items: flex-start; padding-top: 40px; }
-            .brand h1 { font-size: 32px; }
-            .grid { grid-template-columns: 1fr; gap: 40px; }
-        }
+        footer { padding: 100px 5%; border-top: 1px solid var(--border); text-align: center; font-size: 10px; letter-spacing: 3px; color: var(--grey); }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-    <nav class="fade-in">
+    <nav>
         <div class="brand">
             <h1 id="site-name">UBE RAW</h1>
-            <p id="site-sub">Sculpture & 3D Design Studio</p>
         </div>
-        <div id="logo-holder"></div>
+        <div id="logo-place"></div>
     </nav>
 
-    <div id="news-bar" class="fade-in">
-        <span class="news-tag">BÜLTEN // LATEST NEWS</span>
-        <div id="news-content"></div>
+    <div class="filters" id="filter-bar">
+        <span class="filter-btn active" onclick="filterGrid('All')">Hepsi</span>
     </div>
 
-    <div class="container fade-in">
-        <div class="grid" id="portfolio-grid">
-            </div>
-    </div>
+    <div class="grid" id="main-grid"></div>
 
-    <footer class="fade-in">
-        <div class="footer-text" id="site-footer">© 2026 UBE RAW STUDIO</div>
-    </footer>
+    <div id="lightbox" onclick="this.style.display='none'"><img id="l-img"></div>
+
+    <footer id="footer-text"></footer>
 
     <script>
-        // GitHub Pages alt klasör yapısı için yolu otomatik belirle
         const base = window.location.pathname.includes('uberaw') ? '/uberaw/' : '/';
+        let allProjects = [];
 
-        async function loadSite() {
+        async function start() {
             try {
-                // 1. Ayarları Çek
-                const sReq = await fetch(`${base}content/settings.json`);
-                const settings = await sReq.json();
-                document.getElementById('site-name').innerText = settings.siteTitle || "UBE RAW";
-                document.getElementById('site-footer').innerText = settings.footerText;
-                if(settings.logoUrl) {
-                    document.getElementById('logo-holder').innerHTML = `<img src="${base}${settings.logoUrl}" style="height:30px; filter:invert(1);">`;
-                }
-
-                // 2. Haberleri Çek
-                const nReq = await fetch(`${base}content/news.json`);
-                const newsData = await nReq.json();
-                if(newsData.announcements && newsData.announcements.length > 0) {
-                    document.getElementById('news-bar').style.display = 'block';
-                    document.getElementById('news-content').innerHTML = newsData.announcements.map(n => `
-                        <div><strong>${n.title}</strong> — ${n.body}</div>
-                    `).join('');
-                }
-
-                // 3. Portfolyoyu Çek
-                const pReq = await fetch(`${base}content/portfolio.json`);
-                const portData = await pReq.json();
-                const grid = document.getElementById('portfolio-grid');
+                const [sRes, pRes] = await Promise.all([
+                    fetch(`${base}content/settings.json`),
+                    fetch(`${base}content/portfolio.json`)
+                ]);
                 
-                grid.innerHTML = portData.projects.map(p => `
-                    <div class="artwork">
-                        <div class="img-container">
-                            <img src="${base}${p.image}" alt="${p.title}" loading="lazy">
-                        </div>
-                        <div class="artwork-info">
-                            <div class="artwork-title">${p.title}</div>
-                            <div class="artwork-cat">${p.category}</div>
-                        </div>
-                    </div>
-                `).reverse().join('');
+                const settings = await sRes.json();
+                const port = await pRes.json();
+                allProjects = port.projects;
 
-            } catch (err) {
-                console.log("Yükleme hatası: ", err);
-            }
+                document.getElementById('site-name').innerText = settings.siteTitle;
+                document.getElementById('footer-text').innerText = settings.footerText;
+                
+                // Kategorileri oluştur
+                const cats = ['All', ...new Set(allProjects.map(p => p.category))];
+                document.getElementById('filter-bar').innerHTML = cats.map(c => 
+                    `<span class="filter-btn ${c==='All'?'active':''}" onclick="filterGrid('${c}', this)">${c}</span>`
+                ).join('');
+
+                filterGrid('All');
+            } catch(e) { console.error("Hata:", e); }
         }
-        loadSite();
+
+        function filterGrid(cat, btn) {
+            if(btn) {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+            const grid = document.getElementById('main-grid');
+            const filtered = cat === 'All' ? allProjects : allProjects.filter(p => p.category === cat);
+            
+            grid.innerHTML = filtered.map(p => `
+                <div class="artwork">
+                    <div class="img-wrapper" onclick="openLight('${base}${p.image}')">
+                        <img src="${base}${p.image}" loading="lazy">
+                    </div>
+                    <div class="info">
+                        <p>${p.category}</p>
+                        <h3>${p.title}</h3>
+                    </div>
+                </div>
+            `).reverse().join('');
+
+            // Animasyon tetikle
+            setTimeout(() => {
+                document.querySelectorAll('.artwork').forEach((el, i) => {
+                    setTimeout(() => el.classList.add('visible'), i * 100);
+                });
+            }, 100);
+        }
+
+        function openLight(src) {
+            document.getElementById('l-img').src = src;
+            document.getElementById('lightbox').style.display = 'flex';
+        }
+
+        start();
     </script>
 </body>
 </html>
