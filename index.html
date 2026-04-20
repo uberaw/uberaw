@@ -6,135 +6,115 @@
     <title id="page-title">UBE RAW</title>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500&family=Inter:wght@200;400&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #000; --text: #fff; --grey: #777; --border: #1a1a1a; --accent: #fff; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; scroll-behavior: smooth; }
-        
-        /* Navigasyon - Mobil Uyumlu */
-        nav { padding: 30px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top:0; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); z-index: 1000; }
-        .logo h1 { font-family: 'Cormorant Garamond', serif; font-size: 28px; letter-spacing: 5px; margin: 0; cursor: pointer; }
-        .nav-links a { color: var(--grey); text-decoration: none; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-left: 20px; transition: 0.3s; }
-        .nav-links a:hover { color: #fff; }
-
-        /* Haber Bandı */
-        #news-section { background: #0a0a0a; padding: 15px 5%; border-bottom: 1px solid var(--border); display: none; font-size: 13px; }
-
-        /* Filtreler */
-        .filters { padding: 30px 5%; display: flex; gap: 20px; overflow-x: auto; white-space: nowrap; border-bottom: 1px solid var(--border); }
-        .filter-btn { color: var(--grey); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; transition: 0.3s; }
-        .filter-btn.active, .filter-btn:hover { color: #fff; }
-
-        /* Portfolyo Grid - Mobil için 1fr (Tekli) Ayarı */
-        .container { padding: 40px 5%; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 40px; }
-        .artwork { opacity: 0; transform: translateY(30px); transition: 1s all ease; }
-        .artwork.visible { opacity: 1; transform: translateY(0); }
-        .img-wrapper { aspect-ratio: 4/5; overflow: hidden; background: #111; position: relative; cursor: zoom-in; border: 1px solid var(--border); }
-        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: 1.5s transform cubic-bezier(0.19, 1, 0.22, 1); }
-        .artwork:hover img { transform: scale(1.05); }
-        .info { margin-top: 15px; }
-        .info h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; margin: 0; }
-        .info p { font-size: 10px; color: var(--grey); text-transform: uppercase; letter-spacing: 2px; margin-top: 5px; }
-
-        /* Hakkımda & İletişim */
-        section { padding: 100px 5%; border-top: 1px solid var(--border); }
-        .sec-title { font-family: 'Cormorant Garamond', serif; font-size: 35px; letter-spacing: 5px; margin-bottom: 40px; text-align: center; }
-        #about-content { max-width: 800px; margin: 0 auto; line-height: 1.8; text-align: center; color: #ccc; }
-
-        /* Lightbox - Mobil Optimizeli */
-        #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.98); display: none; justify-content: center; align-items: center; z-index: 10000; cursor: zoom-out; }
-        #lightbox img { max-width: 95vw; max-height: 90vh; object-fit: contain; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
-
-        /* Mobil Responsive Dokunuşlar */
-        @media (max-width: 768px) {
-            .grid { grid-template-columns: 1fr; } /* Mobilde her satıra bir eser */
-            .container { padding: 20px; } /* Mobilde padding: 20px */
-            .nav-links { display: none; } /* Sade bir görünüm için */
-            .logo h1 { font-size: 22px; }
+        :root { 
+            --bg: #0a0a0a; 
+            --text: #e5e5e5; 
+            --bronze: #a87f4a; /* Bronz Detay */
+            --border: #1e1e1e; 
         }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; }
+        
+        /* Navigasyon - Bronz Alt Çizgi */
+        nav { padding: 40px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--bronze); background: #000; position: sticky; top:0; z-index: 1000; }
+        .logo h1 { font-family: 'Cormorant Garamond', serif; font-size: 28px; letter-spacing: 6px; margin: 0; color: var(--bronze); text-transform: uppercase; }
+        .logo img { height: 40px; }
+        
+        /* Haberler - Bronz Zemin */
+        #news-bar { background: var(--bronze); color: #000; padding: 10px 5%; font-size: 12px; font-weight: bold; text-align: center; display: none; text-transform: uppercase; letter-spacing: 1px; }
 
-        footer { padding: 60px 5%; text-align: center; font-size: 10px; color: var(--grey); letter-spacing: 3px; }
+        /* Kategori Filtreleri */
+        .filters { padding: 25px 5%; display: flex; gap: 20px; overflow-x: auto; border-bottom: 1px solid var(--border); }
+        .filter-btn { color: #555; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; transition: 0.3s; }
+        .filter-btn.active { color: var(--bronze); border-bottom: 1px solid var(--bronze); }
+
+        /* Portfolyo - Orta Boyutlu Düzen */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; padding: 40px 5%; }
+        .artwork { border: 1px solid var(--border); transition: 0.4s; background: #000; }
+        .artwork:hover { border-color: var(--bronze); }
+        .img-wrapper { aspect-ratio: 1/1; overflow: hidden; cursor: zoom-in; }
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(20%); transition: 1s; }
+        .artwork:hover img { filter: grayscale(0%); transform: scale(1.03); }
+        
+        .info { padding: 20px; border-top: 1px solid var(--border); }
+        .info h3 { font-family: 'Cormorant Garamond', serif; font-size: 18px; margin: 0; letter-spacing: 1px; }
+        .info p { font-size: 9px; color: var(--bronze); text-transform: uppercase; margin-bottom: 5px; }
+
+        /* Lightbox */
+        #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 10000; cursor: zoom-out; }
+        #lightbox img { max-width: 90vw; max-height: 85vh; border: 1px solid var(--bronze); }
+
+        footer { padding: 80px 5%; border-top: 1px solid var(--border); text-align: center; color: #444; font-size: 10px; letter-spacing: 3px; }
+
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; padding: 20px; }
+            nav { padding: 20px 5%; }
+        }
     </style>
 </head>
 <body>
 
+    <div id="news-bar"></div>
+
     <nav>
-        <div class="logo"><h1 onclick="window.scrollTo(0,0)">UBE RAW</h1></div>
-        <div class="nav-links">
-            <a href="#portfolio-sec">Eserler</a>
-            <a href="#about-sec">Manifesto</a>
-            <a href="#contact-sec">İletişim</a>
-        </div>
+        <div class="logo" id="logo-wrap"><h1>UBE RAW</h1></div>
+        <div style="font-size: 10px; letter-spacing: 4px; color: var(--bronze);">SCULPTURE STUDIO</div>
     </nav>
 
-    <div id="news-section"></div>
+    <div class="filters" id="cat-nav"></div>
 
-    <div class="filters" id="cat-filters"></div>
-
-    <div class="container" id="portfolio-sec">
-        <div class="grid" id="main-grid"></div>
-    </div>
-
-    <section id="about-sec">
-        <h2 class="sec-title">MANIFESTO</h2>
-        <div id="about-content"></div>
-    </section>
-
-    <section id="contact-sec">
-        <h2 class="sec-title">İLETİŞİM</h2>
-        <div id="contact-info" style="text-align: center; letter-spacing: 2px; color: #888;"></div>
-    </section>
+    <div class="grid" id="main-grid"></div>
 
     <div id="lightbox" onclick="this.style.display='none'"><img id="l-img"></div>
 
-    <footer id="footer-text"></footer>
+    <footer id="footer-copy"></footer>
 
     <script>
         const base = window.location.pathname.includes('uberaw') ? '/uberaw/' : '/';
-        let works = [];
+        let allWorks = [];
 
-        async function init() {
-            try {
-                const [sRes, pRes, nRes] = await Promise.all([
-                    fetch(`${base}content/settings.json`),
-                    fetch(`${base}content/portfolio.json`),
-                    fetch(`${base}content/news.json`)
-                ]);
-                
-                const settings = await sRes.json();
-                const port = await pRes.json();
-                const news = await nRes.json();
-                works = port.projects;
+        async function load() {
+            const [sRes, pRes, nRes] = await Promise.all([
+                fetch(`${base}content/settings.json`),
+                fetch(`${base}content/portfolio.json`),
+                fetch(`${base}content/news.json`)
+            ]);
+            
+            const s = await sRes.json();
+            const p = await pRes.json();
+            const n = await nRes.json();
+            allWorks = p.projects;
 
-                // UI Güncelle
-                document.getElementById('page-title').innerText = settings.siteTitle;
-                document.getElementById('footer-text').innerText = settings.footerText;
-                document.getElementById('about-content').innerText = settings.aboutText;
-                document.getElementById('contact-info').innerText = settings.contactInfo;
+            // Logo & Ayarlar
+            if(s.logoUrl && s.logoUrl !== "none") {
+                document.getElementById('logo-wrap').innerHTML = `<img src="${base}${s.logoUrl}">`;
+            }
+            document.getElementById('footer-copy').innerText = s.footerText;
+            
+            // Haberler
+            if(n.announcements.length > 0) {
+                const bar = document.getElementById('news-bar');
+                bar.style.display = 'block';
+                bar.innerText = n.announcements[0].title + ": " + n.announcements[0].body;
+            }
 
-                // Haberler
-                if(news.announcements.length > 0) {
-                    const nSec = document.getElementById('news-section');
-                    nSec.style.display = 'block';
-                    nSec.innerHTML = news.announcements.map(n => `<b>${n.title}:</b> ${n.body}`).join(' | ');
-                }
+            // Filtre & Grid
+            const cats = ['HEPSİ', ...new Set(allWorks.map(w => w.category))];
+            document.getElementById('cat-nav').innerHTML = cats.map(c => 
+                `<span class="filter-btn" onclick="draw('${c}', this)">${c}</span>`
+            ).join('');
 
-                // Filtreler
-                const cats = ['HEPSİ', ...new Set(works.map(w => w.category))];
-                document.getElementById('cat-filters').innerHTML = cats.map(c => 
-                    `<span class="filter-btn" onclick="filter('${c}', this)">${c}</span>`
-                ).join('');
-
-                filter('HEPSİ');
-            } catch(e) { console.error(e); }
+            draw('HEPSİ');
         }
 
-        function filter(cat, btn) {
-            const grid = document.getElementById('main-grid');
-            const filtered = cat === 'HEPSİ' ? works : works.filter(w => w.category === cat);
-            
-            grid.innerHTML = filtered.map(w => `
+        function draw(cat, btn) {
+            if(btn) {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+            const filtered = cat === 'HEPSİ' ? allWorks : allWorks.filter(w => w.category === cat);
+            document.getElementById('main-grid').innerHTML = filtered.map(w => `
                 <div class="artwork">
-                    <div class="img-wrapper" onclick="openLight('${base}${w.image}')">
+                    <div class="img-wrapper" onclick="openL('${base}${w.image}')">
                         <img src="${base}${w.image}" loading="lazy">
                     </div>
                     <div class="info">
@@ -143,20 +123,14 @@
                     </div>
                 </div>
             `).reverse().join('');
-
-            setTimeout(() => {
-                document.querySelectorAll('.artwork').forEach((el, i) => {
-                    setTimeout(() => el.classList.add('visible'), i * 150);
-                });
-            }, 100);
         }
 
-        function openLight(src) {
+        function openL(src) {
             document.getElementById('l-img').src = src;
             document.getElementById('lightbox').style.display = 'flex';
         }
 
-        init();
+        load();
     </script>
 </body>
 </html>
