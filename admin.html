@@ -2,179 +2,201 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>UBE RAW | Command Center</title>
+    <title>UBE RAW | Admin</title>
     <style>
         body { background: #000; color: #ccc; font-family: 'Inter', sans-serif; margin: 0; display: flex; }
         .sidebar { width: 240px; height: 100vh; border-right: 1px solid #222; padding: 30px; position: fixed; background: #050505; }
-        .sidebar h2 { color: #a87f4a; letter-spacing: 4px; font-size: 18px; }
+        .sidebar h2 { color: #a87f4a; letter-spacing: 3px; font-size: 16px; margin-bottom: 40px; }
         .nav-link { padding: 15px 0; cursor: pointer; font-size: 11px; text-transform: uppercase; color: #666; transition: 0.3s; }
-        .nav-link.active { color: #a87f4a; font-weight: bold; }
+        .nav-link.active { color: #a87f4a; font-weight: bold; border-left: 2px solid #a87f4a; padding-left: 10px; }
         .main { margin-left: 300px; padding: 60px; width: 100%; max-width: 800px; }
         .tab { display: none; } .tab.active { display: block; }
         .card { background: #0d0d0d; border: 1px solid #1a1a1a; padding: 25px; margin-bottom: 20px; }
         input, select { width: 100%; background: #000; border: 1px solid #222; color: #fff; padding: 12px; margin: 10px 0; box-sizing: border-box; }
-        button { background: #a87f4a; color: #000; border: none; padding: 15px; width: 100%; cursor: pointer; font-weight: bold; }
-        .item-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #111; font-size: 13px; }
+        button { background: #a87f4a; color: #000; border: none; padding: 15px; width: 100%; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #111; font-size: 13px; }
         #login { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
-    <div id="login">
-        <div style="width: 280px; text-align: center;">
-            <h2 style="color:#a87f4a;">UBE RAW ADMIN</h2>
-            <input type="password" id="token" placeholder="GitHub Token">
-            <button onclick="auth()">GİRİŞ</button>
+
+<div id="login">
+    <div style="width: 280px; text-align: center;">
+        <h2 style="color:#a87f4a; letter-spacing: 5px;">UBE RAW</h2>
+        <input type="password" id="token" placeholder="GitHub Token">
+        <button onclick="auth()">GİRİŞ YAP</button>
+    </div>
+</div>
+
+<div class="sidebar">
+    <h2>UBE RAW ADMIN</h2>
+    <div class="nav-link active" onclick="switchTab('add', this)">Eser Ekle</div>
+    <div class="nav-link" onclick="switchTab('inv', this)">Envanter / Sil</div>
+    <div class="nav-link" onclick="switchTab('sale', this)">Satış & Sertifika</div>
+    <div class="nav-link" onclick="switchTab('config', this)">Site Ayarları</div>
+</div>
+
+<div class="main">
+    <div id="tab-add" class="tab active">
+        <h3>Yeni Eser</h3>
+        <div class="card">
+            <input type="file" id="f-file">
+            <input type="text" id="f-title" placeholder="Eser Adı">
+            <input type="text" id="f-cat" placeholder="Kategori (Örn: Wall Relief)">
+            <button onclick="handleUpload()">YAYINLA</button>
         </div>
     </div>
 
-    <div class="sidebar">
-        <h2>UBE RAW</h2>
-        <div class="nav-link active" onclick="tab('add', this)">Eser Ekle</div>
-        <div class="nav-link" onclick="tab('inv', this)">Envanter</div>
-        <div class="nav-link" onclick="tab('sale', this)">Satış & Sertifika</div>
-        <div class="nav-link" onclick="tab('config', this)">Ayarlar</div>
+    <div id="tab-inv" class="tab">
+        <h3>Envanter Listesi</h3>
+        <div id="inventory-list" class="card">Yükleniyor...</div>
     </div>
 
-    <div class="main">
-        <div id="tab-add" class="tab active">
-            <h3>Yeni Eser Yayınla</h3>
-            <div class="card">
-                <input type="file" id="f-file">
-                <input type="text" id="f-title" placeholder="Eser Adı">
-                <input type="text" id="f-cat" placeholder="Kategori">
-                <button onclick="upload()">YÜKLE</button>
-            </div>
-        </div>
-
-        <div id="tab-inv" class="tab">
-            <h3>Envanter</h3>
-            <div id="inventory-list" class="card">Yükleniyor...</div>
-        </div>
-
-        <div id="tab-sale" class="tab">
-            <h3>Satış ve Sertifika Detayları</h3>
-            <div class="card">
-                <select id="sale-select" onchange="loadSaleData(this.value)"><option value="">Eser Seçin</option></select>
-                <input type="text" id="edit-price" placeholder="Fiyat">
-                <input type="text" id="edit-edition" placeholder="Edisyon (örn: 1/10)">
-                <input type="text" id="edit-cert" placeholder="Sertifika No">
-                <button onclick="saveSale()">GÜNCELLE</button>
-            </div>
-        </div>
-
-        <div id="tab-config" class="tab">
-            <h3>Site Ayarları</h3>
-            <div class="card">
-                <input type="text" id="s-footer" placeholder="Footer Metni">
-                <button onclick="updateSettings()">KAYDET</button>
-            </div>
+    <div id="tab-sale" class="tab">
+        <h3>Satış ve Sertifika</h3>
+        <div class="card">
+            <select id="sale-select" onchange="fillSaleFields(this.value)"><option value="">Eser Seçin</option></select>
+            <input type="text" id="edit-price" placeholder="Fiyat (Örn: 12.500 TL)">
+            <input type="text" id="edit-edition" placeholder="Edisyon (Örn: 1/5)">
+            <input type="text" id="edit-cert" placeholder="Sertifika No (Örn: UBE-001)">
+            <button onclick="handleSaleUpdate()">BİLGİLERİ KAYDET</button>
         </div>
     </div>
 
-    <script>
-        const REPO = "uberaw/uberaw"; // BURAYI KONTROL EDİN
-        let portfolio = { projects: [] };
+    <div id="tab-config" class="tab">
+        <h3>Genel Ayarlar</h3>
+        <div class="card">
+            <label style="font-size: 11px; color:#666;">Site Alt Metni (Footer)</label>
+            <input type="text" id="s-footer">
+            <button onclick="handleSettingsUpdate()">AYARLARI KAYDET</button>
+        </div>
+    </div>
+</div>
 
-        async function api(path, method = 'GET', body = null, sha = null) {
-            const t = localStorage.getItem('uber_t');
-            const options = {
-                method,
-                headers: { 'Authorization': `token ${t}`, 'Content-Type': 'application/json' }
-            };
-            if(body) options.body = JSON.stringify({ message: "Admin Update", content: btoa(unescape(encodeURIComponent(JSON.stringify(body, null, 2)))), sha });
-            const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, options);
-            return await r.json();
+<script>
+    const REPO = "uberaw/uberaw"; 
+    let currentData = { projects: [] };
+
+    async function ghAction(path, method = 'GET', data = null, sha = null) {
+        const token = localStorage.getItem('uber_t');
+        const options = {
+            method,
+            headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' }
+        };
+        if (data) {
+            options.body = JSON.stringify({
+                message: "Admin update",
+                content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
+                sha: sha
+            });
         }
+        const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, options);
+        return await r.json();
+    }
 
-        async function auth() {
-            const t = document.getElementById('token').value || localStorage.getItem('uber_t');
-            localStorage.setItem('uber_t', t);
-            const d = await api('content/settings.json');
-            if(d.sha) {
-                document.getElementById('login').style.display='none';
-                loadAll();
+    async function auth() {
+        const t = document.getElementById('token').value || localStorage.getItem('uber_t');
+        localStorage.setItem('uber_t', t);
+        try {
+            const test = await ghAction('content/settings.json');
+            if(test.sha) {
+                document.getElementById('login').style.display = 'none';
+                refreshAll();
+                document.getElementById('s-footer').value = JSON.parse(atob(test.content)).footerText;
             }
-        }
+        } catch(e) { alert("Bağlantı başarısız. Repo adını veya Token'ı kontrol edin."); }
+    }
 
-        async function loadAll() {
-            const d = await api('content/portfolio.json');
-            portfolio = JSON.parse(atob(d.content));
+    async function refreshAll() {
+        const d = await ghAction('content/portfolio.json');
+        currentData = JSON.parse(atob(d.content));
+        
+        // Envanter
+        document.getElementById('inventory-list').innerHTML = currentData.projects.map((x, i) => `
+            <div class="item-row">
+                <span>${x.title}</span>
+                <span style="color:#ff4444; cursor:pointer; font-size:10px;" onclick="handleDelete(${i})">SİL</span>
+            </div>
+        `).reverse().join('');
+
+        // Seçim listesi
+        document.getElementById('sale-select').innerHTML = '<option value="">Eser Seçin</option>' + 
+            currentData.projects.map((x, i) => `<option value="${i}">${x.title}</option>`).join('');
+    }
+
+    async function handleUpload() {
+        const file = document.getElementById('f-file').files[0];
+        const title = document.getElementById('f-title').value;
+        const cat = document.getElementById('f-cat').value;
+        if(!file || !title) return alert("Eksik alan!");
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const fileName = `images/uploads/${Date.now()}_${file.name}`;
+            const token = localStorage.getItem('uber_t');
             
-            // Envanter Listesi
-            document.getElementById('inventory-list').innerHTML = portfolio.projects.map((x, i) => `
-                <div class="item-row">
-                    <span>${x.title}</span>
-                    <span style="color:#ff4444; cursor:pointer" onclick="deleteItem(${i})">SİL</span>
-                </div>
-            `).reverse().join('');
+            // 1. Resmi yükle
+            await fetch(`https://api.github.com/repos/${REPO}/contents/${fileName}`, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${token}` },
+                body: JSON.stringify({ message: "Upload Img", content: e.target.result.split(',')[1] })
+            });
 
-            // Satış Seçimi
-            document.getElementById('sale-select').innerHTML = '<option value="">Eser Seçin</option>' + 
-                portfolio.projects.map((x, i) => `<option value="${i}">${x.title}</option>`).join('');
-        }
+            // 2. JSON'ı güncelle
+            const d = await ghAction('content/portfolio.json');
+            currentData.projects.push({ title, category: cat, image: fileName, isSale: false });
+            await ghAction('content/portfolio.json', 'PUT', currentData, d.sha);
+            
+            alert("Eser başarıyla eklendi!");
+            refreshAll();
+        };
+        reader.readAsDataURL(file);
+    }
 
-        async function upload() {
-            const file = document.getElementById('f-file').files[0];
-            if(!file) return alert("Dosya seçin");
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const fileName = `images/uploads/${Date.now()}_${file.name}`;
-                const t = localStorage.getItem('uber_t');
-                // Resmi yükle
-                await fetch(`https://api.github.com/repos/${REPO}/contents/${fileName}`, {
-                    method: 'PUT', headers: { 'Authorization': `token ${t}` },
-                    body: JSON.stringify({ message: "Upload Img", content: e.target.result.split(',')[1] })
-                });
-                // JSON'a ekle
-                const d = await api('content/portfolio.json');
-                portfolio.projects.push({ 
-                    title: document.getElementById('f-title').value, 
-                    category: document.getElementById('f-cat').value, 
-                    image: fileName,
-                    isSale: false 
-                });
-                await api('content/portfolio.json', 'PUT', portfolio, d.sha);
-                alert("Başarıyla eklendi!"); loadAll();
-            };
-            reader.readAsDataURL(file);
-        }
+    async function handleSaleUpdate() {
+        const idx = document.getElementById('sale-select').value;
+        if(idx === "") return;
+        const d = await ghAction('content/portfolio.json');
+        currentData.projects[idx].price = document.getElementById('edit-price').value;
+        currentData.projects[idx].edition = document.getElementById('edit-edition').value;
+        currentData.projects[idx].certCode = document.getElementById('edit-cert').value;
+        currentData.projects[idx].isSale = true;
+        await ghAction('content/portfolio.json', 'PUT', currentData, d.sha);
+        alert("Satış bilgileri güncellendi!");
+    }
 
-        async function saveSale() {
-            const idx = document.getElementById('sale-select').value;
-            if(idx === "") return;
-            const d = await api('content/portfolio.json');
-            portfolio.projects[idx].price = document.getElementById('edit-price').value;
-            portfolio.projects[idx].edition = document.getElementById('edit-edition').value;
-            portfolio.projects[idx].certCode = document.getElementById('edit-cert').value;
-            portfolio.projects[idx].isSale = true;
-            await api('content/portfolio.json', 'PUT', portfolio, d.sha);
-            alert("Güncellendi!");
-        }
+    async function handleDelete(idx) {
+        if(!confirm("Bu eser kalıcı olarak silinecek. Emin misiniz?")) return;
+        const d = await ghAction('content/portfolio.json');
+        currentData.projects.splice(idx, 1);
+        await ghAction('content/portfolio.json', 'PUT', currentData, d.sha);
+        refreshAll();
+    }
 
-        async function deleteItem(idx) {
-            if(!confirm("Silinsin mi?")) return;
-            const d = await api('content/portfolio.json');
-            portfolio.projects.splice(idx, 1);
-            await api('content/portfolio.json', 'PUT', portfolio, d.sha);
-            loadAll();
-        }
+    async function handleSettingsUpdate() {
+        const d = await ghAction('content/settings.json');
+        const s = JSON.parse(atob(d.content));
+        s.footerText = document.getElementById('s-footer').value;
+        await ghAction('content/settings.json', 'PUT', s, d.sha);
+        alert("Site ayarları güncellendi!");
+    }
 
-        function tab(n, el) {
-            document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-            document.getElementById('tab-'+n).classList.add('active');
-            document.querySelectorAll('.nav-link').forEach(x => x.classList.remove('active'));
-            el.classList.add('active');
-        }
+    function switchTab(n, el) {
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        document.getElementById('tab-'+n).classList.add('active');
+        document.querySelectorAll('.nav-link').forEach(x => x.classList.remove('active'));
+        el.classList.add('active');
+    }
 
-        function loadSaleData(i) {
-            if(i==="") return;
-            const item = portfolio.projects[i];
-            document.getElementById('edit-price').value = item.price || "";
-            document.getElementById('edit-edition').value = item.edition || "";
-            document.getElementById('edit-cert').value = item.certCode || "";
-        }
+    function fillSaleFields(i) {
+        if(i==="") return;
+        const item = currentData.projects[i];
+        document.getElementById('edit-price').value = item.price || "";
+        document.getElementById('edit-edition').value = item.edition || "";
+        document.getElementById('edit-cert').value = item.certCode || "";
+    }
 
-        if(localStorage.getItem('uber_t')) auth();
-    </script>
+    if(localStorage.getItem('uber_t')) auth();
+</script>
 </body>
 </html>
