@@ -12,7 +12,6 @@
         :root { --bg: #0a0a0a; --text: #e5e5e5; --bronze: #a87f4a; --border: #1e1e1e; }
         body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
         
-        /* Bakım Modu Ekranı */
         #maintenance-screen { position: fixed; inset: 0; background: #000; z-index: 999999; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         #maintenance-screen h1 { font-family: 'Cormorant Garamond', serif; color: var(--bronze); letter-spacing: 10px; margin-bottom: 10px; text-transform: uppercase; }
         #maintenance-screen p { color: #666; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; }
@@ -20,14 +19,12 @@
         nav { padding: 30px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--bronze); background: #000; position: sticky; top:0; z-index: 1000; flex-wrap: wrap; gap: 15px; }
         .logo h1 { font-family: 'Cormorant Garamond', serif; font-size: 26px; letter-spacing: 6px; margin: 0; color: var(--bronze); text-transform: uppercase; cursor: pointer; }
         
-        /* Sosyal Medya Linkleri */
         .social-links { display: flex; gap: 20px; }
         .social-links a { color: #666; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; text-decoration: none; transition: 0.3s; }
         .social-links a:hover { color: var(--bronze); }
 
         #news-bar { background: var(--bronze); color: #000; padding: 10px 5%; font-size: 11px; font-weight: bold; text-align: center; display: none; text-transform: uppercase; }
         
-        /* Hakkımda (Bio) Bölümü */
         .bio-sec { padding: 40px 5%; text-align: center; max-width: 700px; margin: 0 auto; color: #999; font-size: 13px; line-height: 1.8; display: none; }
         
         .filters { padding: 20px 5%; display: flex; gap: 25px; overflow-x: auto; border-bottom: 1px solid var(--border); background: #0d0d0d; }
@@ -67,7 +64,6 @@
 <nav>
     <div class="logo" id="logo-wrap" onclick="location.reload()"><h1>UBE RAW</h1></div>
     <div style="font-size: 9px; letter-spacing: 5px; color: var(--bronze);">SCULPTURE STUDIO</div>
-    
     <div class="social-links" id="social-nav"></div>
 </nav>
 
@@ -107,11 +103,9 @@
         try {
             const r = await fetch(`${base}${fileName}?v=${Math.random()}`);
             if (!r.ok) return null;
-            const text = await r.text();
-            const cleanText = text.trim().replace(/\n/g, '').replace(/\r/g, '');
-            return JSON.parse(cleanText);
+            return await r.json();
         } catch (e) {
-            console.warn(`${fileName} okunamadı.`, e);
+            console.warn(`${fileName} okunamadı.`);
             return null;
         }
     }
@@ -121,21 +115,16 @@
         const portfolio = await fetchData('content/portfolio.json') || { projects: [] };
         const news = await fetchData('content/news.json') || { announcements: [], guestbook: [] };
 
-        // 1. BAKIM MODU KONTROLÜ
         if (settings.maintenanceMode) {
             document.getElementById('maintenance-screen').style.display = 'flex';
-            document.body.style.overflow = 'hidden'; // Kaydırmayı kapat
-            return; // Kodun geri kalanını çalıştırma
+            document.body.style.overflow = 'hidden';
+            return;
         }
 
-        // 2. SEO VE BAŞLIK AYARLARI
         if (settings.siteTitle) document.getElementById('site-title').innerText = settings.siteTitle;
         if (settings.siteDesc) document.getElementById('meta-desc').content = settings.siteDesc;
-
-        // 3. FOOTER METNİ
         document.getElementById('footer-copy').innerText = settings.footerText || "UBE RAW © 2026";
 
-        // 4. ANALYTICS (GOOGLE İZLEME KODU ENJEKSİYONU)
         if (settings.analyticsId) {
             const script = document.createElement('script');
             script.src = `https://www.googletagmanager.com/gtag/js?id=${settings.analyticsId}`;
@@ -147,25 +136,25 @@
             gtag('config', settings.analyticsId);
         }
 
-        // 5. BİYOGRAFİ (HAKKIMDA)
         if (settings.bio && settings.bio.trim() !== "") {
             const bioSec = document.getElementById('bio-sec');
             bioSec.innerHTML = settings.bio.replace(/\n/g, '<br>');
             bioSec.style.display = 'block';
         }
 
-        // 6. SOSYAL MEDYA LİNKLERİ
+        // SOSYAL MEDYA LİNK DÜZELTMESİ
         let socialHTML = "";
-        if (settings.instagram) socialHTML += `<a href="${settings.instagram}" target="_blank">INSTAGRAM</a>`;
+        if (settings.instagram) {
+            let igLink = settings.instagram.trim();
+            if(!igLink.startsWith('http')) igLink = 'https://instagram.com/' + igLink;
+            socialHTML += `<a href="${igLink}" target="_blank" rel="noopener">INSTAGRAM</a>`;
+        }
         if (settings.whatsapp) {
-            // Sadece numarayı alıp whatsapp linkine çeviriyoruz
             let waNum = settings.whatsapp.replace(/[^0-9]/g, '');
-            socialHTML += `<a href="https://wa.me/${waNum}" target="_blank">WHATSAPP</a>`;
+            socialHTML += `<a href="https://wa.me/${waNum}" target="_blank" rel="noopener">WHATSAPP</a>`;
         }
         document.getElementById('social-nav').innerHTML = socialHTML;
 
-        // --- MEVCUT SİTE İŞLEVLERİ (Eserler, Duyurular, Ziyaretçi Defteri vb.) ---
-        
         allWorks = portfolio.projects || [];
 
         if(news.announcements?.length) {
@@ -224,12 +213,9 @@
         const name = document.getElementById('g-name').value.trim();
         const msg = document.getElementById('g-msg').value.trim();
         const btn = document.getElementById('send-btn');
-        
-        // --- BU LİNKİ FORMSPREE'DEN ALDIĞINIZ LİNKLE DEĞİŞTİRİN ---
         const endpoint = "https://formspree.io/f/mjgjewqn"; 
 
         if(!name || !msg) return alert("Lütfen isim ve mesaj alanını doldurun.");
-        if(endpoint.includes("BURAYA")) return alert("Lütfen kodun içindeki Formspree linkini güncelleyin.");
         
         btn.innerText = "GÖNDERİLİYOR...";
         btn.disabled = true;
