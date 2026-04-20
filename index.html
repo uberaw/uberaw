@@ -7,153 +7,95 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500&family=Inter:wght@200;400&display=swap" rel="stylesheet">
     <style>
         :root { --bg: #0a0a0a; --text: #e5e5e5; --bronze: #a87f4a; --border: #1e1e1e; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; scroll-behavior: smooth; overflow-x: hidden; }
-        
-        /* Navigasyon */
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
         nav { padding: 30px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--bronze); background: #000; position: sticky; top:0; z-index: 1000; }
         .logo h1 { font-family: 'Cormorant Garamond', serif; font-size: 26px; letter-spacing: 6px; margin: 0; color: var(--bronze); text-transform: uppercase; cursor: pointer; }
-        .logo img { height: 45px; object-fit: contain; }
-
-        /* Duyuru Çubuğu */
-        #news-bar { background: var(--bronze); color: #000; padding: 10px 5%; font-size: 11px; font-weight: bold; text-align: center; display: none; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* Filtreler */
+        #news-bar { background: var(--bronze); color: #000; padding: 10px 5%; font-size: 11px; font-weight: bold; text-align: center; display: none; text-transform: uppercase; }
         .filters { padding: 20px 5%; display: flex; gap: 25px; overflow-x: auto; border-bottom: 1px solid var(--border); background: #0d0d0d; }
-        .filter-btn { color: #666; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; transition: 0.3s; white-space: nowrap; border-bottom: 1px solid transparent; padding-bottom: 5px; }
+        .filter-btn { color: #666; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; transition: 0.3s; white-space: nowrap; padding-bottom: 5px; }
         .filter-btn.active { color: var(--bronze); border-bottom: 1px solid var(--bronze); }
-
-        /* Grid */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 40px; padding: 40px 5%; }
-        .artwork { border: 1px solid var(--border); transition: 0.4s; background: #000; position: relative; overflow: hidden; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 40px; padding: 40px 5%; min-height: 400px; }
+        .artwork { border: 1px solid var(--border); transition: 0.4s; background: #000; position: relative; }
         .artwork:hover { border-color: var(--bronze); transform: translateY(-5px); }
         .img-wrapper { aspect-ratio: 1/1; overflow: hidden; cursor: zoom-in; background: #111; }
-        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: 1.5s cubic-bezier(0.19, 1, 0.22, 1); }
-        .artwork:hover img { transform: scale(1.08); }
-        
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: 1s; }
         .info { padding: 25px; border-top: 1px solid var(--border); }
-        .info h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; margin: 0 0 10px 0; letter-spacing: 1px; color: #fff; }
-        .info p { font-size: 9px; color: var(--bronze); text-transform: uppercase; margin: 0; letter-spacing: 2px; }
-
-        /* Etiketler */
-        .sale-tag { background: var(--bronze); color: #000; font-size: 10px; padding: 5px 12px; position: absolute; top: 20px; right: 20px; font-weight: bold; z-index: 10; letter-spacing: 1px; }
-        .edition { color: #555; font-size: 10px; margin-top: 15px; display: block; border-top: 1px solid #1a1a1a; padding-top: 15px; }
-
-        /* Sertifika Sorgulama */
-        .cert-sec { padding: 80px 5%; background: #050505; border-top: 1px solid var(--border); }
-        .cert-box { max-width: 500px; margin: 0 auto; text-align: center; border: 1px dashed var(--bronze); padding: 50px 30px; }
-        input[type="text"] { background: #000; border: 1px solid #333; color: #fff; padding: 15px; width: 80%; text-align: center; margin-bottom: 20px; outline: none; }
-        .btn-bronze { background: var(--bronze); border: none; padding: 15px 40px; color: #000; font-weight: bold; cursor: pointer; letter-spacing: 2px; transition: 0.3s; }
-        .btn-bronze:hover { filter: brightness(1.2); }
-
-        /* Ziyaretçi Defteri */
-        .guest-sec { padding: 80px 5%; border-top: 1px solid var(--border); text-align: center; }
-        .guest-entry { border-bottom: 1px solid #111; padding: 25px; max-width: 700px; margin: 0 auto; color: #999; font-style: italic; }
-
-        /* Lightbox */
+        .info h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; margin: 0; color: #fff; }
+        .info p { font-size: 9px; color: var(--bronze); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 2px; }
+        .sale-tag { background: var(--bronze); color: #000; font-size: 10px; padding: 5px 12px; position: absolute; top: 15px; right: 15px; font-weight: bold; }
+        .cert-sec { padding: 60px 5%; background: #050505; border-top: 1px solid var(--border); text-align: center; }
+        .cert-box { max-width: 500px; margin: 0 auto; border: 1px dashed var(--bronze); padding: 40px; }
+        input { background: #000; border: 1px solid #333; color: #fff; padding: 12px; width: 70%; text-align: center; margin-bottom: 15px; }
+        .btn-bronze { background: var(--bronze); border: none; padding: 12px 30px; color: #000; font-weight: bold; cursor: pointer; }
         #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.98); display: none; justify-content: center; align-items: center; z-index: 10000; }
         #lightbox img { max-width: 95vw; max-height: 90vh; border: 1px solid var(--bronze); }
-
-        footer { padding: 60px 5%; text-align: center; color: #444; font-size: 10px; letter-spacing: 4px; border-top: 1px solid var(--border); text-transform: uppercase; }
-
-        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } .logo h1 { font-size: 20px; } }
+        footer { padding: 40px 5%; text-align: center; color: #444; font-size: 10px; letter-spacing: 4px; border-top: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
 <div id="news-bar"></div>
-
 <nav>
     <div class="logo" id="logo-wrap" onclick="location.reload()"><h1>UBE RAW</h1></div>
-    <div style="font-size: 9px; letter-spacing: 5px; color: var(--bronze); font-weight: 200;">SCULPTURE STUDIO</div>
+    <div style="font-size: 9px; letter-spacing: 5px; color: var(--bronze);">SCULPTURE STUDIO</div>
 </nav>
-
 <div class="filters" id="cat-nav"></div>
-
 <div class="grid" id="main-grid"></div>
 
 <section class="cert-sec">
     <div class="cert-box">
-        <h2 style="font-family:'Cormorant Garamond'; color:var(--bronze); letter-spacing:4px; margin-top:0;">VERIFICATION</h2>
-        <p style="font-size: 10px; color:#666; margin-bottom:30px;">ESER SERTİFİKA NUMARASINI DOĞRULAYIN</p>
-        <input type="text" id="cert-input" placeholder="UBE-XXX">
+        <h2 style="font-family:'Cormorant Garamond'; color:var(--bronze);">VERIFICATION</h2>
+        <input type="text" id="cert-input" placeholder="SERTİFİKA KODU">
         <br>
         <button class="btn-bronze" onclick="checkCert()">SORGULA</button>
-        <div id="cert-result" style="margin-top:25px; font-size:13px; letter-spacing: 1px;"></div>
+        <div id="cert-result" style="margin-top:20px;"></div>
     </div>
 </section>
 
-<section class="guest-sec">
-    <h2 style="font-family:'Cormorant Garamond'; color:var(--bronze); letter-spacing:5px;">GUESTBOOK</h2>
-    <div id="guestbook-list" style="margin-top:30px;"></div>
-</section>
-
 <div id="lightbox" onclick="this.style.display='none'"><img id="l-img"></div>
-
-<footer id="footer-copy"></footer>
+<footer id="footer-copy">UBE RAW ART & DESIGN</footer>
 
 <script>
-    // GitHub Pages Uyumluluk Ayarı
-    const base = window.location.hostname.includes('github.io') 
-        ? `/${window.location.pathname.split('/')[1]}/`.replace(/\/+$/, '/').replace(/^\/+/, '/')
-        : '/';
-    
-    // Yol temizleyici fonksiyon
-    const fixPath = (p) => {
-        let cleanBase = base.startsWith('/') ? base : '/' + base;
-        if(!cleanBase.endsWith('/')) cleanBase += '/';
-        let path = p.startsWith('/') ? p.substring(1) : p;
-        return (cleanBase + path).replace(/\/+/g, '/');
-    };
-
+    const base = "/uberaw/";
     let allWorks = [];
 
-    async function init() {
+    // Güvenli veri çekme fonksiyonu
+    async function fetchData(fileName) {
         try {
-            const cacheBust = `?t=${Date.now()}`;
-            const [sRes, pRes, nRes] = await Promise.all([
-                fetch(fixPath('content/settings.json') + cacheBust),
-                fetch(fixPath('content/portfolio.json') + cacheBust),
-                fetch(fixPath('content/news.json') + cacheBust)
-            ]);
-
-            const settings = await sRes.json();
-            const portfolio = await pRes.json();
-            const news = await nRes.json();
-
-            allWorks = portfolio.projects || [];
-
-            // Logo & Footer
-            if(settings.logoUrl && settings.logoUrl !== "none") {
-                document.getElementById('logo-wrap').innerHTML = `<img src="${fixPath(settings.logoUrl)}">`;
-            }
-            document.getElementById('footer-copy').innerText = settings.footerText || "UBE RAW © 2026";
-
-            // Haberler
-            if(news.announcements?.length) {
-                const nb = document.getElementById('news-bar');
-                nb.style.display = 'block';
-                nb.innerText = `${news.announcements[0].title}: ${news.announcements[0].body}`;
-            }
-
-            // Defter
-            if(news.guestbook?.length) {
-                document.getElementById('guestbook-list').innerHTML = news.guestbook.map(g => `
-                    <div class="guest-entry">"${g.message}"<br><small style="color:var(--bronze); margin-top:10px; display:block;">— ${g.name}</small></div>
-                `).reverse().join('');
-            }
-
-            // Filtreler
-            const cats = ['HEPSİ', ...new Set(allWorks.map(w => w.category))];
-            document.getElementById('cat-nav').innerHTML = cats.map(c => `
-                <span class="filter-btn" onclick="render('${c}', this)">${c}</span>
-            `).join('');
-
-            render('HEPSİ');
-
-        } catch (err) {
-            console.error("Yükleme Hatası:", err);
-            document.getElementById('main-grid').innerHTML = `<p style="color:red; text-align:center; grid-column: 1/-1;">Veriler yüklenemedi. Lütfen Console panelini kontrol edin.</p>`;
+            const r = await fetch(`${base}${fileName}?v=${Math.random()}`);
+            if (!r.ok) return null;
+            const text = await r.text();
+            // JSON içindeki gizli karakterleri ve fazlalıkları temizle
+            const cleanText = text.trim().replace(/\n/g, '').replace(/\r/g, '');
+            return JSON.parse(cleanText);
+        } catch (e) {
+            console.warn(`${fileName} okunamadı, boş geçiliyor.`, e);
+            return null;
         }
+    }
+
+    async function init() {
+        const settings = await fetchData('content/settings.json') || { footerText: "UBE RAW © 2026" };
+        const portfolio = await fetchData('content/portfolio.json') || { projects: [] };
+        const news = await fetchData('content/news.json') || { announcements: [] };
+
+        allWorks = portfolio.projects || [];
+
+        // Arayüzü Giydir
+        document.getElementById('footer-copy').innerText = settings.footerText;
+        if(news.announcements?.length) {
+            const nb = document.getElementById('news-bar');
+            nb.style.display = 'block';
+            nb.innerText = news.announcements[0].title + ": " + news.announcements[0].body;
+        }
+
+        // Filtreler
+        const cats = ['HEPSİ', ...new Set(allWorks.map(w => w.category))];
+        document.getElementById('cat-nav').innerHTML = cats.map(c => `
+            <span class="filter-btn" onclick="render('${c}', this)">${c}</span>
+        `).join('');
+
+        render('HEPSİ');
     }
 
     function render(cat, btn) {
@@ -162,37 +104,35 @@
             btn.classList.add('active');
         }
         const filtered = cat === 'HEPSİ' ? allWorks : allWorks.filter(w => w.category === cat);
+        const grid = document.getElementById('main-grid');
         
-        document.getElementById('main-grid').innerHTML = filtered.map(w => `
+        if(filtered.length === 0) {
+            grid.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:#555;">Henüz eser eklenmemiş.</p>`;
+            return;
+        }
+
+        grid.innerHTML = filtered.map(w => `
             <div class="artwork">
                 ${w.isSale ? `<div class="sale-tag">${w.price || 'Fiyat Alınız'}</div>` : ''}
-                <div class="img-wrapper" onclick="openLightbox('${fixPath(w.image)}')">
-                    <img src="${fixPath(w.image)}" alt="${w.title}" loading="lazy" onerror="this.src='https://via.placeholder.com/600?text=Resim+Bulunamadi'">
+                <div class="img-wrapper" onclick="openL('${base}${w.image}')">
+                    <img src="${base}${w.image}" onerror="this.src='https://via.placeholder.com/600?text=Resim+Yukleniyor...'">
                 </div>
                 <div class="info">
                     <p>${w.category}</p>
                     <h3>${w.title}</h3>
-                    ${w.edition ? `<span class="edition">EDİSYON: ${w.edition}</span>` : ''}
                 </div>
             </div>
         `).reverse().join('');
     }
 
-    function openLightbox(src) {
-        document.getElementById('l-img').src = src;
-        document.getElementById('lightbox').style.display = 'flex';
-    }
+    function openL(s) { document.getElementById('l-img').src = s; document.getElementById('lightbox').style.display = 'flex'; }
 
     function checkCert() {
         const val = document.getElementById('cert-input').value.trim().toUpperCase();
-        const res = document.getElementById('cert-result');
         const match = allWorks.find(w => w.certCode?.toUpperCase() === val);
-        
-        if(match) {
-            res.innerHTML = `<span style="color:#4CAF50;">✔ DOĞRULANDI:</span><br><b>${match.title}</b> eseri orijinal UBE RAW üretimidir.`;
-        } else {
-            res.innerHTML = `<span style="color:#ff4444;">✘ KAYIT BULUNAMADI</span>`;
-        }
+        document.getElementById('cert-result').innerHTML = match ? 
+            `<span style="color:#4CAF50;">✔ DOĞRULANDI: ${match.title}</span>` : 
+            `<span style="color:#ff4444;">✘ KAYIT BULUNAMADI</span>`;
     }
 
     init();
