@@ -1,2 +1,4 @@
-{ "announcements": [] }
-"guestbook": []
+{
+  "announcements": [],
+  "guestbook": []
+}
