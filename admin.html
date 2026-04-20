@@ -2,165 +2,208 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>UBE RAW | Studio Admin</title>
+    <title>UBE RAW | Master Engine</title>
     <style>
         :root { --bg: #000; --card: #0d0d0d; --border: #222; --accent: #fff; }
-        body { background: var(--bg); color: #ccc; font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        
-        .sidebar { width: 240px; border-right: 1px solid var(--border); padding: 40px 20px; display: flex; flex-direction: column; gap: 10px; }
-        .sidebar h2 { color: #fff; letter-spacing: 5px; font-weight: 300; font-size: 18px; margin-bottom: 30px; }
-        .nav-link { padding: 12px; cursor: pointer; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; border-radius: 4px; transition: 0.3s; }
-        .nav-link:hover { background: #111; color: #fff; }
+        body { background: var(--bg); color: #ccc; font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; }
+        .sidebar { width: 260px; border-right: 1px solid var(--border); padding: 40px 20px; background: #050505; }
+        .sidebar h2 { color: #fff; letter-spacing: 5px; font-weight: 300; font-size: 18px; margin-bottom: 40px; }
+        .nav-link { padding: 15px; cursor: pointer; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; border-radius: 4px; transition: 0.2s; margin-bottom: 5px; color: #666; }
+        .nav-link:hover { color: #fff; background: #111; }
         .nav-link.active { background: var(--accent); color: #000; font-weight: bold; }
-
-        .content { flex: 1; padding: 60px; overflow-y: auto; }
-        .card { background: var(--card); border: 1px solid var(--border); padding: 30px; margin-bottom: 30px; }
-        
-        input, select, textarea { width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 12px; margin-bottom: 15px; border-radius: 4px; }
-        button { background: var(--accent); color: #000; border: none; padding: 14px; width: 100%; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
-        button:disabled { opacity: 0.3; cursor: not-allowed; }
-
-        #preview { width: 100%; height: 200px; border: 1px dashed #333; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        #preview img { max-height: 100%; max-width: 100%; }
-
-        #login-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .status-msg { padding: 15px; border-radius: 4px; margin-bottom: 20px; display: none; font-size: 13px; }
+        .main { flex: 1; padding: 60px; overflow-y: auto; }
+        .tab { display: none; } .tab.active { display: block; }
+        .card { background: var(--card); border: 1px solid var(--border); padding: 25px; margin-bottom: 20px; }
+        input, textarea, select { width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 12px; margin: 10px 0; box-sizing: border-box; }
+        button { background: var(--accent); color: #000; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; margin-top: 10px; }
+        #login-screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-    <div id="login-overlay">
+    <div id="login-screen">
         <div style="width: 300px; text-align: center;">
             <h1 style="letter-spacing: 10px; color:#fff;">UBE RAW</h1>
-            <input type="password" id="gh-token" placeholder="GitHub Erişim Anahtarı">
-            <button onclick="checkAccess()">STÜDYOYU AÇ</button>
+            <input type="password" id="gh-token" placeholder="GitHub Token">
+            <button onclick="init()">STÜDYOYU AÇ</button>
         </div>
     </div>
 
     <div class="sidebar">
         <h2>UBE RAW</h2>
-        <div class="nav-link active" onclick="tab('add')">Eser Ekle</div>
-        <div class="nav-link" onclick="tab('list')">Envanter</div>
-        <div class="nav-link" onclick="tab('site')">Site Ayarları</div>
+        <div class="nav-link active" onclick="showTab('works', this)">Eser Ekle</div>
+        <div class="nav-link" onclick="showTab('pages', this)">Sayfa İçerikleri</div>
+        <div class="nav-link" onclick="showTab('settings', this)">Site & Logo</div>
     </div>
 
-    <div class="content">
-        <div id="status" class="status-msg"></div>
-
-        <div id="tab-add" class="tab">
-            <h3>Yeni Eser Kaydı</h3>
+    <div class="main">
+        <div id="tab-works" class="tab active">
+            <h3>Portfolyo / Eser Kaydı</h3>
             <div class="card">
-                <div id="preview">Görsel Seçilmedi</div>
-                <input type="file" id="f-input" onchange="previewImg(this)">
-                <input type="text" id="f-title" placeholder="Eser Adı">
-                <input type="text" id="f-cat" placeholder="Kategori (Heykel, Portre vb.)">
-                <button id="up-btn" onclick="upload()">Yayınla</button>
+                <input type="file" id="p-file">
+                <input type="text" id="p-title" placeholder="Eser Adı">
+                <select id="p-cat">
+                    <option value="Heykel">Heykel</option>
+                    <option value="3D Design">3D Design</option>
+                    <option value="Rölyef">Rölyef</option>
+                    <option value="Aktivist">Aktivist Projeler</option>
+                </select>
+                <button onclick="uploadArtwork()">Yayınla</button>
             </div>
         </div>
 
-        <div id="tab-list" class="tab" style="display:none">
-            <h3>Eserleri Yönet</h3>
-            <div id="inv-list">Yükleniyor...</div>
+        <div id="tab-pages" class="tab">
+            <h3>Sayfa İçeriklerini Düzenle</h3>
+            <div class="card">
+                <label>Hakkımda (Biography)</label>
+                <textarea id="page-about" rows="8" placeholder="Sanat anlayışınızı ve özgeçmişinizi yazın..."></textarea>
+                <label>İletişim Bilgileri (Adres/E-posta)</label>
+                <input type="text" id="page-contact" placeholder="Rize Promenade / ube@studio.com">
+                <button onclick="savePages()">İçerikleri Kaydet</button>
+            </div>
+        </div>
+
+        <div id="tab-settings" class="tab">
+            <h3>Genel Kimlik & Logo</h3>
+            <div class="card">
+                <label>Site Başlığı</label>
+                <input type="text" id="s-title">
+                <label>Logo URL (veya images/logo.png)</label>
+                <input type="text" id="s-logo" placeholder="images/logo.png">
+                <label>Footer Metni</label>
+                <input type="text" id="s-footer">
+                <button onclick="saveSettings()">Kimliği Güncelle</button>
+            </div>
         </div>
     </div>
 
     <script>
         const REPO = "uberaw/uberaw";
-        let SHA = { portfolio: "" };
+        let SHA_STORE = {};
 
-        async function checkAccess() {
-            const t = document.getElementById('gh-token').value || localStorage.getItem('uber_t');
-            if(!t) return;
-            const res = await fetch(`https://api.github.com/repos/${REPO}/contents/content/portfolio.json`, {
-                headers: { 'Authorization': `token ${t}` }
-            });
-            if(res.ok) {
+        async function init() {
+            const token = document.getElementById('gh-token').value || localStorage.getItem('uber_t');
+            if(!token) return;
+            try {
+                const res = await fetch(`https://api.github.com/repos/${REPO}/contents/content/settings.json`, {
+                    headers: { 'Authorization': `token ${token}` }
+                });
                 const d = await res.json();
-                localStorage.setItem('uber_t', t);
-                SHA.portfolio = d.sha;
-                document.getElementById('login-overlay').style.display = 'none';
-                loadInventory(JSON.parse(atob(d.content)));
-            } else { alert("Erişim reddedildi!"); }
+                const settings = JSON.parse(atob(d.content));
+                SHA_STORE.settings = d.sha;
+                
+                document.getElementById('s-title').value = settings.siteTitle;
+                document.getElementById('s-logo').value = settings.logoUrl;
+                document.getElementById('s-footer').value = settings.footerText;
+                document.getElementById('page-about').value = settings.aboutText || "";
+                document.getElementById('page-contact').value = settings.contactInfo || "";
+
+                localStorage.setItem('uber_t', token);
+                document.getElementById('login-screen').style.display = 'none';
+            } catch(e) { alert("Bağlantı Kurulamadı!"); }
         }
 
-        function previewImg(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    document.getElementById('preview').innerHTML = `<img src="${e.target.result}">`;
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        async function upload() {
-            const btn = document.getElementById('up-btn');
-            const file = document.getElementById('f-input').files[0];
-            const title = document.getElementById('f-title').value;
-            const cat = document.getElementById('f-cat').value;
+        async function savePages() {
             const token = localStorage.getItem('uber_t');
-
-            if(!file || !title) return alert("Bilgileri doldurun!");
+            const about = document.getElementById('page-about').value;
+            const contact = document.getElementById('page-contact').value;
             
-            btn.disabled = true;
-            btn.innerText = "Yükleniyor...";
+            // Ayarları tekrar çekip üzerine yazalım (güvenli yöntem)
+            const res = await fetch(`https://api.github.com/repos/${REPO}/contents/content/settings.json`, {
+                headers: { 'Authorization': `token ${token}` }
+            });
+            const d = await res.json();
+            const config = JSON.parse(atob(d.content));
+            
+            config.aboutText = about;
+            config.contactInfo = contact;
+
+            await fetch(`https://api.github.com/repos/${REPO}/contents/content/settings.json`, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${token}` },
+                body: JSON.stringify({
+                    message: "Pages updated",
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(config, null, 2)))),
+                    sha: d.sha
+                })
+            });
+            alert("Sayfalar Güncellendi!");
+        }
+
+        async function uploadArtwork() {
+            const token = localStorage.getItem('uber_t');
+            const file = document.getElementById('p-file').files[0];
+            const title = document.getElementById('p-title').value;
+            const cat = document.getElementById('p-cat').value;
+            if(!file) return alert("Dosya seçin!");
 
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const content = e.target.result.split(',')[1];
                 const fileName = Date.now() + "_" + file.name;
-
-                // 1. Resmi Yükle
+                
                 await fetch(`https://api.github.com/repos/${REPO}/contents/images/uploads/${fileName}`, {
                     method: 'PUT',
                     headers: { 'Authorization': `token ${token}` },
-                    body: JSON.stringify({ message: "Upload", content })
+                    body: JSON.stringify({ message: "Upload Artwork", content })
                 });
 
-                // 2. JSON Güncelle
-                const currentRes = await fetch(`https://api.github.com/repos/${REPO}/contents/content/portfolio.json`, {
+                const pRes = await fetch(`https://api.github.com/repos/${REPO}/contents/content/portfolio.json`, {
                     headers: { 'Authorization': `token ${token}` }
                 });
-                const currentData = await currentRes.json();
-                const json = JSON.parse(atob(currentData.content));
-                json.projects.push({ title, category: cat, image: `images/uploads/${fileName}` });
+                const pData = await pRes.json();
+                const pJson = JSON.parse(atob(pData.content));
+                pJson.projects.push({ title, category: cat, image: `images/uploads/${fileName}` });
 
-                const updateRes = await fetch(`https://api.github.com/repos/${REPO}/contents/content/portfolio.json`, {
+                await fetch(`https://api.github.com/repos/${REPO}/contents/content/portfolio.json`, {
                     method: 'PUT',
                     headers: { 'Authorization': `token ${token}` },
                     body: JSON.stringify({
                         message: "Portfolio Update",
-                        content: btoa(JSON.stringify(json, null, 2)),
-                        sha: currentData.sha
+                        content: btoa(unescape(encodeURIComponent(JSON.stringify(pJson, null, 2)))),
+                        sha: pData.sha
                     })
                 });
-
-                if(updateRes.ok) {
-                    alert("Başarıyla yayınlandı!");
-                    location.reload();
-                }
+                alert("Eser Yayında!");
             };
             reader.readAsDataURL(file);
         }
 
-        function tab(name) {
-            document.querySelectorAll('.tab').forEach(t => t.style.display = 'none');
-            document.getElementById('tab-' + name).style.display = 'block';
+        async function saveSettings() {
+            const token = localStorage.getItem('uber_t');
+            const config = {
+                siteTitle: document.getElementById('s-title').value,
+                logoUrl: document.getElementById('s-logo').value,
+                footerText: document.getElementById('s-footer').value,
+                aboutText: document.getElementById('page-about').value,
+                contactInfo: document.getElementById('page-contact').value
+            };
+            
+            const res = await fetch(`https://api.github.com/repos/${REPO}/contents/content/settings.json`, {
+                headers: { 'Authorization': `token ${token}` }
+            });
+            const d = await res.json();
+
+            await fetch(`https://api.github.com/repos/${REPO}/contents/content/settings.json`, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${token}` },
+                body: JSON.stringify({
+                    message: "Global Settings Update",
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(config, null, 2)))),
+                    sha: d.sha
+                })
+            });
+            alert("Site Kimliği Güncellendi!");
+        }
+
+        function showTab(id, el) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            event.target.classList.add('active');
+            document.getElementById('tab-'+id).classList.add('active');
+            el.classList.add('active');
         }
 
-        function loadInventory(data) {
-            const list = document.getElementById('inv-list');
-            list.innerHTML = data.projects.map((p, i) => `
-                <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #222;">
-                    <span>${p.title}</span>
-                    <span style="color:red; cursor:pointer" onclick="deleteItem(${i})">Sil</span>
-                </div>
-            `).reverse().join('');
-        }
-
-        if(localStorage.getItem('uber_t')) checkAccess();
+        if(localStorage.getItem('uber_t')) init();
     </script>
 </body>
 </html>
