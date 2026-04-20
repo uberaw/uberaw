@@ -71,12 +71,18 @@
             <input type="text" id="n-title" placeholder="Duyuru Başlığı (Örn: Yeni Sergi)">
             <textarea id="n-body" rows="3" placeholder="Duyuru İçeriği (Kısa bir cümle)"></textarea>
             <button onclick="handleNewsUpdate()">DUYURUYU GÜNCELLE</button>
-            <p style="font-size:10px; color:#666; margin-top:10px;">* Sitede en üstteki bronz bantta görünecektir.</p>
         </div>
     </div>
 
     <div id="tab-guest" class="tab">
-        <h3>Gelen Mesajlar</h3>
+        <h3>Ziyaretçi Defteri Yönetimi</h3>
+        <div class="card" style="border: 1px solid #a87f4a;">
+            <h4 style="margin-top:0; color:#a87f4a;">Mesaj Onayla & Yayınla</h4>
+            <input type="text" id="manual-name" placeholder="Ziyaretçi İsmi">
+            <textarea id="manual-msg" rows="3" placeholder="Ziyaretçi Mesajı"></textarea>
+            <button onclick="approveMessage()">BU MESAJI SİTEDE YAYINLA</button>
+        </div>
+        <h3>Yayındaki Mesajlar</h3>
         <div id="guest-list" class="card">Yükleniyor...</div>
     </div>
 
@@ -121,7 +127,7 @@
                 refreshAll();
                 document.getElementById('s-footer').value = JSON.parse(atob(test.content)).footerText;
             }
-        } catch(e) { alert("Bağlantı başarısız. Repo adını veya Token'ı kontrol edin."); }
+        } catch(e) { alert("Bağlantı başarısız. Token'ı kontrol edin."); }
     }
 
     async function refreshAll() {
@@ -186,7 +192,6 @@
         refreshAll();
     }
 
-    // Duyuru Güncelleme Fonksiyonu
     async function handleNewsUpdate() {
         const title = document.getElementById('n-title').value;
         const body = document.getElementById('n-body').value;
@@ -194,14 +199,37 @@
 
         const d = await ghAction('content/news.json');
         let nData = JSON.parse(atob(d.content));
-        
         nData.announcements = [{ title, body, date: new Date().toLocaleDateString('tr-TR') }];
-        
         await ghAction('content/news.json', 'PUT', nData, d.sha);
-        alert("Duyuru başarıyla yayınlandı!");
+        alert("Duyuru güncellendi!");
     }
 
-    // Ziyaretçi Defteri Yenileme
+    // --- Ziyaretçi Defteri Onaylama Fonksiyonu ---
+    async function approveMessage() {
+        const name = document.getElementById('manual-name').value.trim();
+        const message = document.getElementById('manual-msg').value.trim();
+        
+        if(!name || !message) return alert("İsim ve mesaj alanlarını doldurun.");
+
+        const d = await ghAction('content/news.json');
+        let nData = JSON.parse(atob(d.content));
+        
+        if(!nData.guestbook) nData.guestbook = [];
+        
+        nData.guestbook.push({
+            name: name,
+            message: message,
+            date: new Date().toLocaleDateString('tr-TR')
+        });
+
+        await ghAction('content/news.json', 'PUT', nData, d.sha);
+        alert("Mesaj onaylandı ve yayına alındı!");
+        
+        document.getElementById('manual-name').value = "";
+        document.getElementById('manual-msg').value = "";
+        refreshGuestbook();
+    }
+
     async function refreshGuestbook() {
         const d = await ghAction('content/news.json');
         const nData = JSON.parse(atob(d.content));
@@ -214,7 +242,7 @@
                     <span style="color:#ff4444; cursor:pointer; font-size:10px;" onclick="handleGuestDelete(${i})">SİL</span>
                 </div>
             `).reverse().join('')
-            : "Henüz mesaj bırakılmamış.";
+            : "Henüz yayınlanmış mesaj yok.";
     }
 
     async function handleGuestDelete(idx) {
