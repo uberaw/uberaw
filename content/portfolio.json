@@ -1,15 +1,9 @@
 {
   "categories": [
-    "3D TasarÄ±m",
-    "RÃ¶lyef",
+    "3D TasarÃÂ±m",
+    "RÃÂ¶lyef",
     "Karakalem",
     "Heykel"
   ],
-  "projects": [
-    {
-      "title": "Portre",
-      "category": "Karakalem",
-      "image": "images/uploads/1776720406248_Gemini_Generated_Image_4uyync4uyync4uyy.png"
-    }
-  ]
+  "projects": []
 }
