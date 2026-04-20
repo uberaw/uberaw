@@ -2,259 +2,176 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>UBE RAW | Studio Command</title>
+    <title>UBE RAW | Command Center</title>
     <style>
-        :root { --bg: #000; --bronze: #a87f4a; --border: #1a1a1a; }
-        body { background: var(--bg); color: #ccc; font-family: 'Inter', sans-serif; margin: 0; display: flex; }
-        .sidebar { width: 220px; height: 100vh; border-right: 1px solid #222; padding: 30px; position: fixed; background: #050505; }
-        .sidebar h2 { color: var(--bronze); font-size: 16px; letter-spacing: 4px; margin-bottom: 40px; }
-        .nav-link { padding: 12px 0; cursor: pointer; font-size: 11px; text-transform: uppercase; color: #666; transition: 0.3s; }
-        .nav-link.active { color: var(--bronze); font-weight: bold; border-left: 2px solid var(--bronze); padding-left: 10px; }
-        .main { margin-left: 280px; padding: 60px; width: calc(100% - 280px); }
+        body { background: #000; color: #ccc; font-family: 'Inter', sans-serif; margin: 0; display: flex; }
+        .sidebar { width: 240px; height: 100vh; border-right: 1px solid #222; padding: 30px; position: fixed; background: #050505; }
+        .sidebar h2 { color: #a87f4a; letter-spacing: 4px; font-size: 18px; }
+        .nav-link { padding: 15px 0; cursor: pointer; font-size: 11px; text-transform: uppercase; color: #666; transition: 0.3s; }
+        .nav-link.active { color: #a87f4a; font-weight: bold; }
+        .main { margin-left: 300px; padding: 60px; width: 100%; max-width: 800px; }
         .tab { display: none; } .tab.active { display: block; }
-        .card { background: #0d0d0d; border: 1px solid var(--border); padding: 25px; margin-bottom: 20px; }
-        input, textarea, select { width: 100%; background: #000; border: 1px solid #222; color: #fff; padding: 12px; margin: 10px 0; font-family: inherit; }
-        button { background: var(--bronze); color: #000; border: none; padding: 15px; width: 100%; cursor: pointer; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
-        button:hover { opacity: 0.8; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #111; }
-        .btn-del { color: #ff4444; cursor: pointer; font-size: 10px; text-transform: uppercase; margin-left: 15px; }
-        .btn-edit { color: var(--bronze); cursor: pointer; font-size: 10px; text-transform: uppercase; }
+        .card { background: #0d0d0d; border: 1px solid #1a1a1a; padding: 25px; margin-bottom: 20px; }
+        input, select { width: 100%; background: #000; border: 1px solid #222; color: #fff; padding: 12px; margin: 10px 0; box-sizing: border-box; }
+        button { background: #a87f4a; color: #000; border: none; padding: 15px; width: 100%; cursor: pointer; font-weight: bold; }
+        .item-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #111; font-size: 13px; }
         #login { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
-
     <div id="login">
-        <div style="width: 250px; text-align: center;">
-            <h1 style="color:var(--bronze); letter-spacing: 5px; font-size: 20px;">UBE RAW LOGIN</h1>
+        <div style="width: 280px; text-align: center;">
+            <h2 style="color:#a87f4a;">UBE RAW ADMIN</h2>
             <input type="password" id="token" placeholder="GitHub Token">
-            <button onclick="auth()">GİRİŞ YAP</button>
+            <button onclick="auth()">GİRİŞ</button>
         </div>
     </div>
 
     <div class="sidebar">
         <h2>UBE RAW</h2>
         <div class="nav-link active" onclick="tab('add', this)">Eser Ekle</div>
-        <div class="nav-link" onclick="tab('inv', this)">Envanter / Sil</div>
+        <div class="nav-link" onclick="tab('inv', this)">Envanter</div>
         <div class="nav-link" onclick="tab('sale', this)">Satış & Sertifika</div>
-        <div class="nav-link" onclick="tab('guest', this)">Defteri Yönet</div>
-        <div class="nav-link" onclick="tab('config', this)">Site & Logo</div>
+        <div class="nav-link" onclick="tab('config', this)">Ayarlar</div>
     </div>
 
     <div class="main">
         <div id="tab-add" class="tab active">
-            <h3>Yeni Kayıt</h3>
+            <h3>Yeni Eser Yayınla</h3>
             <div class="card">
                 <input type="file" id="f-file">
                 <input type="text" id="f-title" placeholder="Eser Adı">
                 <input type="text" id="f-cat" placeholder="Kategori">
-                <button onclick="upload()">Yayınla</button>
+                <button onclick="upload()">YÜKLE</button>
             </div>
         </div>
 
         <div id="tab-inv" class="tab">
-            <h3>Kayıtlı Eserler</h3>
+            <h3>Envanter</h3>
             <div id="inventory-list" class="card">Yükleniyor...</div>
         </div>
 
         <div id="tab-sale" class="tab">
-            <h3>Satış Ayarları ve Sertifika</h3>
+            <h3>Satış ve Sertifika Detayları</h3>
             <div class="card">
-                <label>Eser Seçin</label>
-                <select id="sale-item-select" onchange="loadSaleData(this.value)">
-                    <option value="">Eser Seçiniz...</option>
-                </select>
-                <input type="text" id="edit-price" placeholder="Fiyat (Örn: 15.000 TL)">
-                <input type="text" id="edit-edition" placeholder="Edisyon (Örn: 1/5)">
-                <input type="text" id="edit-cert" placeholder="Sertifika No (Örn: UBE-001)">
-                <button onclick="saveSaleDetails()">Bilgileri Güncelle</button>
+                <select id="sale-select" onchange="loadSaleData(this.value)"><option value="">Eser Seçin</option></select>
+                <input type="text" id="edit-price" placeholder="Fiyat">
+                <input type="text" id="edit-edition" placeholder="Edisyon (örn: 1/10)">
+                <input type="text" id="edit-cert" placeholder="Sertifika No">
+                <button onclick="saveSale()">GÜNCELLE</button>
             </div>
         </div>
 
-        <div id="tab-guest" class="tab">
-            <h3>Gelen Mesajlar</h3>
-            <div id="admin-guest-list" class="card">Mesaj bulunamadı.</div>
-        </div>
-
         <div id="tab-config" class="tab">
-            <h3>Site Kimliği</h3>
+            <h3>Site Ayarları</h3>
             <div class="card">
-                <label>Logo Seçin</label><input type="file" id="l-file">
-                <label>Site Başlığı</label><input type="text" id="s-title">
-                <label>Footer Metni</label><input type="text" id="s-footer">
-                <button onclick="updateSettings()">Ayarları Kaydet</button>
+                <input type="text" id="s-footer" placeholder="Footer Metni">
+                <button onclick="updateSettings()">KAYDET</button>
             </div>
         </div>
     </div>
 
     <script>
-        const REPO = "uberaw/uberaw"; // GitHub kullanıcı adınıza göre kontrol edin (ubey53?)
-        let currentPortfolio = [];
+        const REPO = "uberaw/uberaw"; // BURAYI KONTROL EDİN
+        let portfolio = { projects: [] };
 
-        async function get(path) {
+        async function api(path, method = 'GET', body = null, sha = null) {
             const t = localStorage.getItem('uber_t');
-            const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}?t=${Date.now()}`, {
-                headers: { 'Authorization': `token ${t}` }
-            });
+            const options = {
+                method,
+                headers: { 'Authorization': `token ${t}`, 'Content-Type': 'application/json' }
+            };
+            if(body) options.body = JSON.stringify({ message: "Admin Update", content: btoa(unescape(encodeURIComponent(JSON.stringify(body, null, 2)))), sha });
+            const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, options);
             return await r.json();
         }
 
         async function auth() {
             const t = document.getElementById('token').value || localStorage.getItem('uber_t');
             localStorage.setItem('uber_t', t);
-            try {
-                const d = await get('content/settings.json');
-                if(d.sha) {
-                    document.getElementById('login').style.display='none';
-                    refreshData();
-                    const s = JSON.parse(atob(d.content));
-                    document.getElementById('s-title').value = s.siteTitle;
-                    document.getElementById('s-footer').value = s.footerText;
-                }
-            } catch(e) { alert("Bağlantı hatası! Token veya Repo yolunu kontrol edin."); }
-        }
-
-        async function refreshData() {
-            const d = await get('content/portfolio.json');
-            currentPortfolio = JSON.parse(atob(d.content));
-            loadInv();
-            fillSaleSelect();
-            loadGuestbook();
-        }
-
-        function loadInv() {
-            document.getElementById('inventory-list').innerHTML = currentPortfolio.projects.map((x, i) => `
-                <div class="item-row">
-                    <span>${x.title} (${x.category})</span>
-                    <div>
-                        <span class="btn-edit" onclick="tab('sale'); document.getElementById('sale-item-select').value=${i}; loadSaleData(${i});">Düzenle</span>
-                        <span class="btn-del" onclick="deleteItem(${i})">Sil</span>
-                    </div>
-                </div>
-            `).reverse().join('');
-        }
-
-        function fillSaleSelect() {
-            const select = document.getElementById('sale-item-select');
-            select.innerHTML = '<option value="">Eser Seçiniz...</option>' + 
-                currentPortfolio.projects.map((x, i) => `<option value="${i}">${x.title}</option>`).join('');
-        }
-
-        function loadSaleData(idx) {
-            if(idx === "") return;
-            const item = currentPortfolio.projects[idx];
-            document.getElementById('edit-price').value = item.price || "";
-            document.getElementById('edit-edition').value = item.edition || "";
-            document.getElementById('edit-cert').value = item.certCode || "";
-        }
-
-        async function saveSaleDetails() {
-            const idx = document.getElementById('sale-item-select').value;
-            if(idx === "") { alert("Lütfen bir eser seçin!"); return; }
-            
-            const t = localStorage.getItem('uber_t');
-            const d = await get('content/portfolio.json');
-            
-            currentPortfolio.projects[idx].price = document.getElementById('edit-price').value;
-            currentPortfolio.projects[idx].edition = document.getElementById('edit-edition').value;
-            currentPortfolio.projects[idx].certCode = document.getElementById('edit-cert').value;
-            currentPortfolio.projects[idx].isSale = true;
-
-            const res = await fetch(`https://api.github.com/repos/${REPO}/contents/content/portfolio.json`, {
-                method: 'PUT',
-                headers: { 'Authorization': `token ${t}` },
-                body: JSON.stringify({ 
-                    message: "Sale details update", 
-                    content: btoa(unescape(encodeURIComponent(JSON.stringify(currentPortfolio, null, 2)))), 
-                    sha: d.sha 
-                })
-            });
-            if(res.ok) alert("Satış bilgileri güncellendi!");
-        }
-
-        async function loadGuestbook() {
-            const d = await get('content/news.json');
-            const n = JSON.parse(atob(d.content));
-            if(n.guestbook && n.guestbook.length > 0) {
-                document.getElementById('admin-guest-list').innerHTML = n.guestbook.map(g => `
-                    <div class="item-row">
-                        <span><b>${g.name}:</b> ${g.message}</span>
-                    </div>
-                `).reverse().join('');
+            const d = await api('content/settings.json');
+            if(d.sha) {
+                document.getElementById('login').style.display='none';
+                loadAll();
             }
         }
 
-        async function upload() {
-            const t = localStorage.getItem('uber_t');
-            const file = document.getElementById('f-file').files[0];
-            if(!file) { alert("Dosya seçin!"); return; }
+        async function loadAll() {
+            const d = await api('content/portfolio.json');
+            portfolio = JSON.parse(atob(d.content));
             
+            // Envanter Listesi
+            document.getElementById('inventory-list').innerHTML = portfolio.projects.map((x, i) => `
+                <div class="item-row">
+                    <span>${x.title}</span>
+                    <span style="color:#ff4444; cursor:pointer" onclick="deleteItem(${i})">SİL</span>
+                </div>
+            `).reverse().join('');
+
+            // Satış Seçimi
+            document.getElementById('sale-select').innerHTML = '<option value="">Eser Seçin</option>' + 
+                portfolio.projects.map((x, i) => `<option value="${i}">${x.title}</option>`).join('');
+        }
+
+        async function upload() {
+            const file = document.getElementById('f-file').files[0];
+            if(!file) return alert("Dosya seçin");
             const reader = new FileReader();
             reader.onload = async (e) => {
-                const name = Date.now() + "_" + file.name;
-                await fetch(`https://api.github.com/repos/${REPO}/contents/images/uploads/${name}`, {
+                const fileName = `images/uploads/${Date.now()}_${file.name}`;
+                const t = localStorage.getItem('uber_t');
+                // Resmi yükle
+                await fetch(`https://api.github.com/repos/${REPO}/contents/${fileName}`, {
                     method: 'PUT', headers: { 'Authorization': `token ${t}` },
-                    body: JSON.stringify({ message: "Img", content: e.target.result.split(',')[1] })
+                    body: JSON.stringify({ message: "Upload Img", content: e.target.result.split(',')[1] })
                 });
-                
-                const d = await get('content/portfolio.json');
-                const p = JSON.parse(atob(d.content));
-                p.projects.push({ 
+                // JSON'a ekle
+                const d = await api('content/portfolio.json');
+                portfolio.projects.push({ 
                     title: document.getElementById('f-title').value, 
                     category: document.getElementById('f-cat').value, 
-                    image: `images/uploads/${name}`,
-                    isSale: false
+                    image: fileName,
+                    isSale: false 
                 });
-                
-                await fetch(`https://api.github.com/repos/${REPO}/contents/content/portfolio.json`, {
-                    method: 'PUT', headers: { 'Authorization': `token ${t}` },
-                    body: JSON.stringify({ message: "Add", content: btoa(unescape(encodeURIComponent(JSON.stringify(p, null, 2)))), sha: d.sha })
-                });
-                alert("Eser başarıyla eklendi!"); refreshData();
+                await api('content/portfolio.json', 'PUT', portfolio, d.sha);
+                alert("Başarıyla eklendi!"); loadAll();
             };
             reader.readAsDataURL(file);
         }
 
-        async function deleteItem(index) {
-            if(!confirm("Bu eseri kalıcı olarak silmek istiyor musunuz?")) return;
-            const t = localStorage.getItem('uber_t');
-            const d = await get('content/portfolio.json');
-            const p = JSON.parse(atob(d.content));
-            p.projects.splice(p.projects.length - 1 - index, 1);
-            
-            await fetch(`https://api.github.com/repos/${REPO}/contents/content/portfolio.json`, {
-                method: 'PUT',
-                headers: { 'Authorization': `token ${t}` },
-                body: JSON.stringify({ message: "Delete", content: btoa(unescape(encodeURIComponent(JSON.stringify(p, null, 2)))), sha: d.sha })
-            });
-            alert("Silindi!"); refreshData();
+        async function saveSale() {
+            const idx = document.getElementById('sale-select').value;
+            if(idx === "") return;
+            const d = await api('content/portfolio.json');
+            portfolio.projects[idx].price = document.getElementById('edit-price').value;
+            portfolio.projects[idx].edition = document.getElementById('edit-edition').value;
+            portfolio.projects[idx].certCode = document.getElementById('edit-cert').value;
+            portfolio.projects[idx].isSale = true;
+            await api('content/portfolio.json', 'PUT', portfolio, d.sha);
+            alert("Güncellendi!");
         }
 
-        async function updateSettings() {
-            const t = localStorage.getItem('uber_t');
-            const d = await get('content/settings.json');
-            const s = JSON.parse(atob(d.content));
-            s.siteTitle = document.getElementById('s-title').value;
-            s.footerText = document.getElementById('s-footer').value;
-
-            await fetch(`https://api.github.com/repos/${REPO}/contents/content/settings.json`, {
-                method: 'PUT', headers: { 'Authorization': `token ${t}` },
-                body: JSON.stringify({ message: "Sets", content: btoa(unescape(encodeURIComponent(JSON.stringify(s, null, 2)))), sha: d.sha })
-            });
-            alert("Ayarlar kaydedildi!");
+        async function deleteItem(idx) {
+            if(!confirm("Silinsin mi?")) return;
+            const d = await api('content/portfolio.json');
+            portfolio.projects.splice(idx, 1);
+            await api('content/portfolio.json', 'PUT', portfolio, d.sha);
+            loadAll();
         }
 
         function tab(n, el) {
             document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
             document.getElementById('tab-'+n).classList.add('active');
             document.querySelectorAll('.nav-link').forEach(x => x.classList.remove('active'));
-            if(el) el.classList.add('active');
-            else {
-                // Eğer buton dışından (programatik) tetiklendiyse ilgili linki aktif et
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    if(link.getAttribute('onclick').includes(n)) link.classList.add('active');
-                });
-            }
+            el.classList.add('active');
+        }
+
+        function loadSaleData(i) {
+            if(i==="") return;
+            const item = portfolio.projects[i];
+            document.getElementById('edit-price').value = item.price || "";
+            document.getElementById('edit-edition').value = item.edition || "";
+            document.getElementById('edit-cert').value = item.certCode || "";
         }
 
         if(localStorage.getItem('uber_t')) auth();
