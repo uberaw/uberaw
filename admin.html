@@ -3,193 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UBE RAW | Studio Manager</title>
+    <title>UBE RAW | Master Studio</title>
     <style>
-        :root { --bg: #050505; --card: #111; --accent: #fff; --border: #222; --text: #ddd; }
+        :root { --bg: #000; --card: #0a0a0a; --accent: #fff; --border: #1a1a1a; --text: #ccc; }
         body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; display: flex; }
-        
-        /* Sidebar */
-        .sidebar { width: 250px; background: #000; height: 100vh; border-right: 1px solid var(--border); padding: 30px 20px; position: fixed; }
-        .sidebar h2 { letter-spacing: 5px; font-weight: 300; margin-bottom: 50px; }
-        .nav-btn { width: 100%; text-align: left; background: none; border: none; color: #666; padding: 15px 0; cursor: pointer; font-size: 14px; text-transform: uppercase; transition: 0.3s; }
+        .sidebar { width: 220px; background: #000; height: 100vh; border-right: 1px solid var(--border); padding: 40px 20px; position: fixed; }
+        .sidebar h2 { letter-spacing: 5px; font-weight: 300; border-bottom: 1px solid var(--border); padding-bottom: 20px; color: #fff; }
+        .nav-btn { width: 100%; text-align: left; background: none; border: none; color: #555; padding: 12px 0; cursor: pointer; font-size: 13px; text-transform: uppercase; transition: 0.3s; }
         .nav-btn.active { color: var(--accent); font-weight: bold; }
-
-        /* Main Content */
-        .main { margin-left: 290px; padding: 50px; width: 100%; max-width: 900px; }
+        .main { margin-left: 260px; padding: 40px; width: 100%; max-width: 1000px; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-
-        .card { background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 2px; margin-bottom: 20px; }
-        input, select, textarea { width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 12px; margin: 10px 0; box-sizing: border-box; }
-        button.primary { background: var(--accent); color: #000; border: none; padding: 12px 25px; font-weight: bold; cursor: pointer; width: 100%; }
-        
-        /* Portfolio List */
-        .project-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; border-bottom: 1px solid var(--border); }
-        .project-item img { width: 50px; height: 50px; object-fit: cover; margin-right: 15px; }
-        .delete-btn { color: #ff4444; cursor: pointer; background: none; border: none; }
-
+        .card { background: var(--card); border: 1px solid var(--border); padding: 25px; margin-bottom: 20px; }
+        input, select, textarea { width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 10px; margin: 8px 0; }
+        button.primary { background: var(--accent); color: #000; border: none; padding: 12px; font-weight: bold; cursor: pointer; width: 100%; text-transform: uppercase; }
+        .item-list { border-top: 1px solid var(--border); margin-top: 20px; }
+        .item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); align-items: center; }
         #login-screen { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; justify-content: center; align-items: center; }
     </style>
 </head>
 <body>
 
 <div id="login-screen">
-    <div style="width: 300px; text-align: center;">
-        <h1 style="letter-spacing: 10px;">UBE RAW</h1>
-        <input type="password" id="tokenInput" placeholder="GitHub Token">
-        <button class="primary" onclick="initSystem()">SİSTEMİ AÇ</button>
+    <div style="width: 280px; text-align: center;">
+        <h1 style="letter-spacing: 8px; color:#fff;">UBE RAW</h1>
+        <input type="password" id="tokenInput" placeholder="Erişim Anahtarı">
+        <button class="primary" onclick="initSystem()">STUDIO'YU AÇ</button>
     </div>
 </div>
 
 <div class="sidebar">
     <h2>UBE RAW</h2>
-    <button class="nav-btn active" onclick="showTab('upload')">Eser Ekle</button>
-    <button class="nav-btn" onclick="showTab('manage')">Portfolyo Düzenle</button>
-    <button class="nav-btn" onclick="showTab('cats')">Kategoriler</button>
-    <button class="nav-btn" style="margin-top: 50px; color: #444;" onclick="logout()">Güvenli Çıkış</button>
+    <button class="nav-btn active" onclick="showTab('portfolio')">Portfolyo</button>
+    <button class="nav-btn" onclick="showTab('news')">Haber & Duyuru</button>
+    <button class="nav-btn" onclick="showTab('settings')">Site Ayarları</button>
+    <button class="nav-btn" style="margin-top:40px; color:#333;" onclick="logout()">Çıkış</button>
 </div>
 
 <div class="main">
-    <div id="upload" class="tab-content active">
-        <h3>Yeni Eser Yayınla</h3>
+    <div id="portfolio" class="tab-content active">
+        <h3>Eser Yönetimi</h3>
         <div class="card">
-            <input type="file" id="fileInput" accept="image/*">
-            <input type="text" id="title" placeholder="Eser Adı">
-            <select id="categorySelect"></select>
-            <button class="primary" onclick="handleUpload()">YAYINLA</button>
+            <input type="file" id="portFile" accept="image/*">
+            <input type="text" id="portTitle" placeholder="Eser Adı">
+            <input type="text" id="portCat" placeholder="Kategori (Heykel, Rölyef vb.)">
+            <button class="primary" onclick="addPortfolio()">Eseri Yayınla</button>
         </div>
+        <div id="portList" class="item-list"></div>
     </div>
 
-    <div id="manage" class="tab-content">
-        <h3>Mevcut Eserler</h3>
-        <div id="projectList" class="card">
-            Yükleniyor...
+    <div id="news" class="tab-content">
+        <h3>Haber & Duyuru Yayınla</h3>
+        <div class="card">
+            <input type="text" id="newsTitle" placeholder="Duyuru Başlığı">
+            <textarea id="newsContent" rows="4" placeholder="Duyuru içeriği veya önemli gelişme..."></textarea>
+            <button class="primary" onclick="addNews()">Duyuruyu Paylaş</button>
         </div>
+        <div id="newsList" class="item-list"></div>
     </div>
 
-    <div id="cats" class="tab-content">
-        <h3>Kategori Yönetimi</h3>
+    <div id="settings" class="tab-content">
+        <h3>Genel Site Ayarları</h3>
         <div class="card">
-            <div id="categoryList"></div>
-            <hr style="border: 0; border-top: 1px solid #222; margin: 20px 0;">
-            <input type="text" id="newCat" placeholder="Yeni Kategori Adı">
-            <button class="primary" onclick="addCategory()">KATEGORİ EKLE</button>
+            <label>Site Başlığı</label>
+            <input type="text" id="siteTitle">
+            <label>Logo Değiştir (Yeni logo yükle)</label>
+            <input type="file" id="logoFile" accept="image/*">
+            <label>Alt Bilgi (Footer)</label>
+            <input type="text" id="footerText">
+            <button class="primary" onclick="saveSettings()">Ayarları Güncelle</button>
         </div>
     </div>
 </div>
 
 <script>
-    const REPO = "uberaw/uberaw";
-    let DB = { categories: [], projects: [] };
-    let DB_SHA = "";
+    const REPO = "ubey53/uberaw";
+    let DATA = { portfolio: {}, settings: {}, news: {} };
+
+    async function fetchData(path) {
+        const token = localStorage.getItem('uber_token');
+        const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+            headers: { 'Authorization': `token ${token}` }
+        });
+        const d = await res.json();
+        return { sha: d.sha, content: JSON.parse(decodeURIComponent(escape(atob(d.content)))) };
+    }
 
     async function initSystem() {
         const token = document.getElementById('tokenInput').value || localStorage.getItem('uber_token');
         if(!token) return;
-        
-        const res = await fetch(`https://api.github.com/repos/${REPO}/contents/content/portfolio.json`, {
-            headers: { 'Authorization': `token ${token}` }
-        });
+        localStorage.setItem('uber_token', token);
 
-        if(res.ok) {
-            const data = await res.json();
-            DB = JSON.parse(decodeURIComponent(escape(atob(data.content))));
-            DB_SHA = data.sha;
-            localStorage.setItem('uber_token', token);
+        try {
+            DATA.portfolio = await fetchData('content/portfolio.json');
+            DATA.settings = await fetchData('content/settings.json');
+            DATA.news = await fetchData('content/news.json');
             document.getElementById('login-screen').style.display = 'none';
-            renderUI();
-        } else {
-            alert("Bağlantı hatası! Token'ı kontrol edin.");
-        }
+            renderAll();
+        } catch(e) { alert("Bağlantı hatası!"); }
     }
 
-    function renderUI() {
-        // Kategorileri doldur
-        const sel = document.getElementById('categorySelect');
-        sel.innerHTML = DB.categories.map(c => `<option value="${c}">${c}</option>`).join('');
+    function renderAll() {
+        // Portfolyo listele
+        document.getElementById('portList').innerHTML = DATA.portfolio.content.projects.map((p, i) => `
+            <div class="item"><span>${p.title} (${p.category})</span><button onclick="deleteItem('portfolio', ${i})">Sil</button></div>
+        `).reverse().join('');
         
-        document.getElementById('categoryList').innerHTML = DB.categories.map(c => 
-            `<div style="display:flex; justify-content:space-between; padding:5px 0;">
-                ${c} <span onclick="removeCat('${c}')" style="color:red; cursor:pointer;">×</span>
-            </div>`).join('');
+        // Haber listele
+        document.getElementById('newsList').innerHTML = DATA.news.content.announcements.map((n, i) => `
+            <div class="item"><span>${n.title}</span><button onclick="deleteItem('news', ${i})">Kaldır</button></div>
+        `).reverse().join('');
 
-        // Portfolyoyu listele
-        document.getElementById('projectList').innerHTML = DB.projects.map((p, index) => `
-            <div class="project-item">
-                <div style="display:flex; align-items:center;">
-                    <img src="${p.image}">
-                    <div>
-                        <strong>${p.title}</strong><br>
-                        <small style="color:#666">${p.category}</small>
-                    </div>
-                </div>
-                <button class="delete-btn" onclick="deleteProject(${index})">Sil</button>
-            </div>
-        `).reverse().join('') || "Henüz eser yok.";
+        // Ayarları doldur
+        document.getElementById('siteTitle').value = DATA.settings.content.siteTitle;
+        document.getElementById('footerText').value = DATA.settings.content.footerText;
     }
 
-    async function saveDB() {
+    async function pushToGit(path, content, sha) {
         const token = localStorage.getItem('uber_token');
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify(DB, null, 2))));
-        
-        const res = await fetch(`https://api.github.com/repos/${REPO}/contents/content/portfolio.json`, {
+        const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
             method: 'PUT',
             headers: { 'Authorization': `token ${token}` },
-            body: JSON.stringify({
-                message: "Portfolyo güncellendi",
-                content,
-                sha: DB_SHA,
-                branch: "main"
-            })
+            body: JSON.stringify({ message: "Panel güncelleme", content: btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2)))), sha })
         });
-        if(res.ok) {
-            const data = await res.json();
-            DB_SHA = data.content.sha;
-            alert("Değişiklikler kaydedildi!");
-            renderUI();
-        }
+        if(res.ok) { alert("Güncellendi!"); location.reload(); }
     }
 
-    async function handleUpload() {
-        const file = document.getElementById('fileInput').files[0];
-        const title = document.getElementById('title').value;
-        const cat = document.getElementById('categorySelect').value;
-        const token = localStorage.getItem('uber_token');
+    async function addPortfolio() {
+        const file = document.getElementById('portFile').files[0];
+        const title = document.getElementById('portTitle').value;
+        const cat = document.getElementById('portCat').value;
+        if(!file || !title) return;
 
-        if(!file || !title) return alert("Eksik bilgi!");
-
-        const fileName = Date.now() + "_" + file.name;
         const reader = new FileReader();
         reader.onload = async (e) => {
-            const content = e.target.result.split(',')[1];
-            const uploadRes = await fetch(`https://api.github.com/repos/${REPO}/contents/images/uploads/${fileName}`, {
+            const imgContent = e.target.result.split(',')[1];
+            const imgName = Date.now() + "_" + file.name;
+            const token = localStorage.getItem('uber_token');
+            
+            // 1. Resmi yükle
+            await fetch(`https://api.github.com/repos/${REPO}/contents/images/uploads/${imgName}`, {
                 method: 'PUT',
                 headers: { 'Authorization': `token ${token}` },
-                body: JSON.stringify({ message: "Fotoğraf yüklendi", content })
+                body: JSON.stringify({ message: "Eser görseli", content: imgContent })
             });
 
-            if(uploadRes.ok) {
-                DB.projects.push({ title, category: cat, image: `images/uploads/${fileName}` });
-                await saveDB();
-            }
+            // 2. JSON'u güncelle
+            DATA.portfolio.content.projects.push({ title, category: cat, image: `images/uploads/${imgName}` });
+            await pushToGit('content/portfolio.json', DATA.portfolio.content, DATA.portfolio.sha);
         };
         reader.readAsDataURL(file);
     }
 
-    function addCategory() {
-        const name = document.getElementById('newCat').value;
-        if(name) { DB.categories.push(name); saveDB(); }
+    async function addNews() {
+        const title = document.getElementById('newsTitle').value;
+        const body = document.getElementById('newsContent').value;
+        DATA.news.content.announcements.push({ title, body, date: new Date().toLocaleDateString('tr-TR') });
+        await pushToGit('content/news.json', DATA.news.content, DATA.news.sha);
     }
 
-    function removeCat(name) {
-        DB.categories = DB.categories.filter(c => c !== name);
-        saveDB();
+    async function saveSettings() {
+        DATA.settings.content.siteTitle = document.getElementById('siteTitle').value;
+        DATA.settings.content.footerText = document.getElementById('footerText').value;
+        
+        const logoFile = document.getElementById('logoFile').files[0];
+        if(logoFile) {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const token = localStorage.getItem('uber_token');
+                // Mevcut logo.png'yi üzerine yaz
+                const logoRes = await fetch(`https://api.github.com/repos/${REPO}/contents/images/logo.png`, {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+                const logoData = await logoRes.json();
+                
+                await fetch(`https://api.github.com/repos/${REPO}/contents/images/logo.png`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${token}` },
+                    body: JSON.stringify({ message: "Logo güncelleme", content: e.target.result.split(',')[1], sha: logoData.sha })
+                });
+                await pushToGit('content/settings.json', DATA.settings.content, DATA.settings.sha);
+            };
+            reader.readAsDataURL(logoFile);
+        } else {
+            await pushToGit('content/settings.json', DATA.settings.content, DATA.settings.sha);
+        }
     }
 
-    async function deleteProject(index) {
-        if(confirm("Bu eseri silmek istediğinize emin misiniz?")) {
-            DB.projects.splice(index, 1);
-            await saveDB();
+    async function deleteItem(type, index) {
+        if(confirm("Emin misiniz?")) {
+            if(type === 'portfolio') DATA.portfolio.content.projects.splice(index, 1);
+            if(type === 'news') DATA.news.content.announcements.splice(index, 1);
+            const path = type === 'portfolio' ? 'content/portfolio.json' : 'content/news.json';
+            await pushToGit(path, DATA[type].content, DATA[type].sha);
         }
     }
 
@@ -201,10 +207,7 @@
     }
 
     function logout() { localStorage.removeItem('uber_token'); location.reload(); }
-    
-    // Otomatik giriş dene
     if(localStorage.getItem('uber_token')) initSystem();
 </script>
-
 </body>
 </html>
