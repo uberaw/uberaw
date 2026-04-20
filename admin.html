@@ -4,52 +4,41 @@
     <meta charset="UTF-8">
     <title>UBE RAW | Studio Command</title>
     <style>
-        body { background: #000; color: #ccc; font-family: 'Inter', sans-serif; margin: 0; display: flex; }
-        .sidebar { width: 220px; height: 100vh; border-right: 1px solid #222; padding: 30px; position: fixed; }
-        .sidebar h2 { color: #a87f4a; font-size: 16px; letter-spacing: 4px; margin-bottom: 40px; }
-        .nav-link { padding: 10px 0; cursor: pointer; font-size: 11px; text-transform: uppercase; color: #666; }
-        .nav-link.active { color: #a87f4a; font-weight: bold; }
-        .main { margin-left: 280px; padding: 60px; width: 100%; }
+        :root { --bg: #000; --bronze: #a87f4a; --border: #1a1a1a; }
+        body { background: var(--bg); color: #ccc; font-family: 'Inter', sans-serif; margin: 0; display: flex; }
+        .sidebar { width: 220px; height: 100vh; border-right: 1px solid #222; padding: 30px; position: fixed; background: #050505; }
+        .sidebar h2 { color: var(--bronze); font-size: 16px; letter-spacing: 4px; margin-bottom: 40px; }
+        .nav-link { padding: 12px 0; cursor: pointer; font-size: 11px; text-transform: uppercase; color: #666; transition: 0.3s; }
+        .nav-link.active { color: var(--bronze); font-weight: bold; border-left: 2px solid var(--bronze); padding-left: 10px; }
+        .main { margin-left: 280px; padding: 60px; width: calc(100% - 280px); }
         .tab { display: none; } .tab.active { display: block; }
-        .card { background: #0d0d0d; border: 1px solid #1a1a1a; padding: 25px; margin-bottom: 20px; }
-        input, textarea { width: 100%; background: #000; border: 1px solid #222; color: #fff; padding: 12px; margin: 10px 0; }
-        button { background: #a87f4a; color: #000; border: none; padding: 15px; width: 100%; cursor: pointer; font-weight: bold; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #111; }
-        .btn-del { color: #ff4444; cursor: pointer; font-size: 10px; text-transform: uppercase; }
+        .card { background: #0d0d0d; border: 1px solid var(--border); padding: 25px; margin-bottom: 20px; }
+        input, textarea, select { width: 100%; background: #000; border: 1px solid #222; color: #fff; padding: 12px; margin: 10px 0; font-family: inherit; }
+        button { background: var(--bronze); color: #000; border: none; padding: 15px; width: 100%; cursor: pointer; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
+        button:hover { opacity: 0.8; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #111; }
+        .btn-del { color: #ff4444; cursor: pointer; font-size: 10px; text-transform: uppercase; margin-left: 15px; }
+        .btn-edit { color: var(--bronze); cursor: pointer; font-size: 10px; text-transform: uppercase; }
         #login { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
     <div id="login">
-        <div style="width: 250px;">
+        <div style="width: 250px; text-align: center;">
+            <h1 style="color:var(--bronze); letter-spacing: 5px; font-size: 20px;">UBE RAW LOGIN</h1>
             <input type="password" id="token" placeholder="GitHub Token">
-            <button onclick="auth()">GİRİŞ</button>
+            <button onclick="auth()">GİRİŞ YAP</button>
         </div>
     </div>
 
     <div class="sidebar">
         <h2>UBE RAW</h2>
-        <div class="nav-link" onclick="tab('sale', this)">Satış & Sertifika</div>
-        <div class="nav-link" onclick="tab('guest', this)">Defteri Yönet</div>
         <div class="nav-link active" onclick="tab('add', this)">Eser Ekle</div>
         <div class="nav-link" onclick="tab('inv', this)">Envanter / Sil</div>
+        <div class="nav-link" onclick="tab('sale', this)">Satış & Sertifika</div>
+        <div class="nav-link" onclick="tab('guest', this)">Defteri Yönet</div>
         <div class="nav-link" onclick="tab('config', this)">Site & Logo</div>
-        <div id="tab-sale" class="tab">
-    <h3>Satış Ayarları ve Sertifika</h3>
-    <div class="card">
-        <p>Eseri seçip satış bilgilerini güncelleyin (Bu kısım envanterle entegre çalışır).</p>
-        <input type="text" id="edit-price" placeholder="Fiyat (Örn: 15.000 TL)">
-        <input type="text" id="edit-edition" placeholder="Edisyon (Örn: 1/5)">
-        <input type="text" id="edit-cert" placeholder="Sertifika No">
-        <button onclick="saveSaleDetails()">Bilgileri Güncelle</button>
-    </div>
-</div>
-
-<div id="tab-guest" class="tab">
-    <h3>Gelen Mesajlar</h3>
-    <div id="admin-guest-list" class="card">Mesajlar yükleniyor...</div>
-</div>
     </div>
 
     <div class="main">
@@ -68,20 +57,40 @@
             <div id="inventory-list" class="card">Yükleniyor...</div>
         </div>
 
+        <div id="tab-sale" class="tab">
+            <h3>Satış Ayarları ve Sertifika</h3>
+            <div class="card">
+                <label>Eser Seçin</label>
+                <select id="sale-item-select" onchange="loadSaleData(this.value)">
+                    <option value="">Eser Seçiniz...</option>
+                </select>
+                <input type="text" id="edit-price" placeholder="Fiyat (Örn: 15.000 TL)">
+                <input type="text" id="edit-edition" placeholder="Edisyon (Örn: 1/5)">
+                <input type="text" id="edit-cert" placeholder="Sertifika No (Örn: UBE-001)">
+                <button onclick="saveSaleDetails()">Bilgileri Güncelle</button>
+            </div>
+        </div>
+
+        <div id="tab-guest" class="tab">
+            <h3>Gelen Mesajlar</h3>
+            <div id="admin-guest-list" class="card">Mesaj bulunamadı.</div>
+        </div>
+
         <div id="tab-config" class="tab">
             <h3>Site Kimliği</h3>
             <div class="card">
                 <label>Logo Seçin</label><input type="file" id="l-file">
                 <label>Site Başlığı</label><input type="text" id="s-title">
-                <label>Footer</label><input type="text" id="s-footer">
-                <button onclick="updateSettings()">Kaydet</button>
+                <label>Footer Metni</label><input type="text" id="s-footer">
+                <button onclick="updateSettings()">Ayarları Kaydet</button>
             </div>
         </div>
     </div>
 
     <script>
-        const REPO = "uberaw/uberaw";
-        
+        const REPO = "uberaw/uberaw"; // GitHub kullanıcı adınıza göre kontrol edin (ubey53?)
+        let currentPortfolio = [];
+
         async function get(path) {
             const t = localStorage.getItem('uber_t');
             const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}?t=${Date.now()}`, {
@@ -93,45 +102,93 @@
         async function auth() {
             const t = document.getElementById('token').value || localStorage.getItem('uber_t');
             localStorage.setItem('uber_t', t);
-            const d = await get('content/settings.json');
-            if(d.sha) {
-                document.getElementById('login').style.display='none';
-                loadInv();
-                const s = JSON.parse(atob(d.content));
-                document.getElementById('s-title').value = s.siteTitle;
-                document.getElementById('s-footer').value = s.footerText;
-            }
+            try {
+                const d = await get('content/settings.json');
+                if(d.sha) {
+                    document.getElementById('login').style.display='none';
+                    refreshData();
+                    const s = JSON.parse(atob(d.content));
+                    document.getElementById('s-title').value = s.siteTitle;
+                    document.getElementById('s-footer').value = s.footerText;
+                }
+            } catch(e) { alert("Bağlantı hatası! Token veya Repo yolunu kontrol edin."); }
         }
 
-        async function loadInv() {
+        async function refreshData() {
             const d = await get('content/portfolio.json');
-            const p = JSON.parse(atob(d.content));
-            document.getElementById('inventory-list').innerHTML = p.projects.map((x, i) => `
+            currentPortfolio = JSON.parse(atob(d.content));
+            loadInv();
+            fillSaleSelect();
+            loadGuestbook();
+        }
+
+        function loadInv() {
+            document.getElementById('inventory-list').innerHTML = currentPortfolio.projects.map((x, i) => `
                 <div class="item-row">
                     <span>${x.title} (${x.category})</span>
-                    <span class="btn-del" onclick="deleteItem(${i})">Sil</span>
+                    <div>
+                        <span class="btn-edit" onclick="tab('sale'); document.getElementById('sale-item-select').value=${i}; loadSaleData(${i});">Düzenle</span>
+                        <span class="btn-del" onclick="deleteItem(${i})">Sil</span>
+                    </div>
                 </div>
             `).reverse().join('');
         }
 
-        async function deleteItem(index) {
-            if(!confirm("Eseri silmek istiyor musunuz?")) return;
+        function fillSaleSelect() {
+            const select = document.getElementById('sale-item-select');
+            select.innerHTML = '<option value="">Eser Seçiniz...</option>' + 
+                currentPortfolio.projects.map((x, i) => `<option value="${i}">${x.title}</option>`).join('');
+        }
+
+        function loadSaleData(idx) {
+            if(idx === "") return;
+            const item = currentPortfolio.projects[idx];
+            document.getElementById('edit-price').value = item.price || "";
+            document.getElementById('edit-edition').value = item.edition || "";
+            document.getElementById('edit-cert').value = item.certCode || "";
+        }
+
+        async function saveSaleDetails() {
+            const idx = document.getElementById('sale-item-select').value;
+            if(idx === "") { alert("Lütfen bir eser seçin!"); return; }
+            
             const t = localStorage.getItem('uber_t');
             const d = await get('content/portfolio.json');
-            const p = JSON.parse(atob(d.content));
-            p.projects.splice(p.projects.length - 1 - index, 1); // Reverse list mantığına göre silme
             
-            await fetch(`https://api.github.com/repos/${REPO}/contents/content/portfolio.json`, {
+            currentPortfolio.projects[idx].price = document.getElementById('edit-price').value;
+            currentPortfolio.projects[idx].edition = document.getElementById('edit-edition').value;
+            currentPortfolio.projects[idx].certCode = document.getElementById('edit-cert').value;
+            currentPortfolio.projects[idx].isSale = true;
+
+            const res = await fetch(`https://api.github.com/repos/${REPO}/contents/content/portfolio.json`, {
                 method: 'PUT',
                 headers: { 'Authorization': `token ${t}` },
-                body: JSON.stringify({ message: "Delete item", content: btoa(JSON.stringify(p, null, 2)), sha: d.sha })
+                body: JSON.stringify({ 
+                    message: "Sale details update", 
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(currentPortfolio, null, 2)))), 
+                    sha: d.sha 
+                })
             });
-            alert("Silindi!"); loadInv();
+            if(res.ok) alert("Satış bilgileri güncellendi!");
+        }
+
+        async function loadGuestbook() {
+            const d = await get('content/news.json');
+            const n = JSON.parse(atob(d.content));
+            if(n.guestbook && n.guestbook.length > 0) {
+                document.getElementById('admin-guest-list').innerHTML = n.guestbook.map(g => `
+                    <div class="item-row">
+                        <span><b>${g.name}:</b> ${g.message}</span>
+                    </div>
+                `).reverse().join('');
+            }
         }
 
         async function upload() {
             const t = localStorage.getItem('uber_t');
             const file = document.getElementById('f-file').files[0];
+            if(!file) { alert("Dosya seçin!"); return; }
+            
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const name = Date.now() + "_" + file.name;
@@ -139,72 +196,67 @@
                     method: 'PUT', headers: { 'Authorization': `token ${t}` },
                     body: JSON.stringify({ message: "Img", content: e.target.result.split(',')[1] })
                 });
+                
                 const d = await get('content/portfolio.json');
                 const p = JSON.parse(atob(d.content));
-                p.projects.push({ title: document.getElementById('f-title').value, category: document.getElementById('f-cat').value, image: `images/uploads/${name}` });
+                p.projects.push({ 
+                    title: document.getElementById('f-title').value, 
+                    category: document.getElementById('f-cat').value, 
+                    image: `images/uploads/${name}`,
+                    isSale: false
+                });
+                
                 await fetch(`https://api.github.com/repos/${REPO}/contents/content/portfolio.json`, {
                     method: 'PUT', headers: { 'Authorization': `token ${t}` },
-                    body: JSON.stringify({ message: "Add", content: btoa(JSON.stringify(p, null, 2)), sha: d.sha })
+                    body: JSON.stringify({ message: "Add", content: btoa(unescape(encodeURIComponent(JSON.stringify(p, null, 2)))), sha: d.sha })
                 });
-                alert("Eklendi!"); loadInv();
+                alert("Eser başarıyla eklendi!"); refreshData();
             };
             reader.readAsDataURL(file);
         }
 
+        async function deleteItem(index) {
+            if(!confirm("Bu eseri kalıcı olarak silmek istiyor musunuz?")) return;
+            const t = localStorage.getItem('uber_t');
+            const d = await get('content/portfolio.json');
+            const p = JSON.parse(atob(d.content));
+            p.projects.splice(p.projects.length - 1 - index, 1);
+            
+            await fetch(`https://api.github.com/repos/${REPO}/contents/content/portfolio.json`, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${t}` },
+                body: JSON.stringify({ message: "Delete", content: btoa(unescape(encodeURIComponent(JSON.stringify(p, null, 2)))), sha: d.sha })
+            });
+            alert("Silindi!"); refreshData();
+        }
+
         async function updateSettings() {
             const t = localStorage.getItem('uber_t');
-            const logoFile = document.getElementById('l-file').files[0];
-            let logoUrl = "images/logo.png";
-
-            if(logoFile) {
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    await fetch(`https://api.github.com/repos/${REPO}/contents/images/logo.png`, {
-                        method: 'PUT', headers: { 'Authorization': `token ${t}` },
-                        body: JSON.stringify({ message: "Logo Update", content: e.target.result.split(',')[1], sha: (await get('images/logo.png')).sha })
-                    });
-                };
-                reader.readAsDataURL(logoFile);
-            }
-
             const d = await get('content/settings.json');
             const s = JSON.parse(atob(d.content));
             s.siteTitle = document.getElementById('s-title').value;
             s.footerText = document.getElementById('s-footer').value;
-            s.logoUrl = "images/logo.png";
 
-            await fetch(`https://api.github.com/repos/${REPO}/contents/settings.json`, {
+            await fetch(`https://api.github.com/repos/${REPO}/contents/content/settings.json`, {
                 method: 'PUT', headers: { 'Authorization': `token ${t}` },
-                body: JSON.stringify({ message: "Sets", content: btoa(JSON.stringify(s, null, 2)), sha: d.sha })
+                body: JSON.stringify({ message: "Sets", content: btoa(unescape(encodeURIComponent(JSON.stringify(s, null, 2)))), sha: d.sha })
             });
-            alert("Ayarlar güncellendi!");
+            alert("Ayarlar kaydedildi!");
         }
 
         function tab(n, el) {
             document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
             document.getElementById('tab-'+n).classList.add('active');
             document.querySelectorAll('.nav-link').forEach(x => x.classList.remove('active'));
-            el.classList.add('active');
+            if(el) el.classList.add('active');
+            else {
+                // Eğer buton dışından (programatik) tetiklendiyse ilgili linki aktif et
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    if(link.getAttribute('onclick').includes(n)) link.classList.add('active');
+                });
+            }
         }
-async function saveSaleDetails() {
-    const t = localStorage.getItem('uber_t');
-    const d = await get('content/portfolio.json');
-    const p = JSON.parse(atob(d.content));
-    
-    // En son eklenen eser üzerinden örnek işlem:
-    const lastIdx = p.projects.length - 1;
-    p.projects[lastIdx].price = document.getElementById('edit-price').value;
-    p.projects[lastIdx].edition = document.getElementById('edit-edition').value;
-    p.projects[lastIdx].certCode = document.getElementById('edit-cert').value;
-    p.projects[lastIdx].isSale = true;
 
-    await fetch(`https://api.github.com/repos/${REPO}/contents/content/portfolio.json`, {
-        method: 'PUT',
-        headers: { 'Authorization': `token ${t}` },
-        body: JSON.stringify({ message: "Sale details update", content: btoa(JSON.stringify(p, null, 2)), sha: d.sha })
-    });
-    alert("Satış bilgileri kaydedildi!");
-}
         if(localStorage.getItem('uber_t')) auth();
     </script>
 </body>
