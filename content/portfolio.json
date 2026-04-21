@@ -1,6 +1,12 @@
 {
   "projects": [
     {
+      "title": "Kadın Portre",
+      "category": "Karakalem",
+      "image": "images/uploads/kad-n-portre-1776761676289-0.jpg",
+      "mapLink": ""
+    },
+    {
       "title": "Erkek Portre",
       "category": "Karakalem",
       "image": "images/uploads/erkek-portre-1776761661711-0.jpg",
