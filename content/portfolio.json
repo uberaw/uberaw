@@ -16,9 +16,10 @@
       "category": "Karakalem",
       "image": "images/uploads/1776725158059_Gemini_Generated_Image_rsltyyrsltyyrslt.png",
       "isSale": true,
-      "price": "2500",
+      "price": "2500TL",
       "edition": "1/1",
-      "certCode": "1-111-111-111"
+      "certCode": "1-111-111-111",
+      "owner": ""
     }
   ]
 }
