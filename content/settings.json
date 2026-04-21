@@ -6,8 +6,10 @@
   "instagram": "www.instagram.com/hasan",
   "whatsapp": "5353535353",
   "siteDesc": "",
-  "bio": "Tarzımız.",
+  "bio": "",
   "analyticsId": "",
   "maintenanceMode": false,
-  "themeColor": "#c26700"
+  "themeColor": "#c26700",
+  "menuPortfolio": "WORKS",
+  "menuContact": "CONTACT"
 }
