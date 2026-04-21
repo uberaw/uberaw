@@ -2,60 +2,108 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>UBE RAW | Studio Management</title>
+    <title>UBE RAW | Studio Management v2.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        :root { --accent: #a87f4a; --bg: #000; --card: #0d0d0d; }
+        :root { --accent: #a87f4a; --bg: #000; --card: #0d0d0d; --border: #222; }
         body { background: var(--bg); color: #ccc; font-family: 'Inter', sans-serif; margin: 0; display: flex; }
-        .sidebar { width: 240px; height: 100vh; border-right: 1px solid #222; padding: 30px; position: fixed; background: #050505; z-index: 100; }
-        .sidebar h2 { color: var(--accent); letter-spacing: 3px; font-size: 16px; margin-bottom: 40px; }
-        .nav-link { padding: 15px 0; cursor: pointer; font-size: 11px; text-transform: uppercase; color: #666; transition: 0.3s; position: relative; }
-        .nav-link.active { color: var(--accent); font-weight: bold; border-left: 2px solid var(--accent); padding-left: 10px; }
-        .main { margin-left: 300px; padding: 60px; width: 100%; max-width: 900px; }
-        .tab { display: none; } .tab.active { display: block; }
-        .card { background: var(--card); border: 1px solid #1a1a1a; padding: 25px; margin-bottom: 20px; }
-        .section-title { color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 20px 0 10px 0; border-bottom: 1px solid #222; padding-bottom: 5px; }
-        input, select, textarea { width: 100%; background: #000; border: 1px solid #222; color: #fff; padding: 12px; margin: 10px 0; box-sizing: border-box; font-family: inherit; }
-        button { background: var(--accent); color: #000; border: none; padding: 15px; width: 100%; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; transition: 0.2s; }
-        button:hover { opacity: 0.8; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #111; font-size: 13px; }
+        
+        /* Sidebar */
+        .sidebar { width: 260px; height: 100vh; border-right: 1px solid var(--border); padding: 30px; position: fixed; background: #050505; z-index: 100; box-sizing: border-box; }
+        .sidebar h2 { color: var(--accent); letter-spacing: 3px; font-size: 16px; margin-bottom: 40px; border-bottom: 1px solid var(--accent); padding-bottom: 10px; }
+        .nav-link { padding: 15px 12px; cursor: pointer; font-size: 11px; text-transform: uppercase; color: #666; transition: 0.3s; margin-bottom: 5px; border-radius: 4px; }
+        .nav-link:hover { background: #111; color: #fff; }
+        .nav-link.active { color: #000; background: var(--accent); font-weight: bold; }
+
+        /* Main Content */
+        .main { margin-left: 260px; padding: 60px; width: 100%; max-width: 1000px; }
+        .tab { display: none; animation: fadeIn 0.4s ease; } 
+        .tab.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* UI Elements */
+        .card { background: var(--card); border: 1px solid #1a1a1a; padding: 25px; margin-bottom: 25px; border-radius: 8px; }
+        .section-title { color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px; }
+        .section-title::after { content: ""; height: 1px; background: #222; flex: 1; }
+        
+        input, select, textarea { width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 12px; margin: 10px 0; border-radius: 4px; font-family: inherit; }
+        input:focus { border-color: var(--accent); outline: none; }
+        
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        button { background: var(--accent); color: #000; border: none; padding: 14px 20px; cursor: pointer; font-weight: bold; text-transform: uppercase; border-radius: 4px; transition: 0.2s; font-size: 12px; }
+        button:hover { filter: brightness(1.2); }
+        button.secondary { background: #222; color: #fff; }
+        button.danger { background: #500; color: #fff; }
+
+        /* Inventory List */
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #111; transition: 0.2s; }
+        .item-row:hover { background: #111; }
+        .item-info { display: flex; flex-direction: column; gap: 4px; }
+        .item-info b { color: #fff; font-size: 14px; }
+        .item-info small { color: var(--accent); font-size: 10px; }
+
+        /* Modal / Edit Overlay */
+        #edit-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        #edit-modal .modal-content { background: var(--card); border: 1px solid var(--accent); padding: 30px; width: 100%; max-width: 500px; border-radius: 8px; }
+
+        /* Login */
         #login { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .approval-box { background: #111; padding: 20px; border: 1px dashed var(--accent); margin-top: 20px; }
+        .login-box { width: 300px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div id="login">
-    <div style="width: 280px; text-align: center;">
-        <h2 style="color:var(--accent); letter-spacing: 5px;">UBE RAW</h2>
-        <input type="password" id="token" placeholder="GitHub Token">
-        <button onclick="auth()">SİSTEME GİRİŞ</button>
+    <div class="login-box">
+        <h2 style="color:var(--accent); letter-spacing: 5px; margin-bottom: 30px;">UBE RAW</h2>
+        <input type="password" id="token" placeholder="GitHub Erişim Anahtarı">
+        <button onclick="auth()" style="width: 100%;">SİSTEMİ BAŞLAT</button>
+    </div>
+</div>
+
+<div id="edit-modal">
+    <div class="modal-content">
+        <h3 id="edit-modal-title" style="color: var(--accent); margin-top: 0;">Eseri Düzenle</h3>
+        <input type="hidden" id="edit-idx">
+        <label style="font-size: 11px;">Eser Adı</label>
+        <input type="text" id="edit-title">
+        <label style="font-size: 11px;">Kategori</label>
+        <input type="text" id="edit-cat">
+        <label style="font-size: 11px;">Harita/Link</label>
+        <input type="text" id="edit-map">
+        <div class="btn-group">
+            <button onclick="saveProjectEdit()" style="flex: 2;">GÜNCELLE</button>
+            <button onclick="closeEditModal()" class="secondary" style="flex: 1;">İPTAL</button>
+        </div>
     </div>
 </div>
 
 <div class="sidebar">
     <h2>UBE RAW</h2>
-    <div class="nav-link active" onclick="switchTab('add', this)">Eser Ekle</div>
-    <div class="nav-link" onclick="switchTab('inv', this)">Envanter & Sıra</div>
-    <div class="nav-link" onclick="switchTab('sale', this)">Satış & Sertifika</div>
-    <div class="nav-link" onclick="switchTab('guest', this)">Mesajlar</div>
-    <div class="nav-link" onclick="switchTab('config', this)">Site Ayarları</div>
+    <div class="nav-link active" onclick="switchTab('add', this)">✨ Eser Ekle</div>
+    <div class="nav-link" onclick="switchTab('inv', this)">📦 Envanter</div>
+    <div class="nav-link" onclick="switchTab('sale', this)">📜 Sertifika</div>
+    <div class="nav-link" onclick="switchTab('guest', this)">💬 Mesajlar</div>
+    <div class="nav-link" onclick="switchTab('config', this)">⚙️ Site Ayarları</div>
 </div>
 
 <div class="main">
     <div id="tab-add" class="tab active">
         <h3>Yeni Eser Kaydı</h3>
         <div class="card">
+            <div class="section-title">Eser Detayları</div>
             <input type="file" id="f-file" multiple>
+            <p style="font-size: 10px; color: #555;">* Birden fazla resim seçebilirsiniz.</p>
             <input type="text" id="f-title" placeholder="Eser Adı">
-            <input type="text" id="f-cat" placeholder="Kategori (Wall Relief, Sculpture vb.)">
-            <input type="text" id="f-map" placeholder="Harita Koordinat/Link (Opsiyonel)">
-            <button onclick="handleUpload()">YAYINLA</button>
+            <input type="text" id="f-cat" placeholder="Kategori (Örn: Wall Relief)">
+            <input type="text" id="f-map" placeholder="Harita Linki (Opsiyonel)">
+            <button onclick="handleUpload()" style="width: 100%; margin-top: 20px;">YAYINLA</button>
         </div>
     </div>
 
     <div id="tab-inv" class="tab">
         <h3>Envanter Yönetimi</h3>
+        <p style="font-size: 12px; color: #777;">Sıralamayı değiştirmek için okları kullanın.</p>
         <div id="inventory-list" class="card">Yükleniyor...</div>
     </div>
 
@@ -63,12 +111,12 @@
         <h3>Satış & Dijital Sertifika</h3>
         <div class="card">
             <select id="sale-select" onchange="fillSaleFields(this.value)"><option value="">Eser Seçin</option></select>
-            <input type="text" id="edit-price" placeholder="Fiyat Bilgisi">
-            <input type="text" id="edit-cert" placeholder="Sertifika Numarası">
-            <input type="text" id="edit-owner" placeholder="Alıcı / Koleksiyoner İsmi">
-            <div style="display: flex; gap: 10px;">
-                <button onclick="handleSaleUpdate()" style="flex: 2;">BİLGİLERİ KAYDET</button>
-                <button onclick="generatePDF()" style="background: #222; color: #fff; flex: 1;">PDF ÜRET</button>
+            <input type="text" id="edit-price" placeholder="Satış Fiyatı">
+            <input type="text" id="edit-cert" placeholder="Sertifika No (Örn: UBE-001)">
+            <input type="text" id="edit-owner" placeholder="Alıcı İsmi">
+            <div class="btn-group">
+                <button onclick="handleSaleUpdate()" style="flex: 2;">SATIŞI KAYDET</button>
+                <button onclick="generatePDF()" class="secondary" style="flex: 1;">PDF AL</button>
             </div>
         </div>
     </div>
@@ -76,32 +124,45 @@
     <div id="tab-guest" class="tab">
         <h3>Ziyaretçi Mesajları</h3>
         <div id="guest-list" class="card">Yükleniyor...</div>
-        
-        <div class="approval-box">
-            <div class="section-title">Yeni Mesaj Onayla</div>
-            <p style="font-size: 11px; color: #777;">Formspree (E-posta) üzerinden gelen mesajı buraya girerek onaylayabilirsiniz.</p>
-            <input type="text" id="new-g-name" placeholder="Ziyaretçi İsmi">
-            <textarea id="new-g-msg" rows="3" placeholder="Mesaj Metni"></textarea>
-            <button onclick="approveNewMessage()" style="background:#4CAF50; color:white;">MESAJI SİTEDE YAYINLA</button>
+        <div class="card" style="border: 1px dashed var(--accent);">
+            <div class="section-title">Manuel Mesaj Onayla</div>
+            <input type="text" id="new-g-name" placeholder="Ziyaretçi Adı">
+            <textarea id="new-g-msg" rows="3" placeholder="Mesaj İçeriği"></textarea>
+            <button onclick="approveNewMessage()" style="width:100%; background: #4CAF50; color:#fff;">ONAYLA VE YAYINLA</button>
         </div>
     </div>
 
     <div id="tab-config" class="tab">
         <h3>Site Genel Ayarları</h3>
+        
         <div class="card">
-            <div class="section-title">Tema & Görünüm</div>
-            <input type="color" id="s-theme" style="height:50px;">
-            <input type="text" id="s-title" placeholder="Site Başlığı">
-            <textarea id="s-bio" rows="4" placeholder="Sanatçı Biyografisi"></textarea>
-            <div class="section-title">İletişim & Sosyal</div>
-            <input type="text" id="s-instagram" placeholder="Instagram">
-            <input type="text" id="s-whatsapp" placeholder="WhatsApp (90...)">
-            <input type="text" id="s-footer" placeholder="Footer Metni">
-            <div class="section-title">Sistem</div>
-            <div style="background:#111; padding:15px; display:flex; gap:15px; align-items: center;">
-                <input type="checkbox" id="s-maintenance" style="width:auto; margin:0;"> Bakım Modu
+            <div class="section-title">Marka & Logo</div>
+            <label style="font-size: 11px;">Site Logosu (PNG önerilir)</label>
+            <input type="file" id="s-logo-file" accept="image/*">
+            <button onclick="uploadLogo()" class="secondary" style="width: auto; padding: 8px 15px; font-size: 10px;">LOGOYU GÜNCELLE</button>
+            
+            <div class="section-title">Temel Bilgiler</div>
+            <input type="text" id="s-title" placeholder="Site Başlığı (Tarayıcı sekmesinde görünür)">
+            <textarea id="s-bio" rows="3" placeholder="Kısa Biyografi / Hakkımda"></textarea>
+            
+            <div class="section-title">Menü & Sayfa İsimleri</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <input type="text" id="m-portfolio" placeholder="Eserler Menü Adı">
+                <input type="text" id="m-contact" placeholder="İletişim Menü Adı">
             </div>
-            <button onclick="handleSettingsUpdate()" style="background:#4CAF50; color:white;">DEĞİŞİKLİKLERİ KAYDET</button>
+
+            <div class="section-title">Sosyal Medya & İletişim</div>
+            <input type="text" id="s-instagram" placeholder="Instagram Adresi">
+            <input type="text" id="s-whatsapp" placeholder="WhatsApp Numarası">
+            <input type="text" id="s-footer" placeholder="Footer (Alt Bilgi) Metni">
+
+            <div class="section-title">Görünüm & Sistem</div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <input type="color" id="s-theme" style="width: 60px; height: 40px; cursor: pointer; padding: 2px;">
+                <label><input type="checkbox" id="s-maintenance" style="width:auto;"> Bakım Modu</label>
+            </div>
+            
+            <button onclick="handleSettingsUpdate()" style="width:100%; margin-top: 30px; background: #4CAF50; color: #fff;">TÜM AYARLARI KAYDET</button>
         </div>
     </div>
 </div>
@@ -121,8 +182,8 @@
         };
         if (data) {
             options.body = JSON.stringify({
-                message: "Studio Update",
-                content: u2b(JSON.stringify(data, null, 2)),
+                message: "Studio OS Update",
+                content: (path.endsWith('.png') || path.endsWith('.jpg')) ? data : u2b(JSON.stringify(data, null, 2)),
                 sha: sha
             });
         }
@@ -140,7 +201,7 @@
                 document.getElementById('login').style.display = 'none';
                 initDashboard();
             } else { throw new Error(); }
-        } catch(e) { alert("Yetki Hatası! Tokenı kontrol edin."); localStorage.removeItem('uber_t'); }
+        } catch(e) { alert("Bağlantı Hatası!"); localStorage.removeItem('uber_t'); }
     }
 
     async function initDashboard() {
@@ -159,6 +220,9 @@
         document.getElementById('s-whatsapp').value = s.whatsapp || "";
         document.getElementById('s-footer').value = s.footerText || "";
         document.getElementById('s-maintenance').checked = s.maintenanceMode || false;
+        // Menü isimleri
+        document.getElementById('m-portfolio').value = s.menuPortfolio || "WORKS";
+        document.getElementById('m-contact').value = s.menuContact || "CONTACT";
     }
 
     async function refreshInventory() {
@@ -166,81 +230,77 @@
         currentPortfolio = JSON.parse(b2u(d.content));
         document.getElementById('inventory-list').innerHTML = currentPortfolio.projects.map((p, i) => `
             <div class="item-row">
-                <span>${p.title}</span>
-                <div>
-                    <button style="width:auto; padding:5px 10px; margin:0; background:#333; color:#fff;" onclick="moveItem(${i},-1)">▲</button>
-                    <button style="width:auto; padding:5px 10px; margin:0; background:#333; color:#fff;" onclick="moveItem(${i},1)">▼</button>
-                    <button style="width:auto; padding:5px 10px; margin:0; background:#500; color:#fff;" onclick="handleDelete(${i})">SİL</button>
+                <div class="item-info">
+                    <b>${p.title}</b>
+                    <small>${p.category || 'Kategorisiz'}</small>
+                </div>
+                <div class="btn-group">
+                    <button class="secondary" style="padding: 5px 10px;" onclick="moveItem(${i},-1)">▲</button>
+                    <button class="secondary" style="padding: 5px 10px;" onclick="moveItem(${i},1)">▼</button>
+                    <button style="padding: 5px 15px; background: #333; color: #fff;" onclick="openEditModal(${i})">DÜZENLE</button>
+                    <button class="danger" style="padding: 5px 10px;" onclick="handleDelete(${i})">SİL</button>
                 </div>
             </div>
         `).join('');
+        
         document.getElementById('sale-select').innerHTML = '<option value="">Eser Seçin</option>' + 
             currentPortfolio.projects.map((p, i) => `<option value="${i}">${p.title}</option>`).join('');
     }
 
-    async function refreshGuestbook() {
-        try {
-            const d = await ghAction('content/news.json');
-            const nData = JSON.parse(b2u(d.content));
-            const list = nData.guestbook || [];
-            document.getElementById('guest-list').innerHTML = list.length ? list.map((g, i) => `
-                <div class="item-row">
-                    <span><b>${g.name}:</b> ${g.message}</span>
-                    <button style="width:auto; padding:5px; background:#500; color:#fff;" onclick="handleGuestDelete(${i})">SİL</button>
-                </div>
-            `).reverse().join('') : "Henüz onaylanmış mesaj yok.";
-        } catch(e) { document.getElementById('guest-list').innerHTML = "Mesajlar yüklenemedi."; }
+    // --- ESER DÜZENLEME FONKSİYONLARI ---
+    function openEditModal(i) {
+        const p = currentPortfolio.projects[i];
+        document.getElementById('edit-idx').value = i;
+        document.getElementById('edit-title').value = p.title;
+        document.getElementById('edit-cat').value = p.category || "";
+        document.getElementById('edit-map').value = p.mapLink || "";
+        document.getElementById('edit-modal').style.display = 'flex';
     }
 
-    async function approveNewMessage() {
-        const name = document.getElementById('new-g-name').value;
-        const msg = document.getElementById('new-g-msg').value;
-        if(!name || !msg) return alert("Eksik alan!");
+    function closeEditModal() { document.getElementById('edit-modal').style.display = 'none'; }
 
-        const d = await ghAction('content/news.json');
-        let nData = JSON.parse(b2u(d.content));
-        if(!nData.guestbook) nData.guestbook = [];
-        
-        nData.guestbook.push({ name, message: msg, date: new Date().toLocaleDateString() });
-        await ghAction('content/news.json', 'PUT', nData, d.sha);
-        
-        document.getElementById('new-g-name').value = "";
-        document.getElementById('new-g-msg').value = "";
-        alert("Mesaj Yayınlandı!");
-        refreshGuestbook();
-    }
-
-    async function handleGuestDelete(i) {
-        if(!confirm("Bu mesajı kaldırmak istediğinize emin misiniz?")) return;
-        const d = await ghAction('content/news.json');
-        let nData = JSON.parse(b2u(d.content));
-        nData.guestbook.splice(nData.guestbook.length - 1 - i, 1);
-        await ghAction('content/news.json', 'PUT', nData, d.sha);
-        refreshGuestbook();
-    }
-
-    function fillSaleFields(idx) {
-        if(idx === "") return;
-        const p = currentPortfolio.projects[idx];
-        document.getElementById('edit-price').value = p.price || "";
-        document.getElementById('edit-cert').value = p.certCode || "";
-        document.getElementById('edit-owner').value = p.owner || "";
-    }
-
-    async function handleSaleUpdate() {
-        const idx = document.getElementById('sale-select').value;
-        if(idx==="") return alert("Eser seçin!");
+    async function saveProjectEdit() {
+        const i = document.getElementById('edit-idx').value;
         const d = await ghAction('content/portfolio.json');
-        let pData = JSON.parse(b2u(d.content));
-        pData.projects[idx].price = document.getElementById('edit-price').value;
-        pData.projects[idx].certCode = document.getElementById('edit-cert').value;
-        pData.projects[idx].owner = document.getElementById('edit-owner').value;
-        pData.projects[idx].isSale = true;
-        await ghAction('content/portfolio.json', 'PUT', pData, d.sha);
-        alert("Güncellendi!");
+        let data = JSON.parse(b2u(d.content));
+        
+        data.projects[i].title = document.getElementById('edit-title').value;
+        data.projects[i].category = document.getElementById('edit-cat').value;
+        data.projects[i].mapLink = document.getElementById('edit-map').value;
+
+        await ghAction('content/portfolio.json', 'PUT', data, d.sha);
+        alert("Eser Güncellendi!");
+        closeEditModal();
         refreshInventory();
     }
 
+    // --- LOGO YÜKLEME ---
+    async function uploadLogo() {
+        const file = document.getElementById('s-logo-file').files[0];
+        if(!file) return alert("Dosya seçmediniz!");
+        
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const content = e.target.result.split(',')[1];
+            // Önce varsa eski logonun SHA'sını al
+            const oldFile = await fetch(`https://api.github.com/repos/${REPO}/contents/images/logo.png`);
+            const oldData = await oldFile.json();
+            
+            await fetch(`https://api.github.com/repos/${REPO}/contents/images/logo.png`, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${localStorage.getItem('uber_t')}` },
+                body: JSON.stringify({ 
+                    message: "Logo Update", 
+                    content: content,
+                    sha: oldData.sha || null 
+                })
+            });
+            alert("Logo başarıyla yüklendi!");
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // --- DİĞER STANDART FONKSİYONLAR ---
     async function handleSettingsUpdate() {
         const d = await ghAction('content/settings.json');
         let s = JSON.parse(b2u(d.content));
@@ -251,32 +311,17 @@
         s.whatsapp = document.getElementById('s-whatsapp').value;
         s.footerText = document.getElementById('s-footer').value;
         s.maintenanceMode = document.getElementById('s-maintenance').checked;
+        s.menuPortfolio = document.getElementById('m-portfolio').value;
+        s.menuContact = document.getElementById('m-contact').value;
+        
         await ghAction('content/settings.json', 'PUT', s, d.sha);
-        alert("Ayarlar Kaydedildi!");
-    }
-
-    function generatePDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4');
-        const idx = document.getElementById('sale-select').value;
-        const title = idx !== "" ? currentPortfolio.projects[idx].title : "ARTWORK";
-        const cert = document.getElementById('edit-cert').value || "CERT-2026";
-        const owner = document.getElementById('edit-owner').value || "COLLECTOR";
-
-        doc.setFillColor(10, 10, 10); doc.rect(0, 0, 297, 210, 'F');
-        doc.setDrawColor(168, 127, 74); doc.setLineWidth(1); doc.rect(10, 10, 277, 190);
-        doc.setTextColor(168, 127, 74); doc.setFontSize(40); doc.text("UBE RAW", 148, 60, {align:"center"});
-        doc.setFontSize(12); doc.text("CERTIFICATE OF AUTHENTICITY", 148, 75, {align:"center"});
-        doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.text(title.toUpperCase(), 148, 110, {align:"center"});
-        doc.setTextColor(168, 127, 74); doc.setFontSize(14); doc.text(`Registration No: ${cert}`, 148, 130, {align:"center"});
-        doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.text(`Collector: ${owner}`, 148, 175, {align:"center"});
-        doc.save(`UBE-RAW-CERT-${cert}.pdf`);
+        alert("Tüm Ayarlar Uygulandı!");
     }
 
     async function handleUpload() {
         const files = document.getElementById('f-file').files;
         const title = document.getElementById('f-title').value;
-        if(!files.length || !title) return alert("Dosya ve başlık gerekli!");
+        if(!files.length || !title) return alert("Başlık ve resim zorunludur!");
 
         let paths = [];
         for(let f of files) {
@@ -287,7 +332,7 @@
                     await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
                         method: 'PUT',
                         headers: { 'Authorization': `token ${localStorage.getItem('uber_t')}` },
-                        body: JSON.stringify({ message: "UPLOAD", content: e.target.result.split(',')[1] })
+                        body: JSON.stringify({ message: "IMG", content: e.target.result.split(',')[1] })
                     });
                     res(path);
                 };
@@ -298,16 +343,38 @@
 
         const d = await ghAction('content/portfolio.json');
         let data = JSON.parse(b2u(d.content));
-        data.projects.unshift({ 
-            title, 
-            category: document.getElementById('f-cat').value, 
-            image: paths.join(','), 
-            mapLink: document.getElementById('f-map').value,
-            isSale: false
-        });
+        data.projects.unshift({ title, category: document.getElementById('f-cat').value, image: paths.join(','), mapLink: document.getElementById('f-map').value });
         await ghAction('content/portfolio.json', 'PUT', data, d.sha);
-        alert("Eser Eklendi!");
+        alert("Yeni Eser Portfolyoya Eklendi!");
         refreshInventory();
+    }
+
+    // Mesajlar, Silme, Sıralama ve PDF fonksiyonları önceki kod ile uyumlu şekilde korunmuştur...
+    async function refreshGuestbook() {
+        try {
+            const d = await ghAction('content/news.json');
+            const nData = JSON.parse(b2u(d.content));
+            const list = nData.guestbook || [];
+            document.getElementById('guest-list').innerHTML = list.length ? list.map((g, i) => `
+                <div class="item-row">
+                    <span><b>${g.name}:</b> ${g.message}</span>
+                    <button class="danger" onclick="handleGuestDelete(${i})">SİL</button>
+                </div>
+            `).reverse().join('') : "Henüz mesaj yok.";
+        } catch(e) { document.getElementById('guest-list').innerHTML = "Hata!"; }
+    }
+
+    async function approveNewMessage() {
+        const name = document.getElementById('new-g-name').value;
+        const msg = document.getElementById('new-g-msg').value;
+        if(!name || !msg) return alert("Eksik alan!");
+        const d = await ghAction('content/news.json');
+        let nData = JSON.parse(b2u(d.content));
+        if(!nData.guestbook) nData.guestbook = [];
+        nData.guestbook.push({ name, message: msg, date: new Date().toLocaleDateString() });
+        await ghAction('content/news.json', 'PUT', nData, d.sha);
+        document.getElementById('new-g-name').value = ""; document.getElementById('new-g-msg').value = "";
+        refreshGuestbook();
     }
 
     async function moveItem(i, dir) {
@@ -322,12 +389,58 @@
     }
 
     async function handleDelete(i) {
-        if(!confirm("Silinsin mi?")) return;
+        if(!confirm("Bu eser kalıcı olarak silinecek. Emin misiniz?")) return;
         const d = await ghAction('content/portfolio.json');
         let data = JSON.parse(b2u(d.content));
         data.projects.splice(i, 1);
         await ghAction('content/portfolio.json', 'PUT', data, d.sha);
         refreshInventory();
+    }
+
+    async function handleGuestDelete(i) {
+        const d = await ghAction('content/news.json');
+        let data = JSON.parse(b2u(d.content));
+        data.guestbook.splice(data.guestbook.length - 1 - i, 1);
+        await ghAction('content/news.json', 'PUT', data, d.sha);
+        refreshGuestbook();
+    }
+
+    function fillSaleFields(idx) {
+        if(idx === "") return;
+        const p = currentPortfolio.projects[idx];
+        document.getElementById('edit-price').value = p.price || "";
+        document.getElementById('edit-cert').value = p.certCode || "";
+        document.getElementById('edit-owner').value = p.owner || "";
+    }
+
+    async function handleSaleUpdate() {
+        const idx = document.getElementById('sale-select').value;
+        if(idx==="") return;
+        const d = await ghAction('content/portfolio.json');
+        let pData = JSON.parse(b2u(d.content));
+        pData.projects[idx].price = document.getElementById('edit-price').value;
+        pData.projects[idx].certCode = document.getElementById('edit-cert').value;
+        pData.projects[idx].owner = document.getElementById('edit-owner').value;
+        pData.projects[idx].isSale = true;
+        await ghAction('content/portfolio.json', 'PUT', pData, d.sha);
+        alert("Satış Kaydedildi!");
+    }
+
+    function generatePDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l', 'mm', 'a4');
+        const idx = document.getElementById('sale-select').value;
+        const title = idx !== "" ? currentPortfolio.projects[idx].title : "ARTWORK";
+        const cert = document.getElementById('edit-cert').value || "UBE-2026";
+        const owner = document.getElementById('edit-owner').value || "COLLECTOR";
+        doc.setFillColor(10, 10, 10); doc.rect(0, 0, 297, 210, 'F');
+        doc.setDrawColor(168, 127, 74); doc.setLineWidth(1); doc.rect(10, 10, 277, 190);
+        doc.setTextColor(168, 127, 74); doc.setFontSize(40); doc.text("UBE RAW", 148, 60, {align:"center"});
+        doc.setFontSize(12); doc.text("CERTIFICATE OF AUTHENTICITY", 148, 75, {align:"center"});
+        doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.text(title.toUpperCase(), 148, 110, {align:"center"});
+        doc.setTextColor(168, 127, 74); doc.setFontSize(14); doc.text(`Sertifika No: ${cert}`, 148, 130, {align:"center"});
+        doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.text(`Koleksiyoner: ${owner}`, 148, 170, {align:"center"});
+        doc.save(`UBE-RAW-CERT-${cert}.pdf`);
     }
 
     function switchTab(t, el) {
