@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>UBE RAW | Studio Management v2.0</title>
+    <title>UBE RAW | Studio Management v2.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root { --accent: #a87f4a; --bg: #000; --card: #0d0d0d; --border: #222; }
@@ -42,11 +42,9 @@
         .item-info b { color: #fff; font-size: 14px; }
         .item-info small { color: var(--accent); font-size: 10px; }
 
-        /* Modal / Edit Overlay */
         #edit-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
         #edit-modal .modal-content { background: var(--card); border: 1px solid var(--accent); padding: 30px; width: 100%; max-width: 500px; border-radius: 8px; }
 
-        /* Login */
         #login { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .login-box { width: 300px; text-align: center; }
     </style>
@@ -92,8 +90,8 @@
         <h3>Yeni Eser Kaydı</h3>
         <div class="card">
             <div class="section-title">Eser Detayları</div>
-            <input type="file" id="f-file" multiple>
-            <p style="font-size: 10px; color: #555;">* Birden fazla resim seçebilirsiniz.</p>
+            <input type="file" id="f-file" multiple accept="image/*">
+            <p style="font-size: 10px; color: #555;">* Otomatik optimize edilir ve .jpg formatına çevrilir.</p>
             <input type="text" id="f-title" placeholder="Eser Adı">
             <input type="text" id="f-cat" placeholder="Kategori (Örn: Wall Relief)">
             <input type="text" id="f-map" placeholder="Harita Linki (Opsiyonel)">
@@ -134,7 +132,6 @@
 
     <div id="tab-config" class="tab">
         <h3>Site Genel Ayarları</h3>
-        
         <div class="card">
             <div class="section-title">Marka & Logo</div>
             <label style="font-size: 11px;">Site Logosu (PNG önerilir)</label>
@@ -142,8 +139,8 @@
             <button onclick="uploadLogo()" class="secondary" style="width: auto; padding: 8px 15px; font-size: 10px;">LOGOYU GÜNCELLE</button>
             
             <div class="section-title">Temel Bilgiler</div>
-            <input type="text" id="s-title" placeholder="Site Başlığı (Tarayıcı sekmesinde görünür)">
-            <textarea id="s-bio" rows="3" placeholder="Kısa Biyografi / Hakkımda"></textarea>
+            <input type="text" id="s-title" placeholder="Site Başlığı">
+            <textarea id="s-bio" rows="3" placeholder="Kısa Biyografi"></textarea>
             
             <div class="section-title">Menü & Sayfa İsimleri</div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -154,14 +151,13 @@
             <div class="section-title">Sosyal Medya & İletişim</div>
             <input type="text" id="s-instagram" placeholder="Instagram Adresi">
             <input type="text" id="s-whatsapp" placeholder="WhatsApp Numarası">
-            <input type="text" id="s-footer" placeholder="Footer (Alt Bilgi) Metni">
+            <input type="text" id="s-footer" placeholder="Footer Metni">
 
             <div class="section-title">Görünüm & Sistem</div>
             <div style="display: flex; align-items: center; gap: 20px;">
                 <input type="color" id="s-theme" style="width: 60px; height: 40px; cursor: pointer; padding: 2px;">
                 <label><input type="checkbox" id="s-maintenance" style="width:auto;"> Bakım Modu</label>
             </div>
-            
             <button onclick="handleSettingsUpdate()" style="width:100%; margin-top: 30px; background: #4CAF50; color: #fff;">TÜM AYARLARI KAYDET</button>
         </div>
     </div>
@@ -210,6 +206,101 @@
         await refreshGuestbook();
     }
 
+    // --- AKILLI RESİM İŞLEME (NEW) ---
+    async function processImage(file, artworkTitle, index) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const MAX_WIDTH = 1500;
+
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    const slug = artworkTitle.toLowerCase()
+                        .replace(/[^a-z0-9]/g, '-')
+                        .replace(/-+/g, '-')
+                        .trim();
+                    const fileName = `images/uploads/${slug}-${Date.now()}-${index}.jpg`;
+                    const base64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+                    
+                    resolve({ name: fileName, content: base64 });
+                };
+            };
+        });
+    }
+
+    async function handleUpload() {
+        const files = document.getElementById('f-file').files;
+        const title = document.getElementById('f-title').value;
+        if(!files.length || !title) return alert("Başlık ve resim zorunludur!");
+
+        let paths = [];
+        for(let i = 0; i < files.length; i++) {
+            const proc = await processImage(files[i], title, i);
+            await fetch(`https://api.github.com/repos/${REPO}/contents/${proc.name}`, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${localStorage.getItem('uber_t')}` },
+                body: JSON.stringify({ message: "IMG_OPT", content: proc.content })
+            });
+            paths.push(proc.name);
+        }
+
+        const d = await ghAction('content/portfolio.json');
+        let data = JSON.parse(b2u(d.content));
+        data.projects.unshift({ 
+            title, 
+            category: document.getElementById('f-cat').value, 
+            image: paths.join(','), 
+            mapLink: document.getElementById('f-map').value 
+        });
+        await ghAction('content/portfolio.json', 'PUT', data, d.sha);
+        alert("Eser optimize edilerek eklendi!");
+        refreshInventory();
+    }
+
+    async function handleDelete(i) {
+        if(!confirm("Bu eser ve resimleri GitHub'dan TAMAMEN silinecek. Emin misiniz?")) return;
+        
+        const d = await ghAction('content/portfolio.json');
+        let data = JSON.parse(b2u(d.content));
+        const project = data.projects[i];
+
+        // Fiziksel Dosya Silme
+        const imgs = project.image.split(',');
+        for(let path of imgs) {
+            try {
+                const info = await fetch(`https://api.github.com/repos/${REPO}/contents/${path.trim()}`);
+                const fData = await info.json();
+                if(fData.sha) {
+                    await fetch(`https://api.github.com/repos/${REPO}/contents/${path.trim()}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `token ${localStorage.getItem('uber_t')}` },
+                        body: JSON.stringify({ message: "Cleanup", sha: fData.sha })
+                    });
+                }
+            } catch(e) { console.log("Dosya silinemedi veya yok."); }
+        }
+
+        data.projects.splice(i, 1);
+        await ghAction('content/portfolio.json', 'PUT', data, d.sha);
+        refreshInventory();
+    }
+
+    // --- DİĞER FONKSİYONLAR (AYARLAR, SERTİFİKA VB.) ---
     async function loadSettings() {
         const d = await ghAction('content/settings.json');
         const s = JSON.parse(b2u(d.content));
@@ -220,7 +311,6 @@
         document.getElementById('s-whatsapp').value = s.whatsapp || "";
         document.getElementById('s-footer').value = s.footerText || "";
         document.getElementById('s-maintenance').checked = s.maintenanceMode || false;
-        // Menü isimleri
         document.getElementById('m-portfolio').value = s.menuPortfolio || "WORKS";
         document.getElementById('m-contact').value = s.menuContact || "CONTACT";
     }
@@ -230,24 +320,19 @@
         currentPortfolio = JSON.parse(b2u(d.content));
         document.getElementById('inventory-list').innerHTML = currentPortfolio.projects.map((p, i) => `
             <div class="item-row">
-                <div class="item-info">
-                    <b>${p.title}</b>
-                    <small>${p.category || 'Kategorisiz'}</small>
-                </div>
+                <div class="item-info"><b>${p.title}</b><small>${p.category || ''}</small></div>
                 <div class="btn-group">
-                    <button class="secondary" style="padding: 5px 10px;" onclick="moveItem(${i},-1)">▲</button>
-                    <button class="secondary" style="padding: 5px 10px;" onclick="moveItem(${i},1)">▼</button>
-                    <button style="padding: 5px 15px; background: #333; color: #fff;" onclick="openEditModal(${i})">DÜZENLE</button>
-                    <button class="danger" style="padding: 5px 10px;" onclick="handleDelete(${i})">SİL</button>
+                    <button class="secondary" onclick="moveItem(${i},-1)">▲</button>
+                    <button class="secondary" onclick="moveItem(${i},1)">▼</button>
+                    <button style="background:#333;color:#fff;" onclick="openEditModal(${i})">DÜZENLE</button>
+                    <button class="danger" onclick="handleDelete(${i})">SİL</button>
                 </div>
             </div>
         `).join('');
-        
         document.getElementById('sale-select').innerHTML = '<option value="">Eser Seçin</option>' + 
             currentPortfolio.projects.map((p, i) => `<option value="${i}">${p.title}</option>`).join('');
     }
 
-    // --- ESER DÜZENLEME FONKSİYONLARI ---
     function openEditModal(i) {
         const p = currentPortfolio.projects[i];
         document.getElementById('edit-idx').value = i;
@@ -263,44 +348,13 @@
         const i = document.getElementById('edit-idx').value;
         const d = await ghAction('content/portfolio.json');
         let data = JSON.parse(b2u(d.content));
-        
         data.projects[i].title = document.getElementById('edit-title').value;
         data.projects[i].category = document.getElementById('edit-cat').value;
         data.projects[i].mapLink = document.getElementById('edit-map').value;
-
         await ghAction('content/portfolio.json', 'PUT', data, d.sha);
-        alert("Eser Güncellendi!");
-        closeEditModal();
-        refreshInventory();
+        closeEditModal(); refreshInventory();
     }
 
-    // --- LOGO YÜKLEME ---
-    async function uploadLogo() {
-        const file = document.getElementById('s-logo-file').files[0];
-        if(!file) return alert("Dosya seçmediniz!");
-        
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const content = e.target.result.split(',')[1];
-            // Önce varsa eski logonun SHA'sını al
-            const oldFile = await fetch(`https://api.github.com/repos/${REPO}/contents/images/logo.png`);
-            const oldData = await oldFile.json();
-            
-            await fetch(`https://api.github.com/repos/${REPO}/contents/images/logo.png`, {
-                method: 'PUT',
-                headers: { 'Authorization': `token ${localStorage.getItem('uber_t')}` },
-                body: JSON.stringify({ 
-                    message: "Logo Update", 
-                    content: content,
-                    sha: oldData.sha || null 
-                })
-            });
-            alert("Logo başarıyla yüklendi!");
-        };
-        reader.readAsDataURL(file);
-    }
-
-    // --- DİĞER STANDART FONKSİYONLAR ---
     async function handleSettingsUpdate() {
         const d = await ghAction('content/settings.json');
         let s = JSON.parse(b2u(d.content));
@@ -313,67 +367,51 @@
         s.maintenanceMode = document.getElementById('s-maintenance').checked;
         s.menuPortfolio = document.getElementById('m-portfolio').value;
         s.menuContact = document.getElementById('m-contact').value;
-        
         await ghAction('content/settings.json', 'PUT', s, d.sha);
-        alert("Tüm Ayarlar Uygulandı!");
+        alert("Ayarlar Kaydedildi!");
     }
 
-    async function handleUpload() {
-        const files = document.getElementById('f-file').files;
-        const title = document.getElementById('f-title').value;
-        if(!files.length || !title) return alert("Başlık ve resim zorunludur!");
-
-        let paths = [];
-        for(let f of files) {
-            const path = `images/uploads/${Date.now()}_${f.name}`;
-            const reader = new FileReader();
-            const p = new Promise(res => {
-                reader.onload = async (e) => {
-                    await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
-                        method: 'PUT',
-                        headers: { 'Authorization': `token ${localStorage.getItem('uber_t')}` },
-                        body: JSON.stringify({ message: "IMG", content: e.target.result.split(',')[1] })
-                    });
-                    res(path);
-                };
+    async function uploadLogo() {
+        const file = document.getElementById('s-logo-file').files[0];
+        if(!file) return alert("Dosya seçmediniz!");
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const content = e.target.result.split(',')[1];
+            let oldSha = null;
+            try {
+                const old = await fetch(`https://api.github.com/repos/${REPO}/contents/images/logo.png`);
+                const oldD = await old.json();
+                oldSha = oldD.sha;
+            } catch(e) {}
+            await fetch(`https://api.github.com/repos/${REPO}/contents/images/logo.png`, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${localStorage.getItem('uber_t')}` },
+                body: JSON.stringify({ message: "Logo", content, sha: oldSha })
             });
-            reader.readAsDataURL(f);
-            paths.push(await p);
-        }
-
-        const d = await ghAction('content/portfolio.json');
-        let data = JSON.parse(b2u(d.content));
-        data.projects.unshift({ title, category: document.getElementById('f-cat').value, image: paths.join(','), mapLink: document.getElementById('f-map').value });
-        await ghAction('content/portfolio.json', 'PUT', data, d.sha);
-        alert("Yeni Eser Portfolyoya Eklendi!");
-        refreshInventory();
+            alert("Logo Güncellendi!");
+        };
+        reader.readAsDataURL(file);
     }
 
-    // Mesajlar, Silme, Sıralama ve PDF fonksiyonları önceki kod ile uyumlu şekilde korunmuştur...
     async function refreshGuestbook() {
         try {
             const d = await ghAction('content/news.json');
-            const nData = JSON.parse(b2u(d.content));
-            const list = nData.guestbook || [];
-            document.getElementById('guest-list').innerHTML = list.length ? list.map((g, i) => `
-                <div class="item-row">
-                    <span><b>${g.name}:</b> ${g.message}</span>
-                    <button class="danger" onclick="handleGuestDelete(${i})">SİL</button>
-                </div>
-            `).reverse().join('') : "Henüz mesaj yok.";
-        } catch(e) { document.getElementById('guest-list').innerHTML = "Hata!"; }
+            const list = JSON.parse(b2u(d.content)).guestbook || [];
+            document.getElementById('guest-list').innerHTML = list.map((g, i) => `
+                <div class="item-row"><span><b>${g.name}:</b> ${g.message}</span>
+                <button class="danger" onclick="handleGuestDelete(${i})">SİL</button></div>
+            `).reverse().join('');
+        } catch(e) {}
     }
 
     async function approveNewMessage() {
         const name = document.getElementById('new-g-name').value;
         const msg = document.getElementById('new-g-msg').value;
-        if(!name || !msg) return alert("Eksik alan!");
         const d = await ghAction('content/news.json');
         let nData = JSON.parse(b2u(d.content));
         if(!nData.guestbook) nData.guestbook = [];
         nData.guestbook.push({ name, message: msg, date: new Date().toLocaleDateString() });
         await ghAction('content/news.json', 'PUT', nData, d.sha);
-        document.getElementById('new-g-name').value = ""; document.getElementById('new-g-msg').value = "";
         refreshGuestbook();
     }
 
@@ -385,15 +423,6 @@
         currentPortfolio.projects[ni] = temp;
         const d = await ghAction('content/portfolio.json');
         await ghAction('content/portfolio.json', 'PUT', currentPortfolio, d.sha);
-        refreshInventory();
-    }
-
-    async function handleDelete(i) {
-        if(!confirm("Bu eser kalıcı olarak silinecek. Emin misiniz?")) return;
-        const d = await ghAction('content/portfolio.json');
-        let data = JSON.parse(b2u(d.content));
-        data.projects.splice(i, 1);
-        await ghAction('content/portfolio.json', 'PUT', data, d.sha);
         refreshInventory();
     }
 
@@ -415,7 +444,6 @@
 
     async function handleSaleUpdate() {
         const idx = document.getElementById('sale-select').value;
-        if(idx==="") return;
         const d = await ghAction('content/portfolio.json');
         let pData = JSON.parse(b2u(d.content));
         pData.projects[idx].price = document.getElementById('edit-price').value;
