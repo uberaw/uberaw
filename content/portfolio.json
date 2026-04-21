@@ -68,7 +68,7 @@
       "price": "",
       "certCode": "",
       "owner": "",
-      "isSale": true
+      "isSale": false
     }
   ]
 }
