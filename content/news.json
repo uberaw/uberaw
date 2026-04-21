@@ -1,4 +1,10 @@
 {
   "announcements": [],
-  "guestbook": []
+  "guestbook": [
+    {
+      "name": "dsdfs",
+      "message": "sdfsdf",
+      "date": "21.04.2026"
+    }
+  ]
 }
