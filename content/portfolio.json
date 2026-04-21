@@ -1,6 +1,12 @@
 {
   "projects": [
     {
+      "title": "Erkek Büst 2",
+      "category": "Heykel",
+      "image": "images/uploads/erkek-b-st-2-1776761733304-0.jpg",
+      "mapLink": ""
+    },
+    {
       "title": "Erkek Büst",
       "category": "Heykel",
       "image": "images/uploads/erkek-b-st-1776761717123-0.jpg",
