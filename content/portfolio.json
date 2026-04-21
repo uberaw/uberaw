@@ -71,7 +71,7 @@
       "certCode": "",
       "owner": "",
       "isSale": false,
-      "isHidden": true
+      "isHidden": false
     }
   ]
 }
