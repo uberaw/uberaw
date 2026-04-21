@@ -1,11 +1,3 @@
 {
-  "orders": [
-    {
-      "customerName": "UBEY",
-      "contact": "",
-      "artwork": "Erkek Portre",
-      "status": "Tamamlandı",
-      "date": "21.04.2026"
-    }
-  ]
+  "orders": []
 }
