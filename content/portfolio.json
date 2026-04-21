@@ -70,7 +70,8 @@
       "price": "2500TL",
       "certCode": "",
       "owner": "",
-      "isSale": false
+      "isSale": false,
+      "isHidden": true
     }
   ]
 }
