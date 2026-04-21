@@ -1,3 +1,10 @@
 {
-  "projects": []
+  "projects": [
+    {
+      "title": "Erkek Portre",
+      "category": "Karakalem",
+      "image": "images/uploads/erkek-portre-1776761661711-0.jpg",
+      "mapLink": ""
+    }
+  ]
 }
