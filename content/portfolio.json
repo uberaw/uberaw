@@ -1,6 +1,12 @@
 {
   "projects": [
     {
+      "title": "Erkek Büst",
+      "category": "Heykel",
+      "image": "images/uploads/erkek-b-st-1776761717123-0.jpg",
+      "mapLink": ""
+    },
+    {
       "title": "Kadın Portre 2",
       "category": "Karakalem",
       "image": "images/uploads/kad-n-portre-2-1776761692773-0.jpg",
