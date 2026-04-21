@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>UBE RAW | Studio Management v3.0 PRO</title>
+    <title>UBE RAW | Studio Management v3.1 PRO</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root { --accent: #a87f4a; --bg: #000; --card: #0d0d0d; --border: #222; --text: #ccc; }
@@ -27,7 +27,7 @@
         .section-title::after { content: ""; height: 1px; background: #222; flex: 1; }
         
         input, select, textarea { width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 14px; margin: 10px 0; border-radius: 4px; font-family: inherit; box-sizing: border-box; transition: 0.3s; }
-        input:focus, textarea:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 1px var(--accent); }
+        input:focus, textarea:focus, select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 1px var(--accent); }
         
         .btn-group { display: flex; gap: 10px; margin-top: 10px; }
         button { background: var(--accent); color: #000; border: none; padding: 14px 20px; cursor: pointer; font-weight: bold; text-transform: uppercase; border-radius: 4px; transition: 0.2s; font-size: 12px; }
@@ -35,9 +35,10 @@
         button.secondary { background: #222; color: #fff; }
         button.danger { background: #500; color: #fff; }
         button.warning { background: #b8860b; color: #fff; }
+        button.success { background: #2e7d32; color: #fff; }
 
         /* Dashboard Stats */
-        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .stat-box { background: #0a0a0a; border: 1px solid var(--border); padding: 20px; border-radius: 8px; text-align: center; border-top: 3px solid var(--accent); }
         .stat-box h3 { font-size: 32px; color: #fff; margin: 0 0 10px 0; }
         .stat-box p { margin: 0; font-size: 11px; text-transform: uppercase; color: #777; letter-spacing: 1px; }
@@ -51,15 +52,16 @@
         #file-preview { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
         .file-badge { background: #222; padding: 5px 10px; border-radius: 4px; font-size: 11px; color: var(--accent); }
 
-        /* Inventory List */
+        /* Inventory & List */
         .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #111; transition: 0.2s; }
         .item-row:hover { background: #111; }
-        .item-info { display: flex; flex-direction: column; gap: 4px; }
+        .item-info { display: flex; flex-direction: column; gap: 6px; }
         .item-info b { color: #fff; font-size: 14px; display: flex; align-items: center; gap: 8px; }
-        .item-info small { color: #777; font-size: 10px; }
-        .badge { padding: 2px 6px; border-radius: 3px; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; }
+        .item-info small { color: #888; font-size: 11px; }
+        .badge { padding: 3px 8px; border-radius: 4px; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
         .badge.hidden { background: #333; color: #aaa; border: 1px solid #555; }
         .badge.sold { background: #1a3a1a; color: #4CAF50; border: 1px solid #4CAF50; }
+        .badge.pending { background: #4a3600; color: #ffb300; border: 1px solid #ffb300; }
 
         /* Modals & Loading */
         #edit-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
@@ -96,6 +98,8 @@
         <input type="text" id="edit-title">
         <label style="font-size: 11px;">Kategori</label>
         <input type="text" id="edit-cat">
+        <label style="font-size: 11px;">Fiyat (Satış/Sertifika panelinden de eklenebilir)</label>
+        <input type="text" id="edit-price-direct">
         <label style="font-size: 11px;">Harita/Konum Linki</label>
         <input type="text" id="edit-map">
         <div class="btn-group">
@@ -110,6 +114,7 @@
     <div class="nav-link active" onclick="switchTab('dash', this)">📊 Ana Ekran</div>
     <div class="nav-link" onclick="switchTab('add', this)">✨ Eser Ekle</div>
     <div class="nav-link" onclick="switchTab('inv', this)">📦 Envanter</div>
+    <div class="nav-link" onclick="switchTab('orders', this)">🛍️ Siparişler</div>
     <div class="nav-link" onclick="switchTab('sale', this)">📜 Sertifika & Satış</div>
     <div class="nav-link" onclick="switchTab('guest', this)">💬 Mesajlar</div>
     <div class="nav-link" onclick="switchTab('config', this)">⚙️ Site Ayarları</div>
@@ -132,6 +137,10 @@
                 <p>Satılan Eser</p>
             </div>
             <div class="stat-box">
+                <h3 id="stat-orders" style="color: #ffb300;">0</h3>
+                <p>Bekleyen Sipariş</p>
+            </div>
+            <div class="stat-box">
                 <h3 id="stat-msg">0</h3>
                 <p>Ziyaretçi Mesajı</p>
             </div>
@@ -140,7 +149,7 @@
             <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.8); border-radius: 8px;"></div>
             <div style="position: relative; z-index: 1;">
                 <h4 style="color: var(--accent); margin-top: 0;">Sisteme Hoş Geldiniz, Ubeydullah Bey.</h4>
-                <p style="font-size: 13px; color: #aaa; line-height: 1.6;">Sol menüyü kullanarak stüdyonuzu yönetebilir, yeni eserler ekleyebilir ve satış sertifikalarınızı oluşturabilirsiniz. Tüm değişiklikler GitHub üzerinden otomatik senkronize edilir.</p>
+                <p style="font-size: 13px; color: #aaa; line-height: 1.6;">Sol menüyü kullanarak stüdyonuzu yönetebilir, yeni eserler ekleyebilir, fiyatları belirleyebilir ve gelen siparişlerinizi takip edebilirsiniz.</p>
             </div>
         </div>
     </div>
@@ -158,7 +167,10 @@
             
             <div class="section-title">Eser Detayları</div>
             <input type="text" id="f-title" placeholder="Eser Adı (Örn: The Melted Core)">
-            <input type="text" id="f-cat" placeholder="Kategori (Örn: Wall Relief, Heykel, Konsept)">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <input type="text" id="f-cat" placeholder="Kategori (Örn: Wall Relief)">
+                <input type="text" id="f-price" placeholder="Fiyat (İsteğe bağlı, örn: $2,500)">
+            </div>
             <input type="text" id="f-map" placeholder="Harita/Sergi Linki (Opsiyonel)">
             
             <button onclick="handleUpload()" style="width: 100%; margin-top: 20px; padding: 18px;">GÖRSELLERİ İŞLE VE YAYINLA</button>
@@ -173,6 +185,25 @@
         <div id="inventory-list" class="card" style="padding: 10px 25px;">Yükleniyor...</div>
     </div>
 
+    <div id="tab-orders" class="tab">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>Sipariş & Talep Yönetimi</h3>
+            <span style="font-size: 11px; color: var(--accent);">Yeni siparişleri buradan takip edin.</span>
+        </div>
+        
+        <div class="card" style="background: #080808; border-color: #222;">
+            <div class="section-title" style="margin-top:0;">Manuel Sipariş / Talep Ekle</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <input type="text" id="new-o-name" placeholder="Müşteri Adı / Koleksiyoner">
+                <input type="text" id="new-o-contact" placeholder="İletişim (Telefon veya E-posta)">
+            </div>
+            <select id="new-o-artwork" style="margin-top: 10px;"></select>
+            <button onclick="addNewOrder()" style="width:100%; margin-top: 15px;">SİPARİŞ KAYDINI OLUŞTUR</button>
+        </div>
+
+        <div id="orders-list" class="card" style="padding: 10px 25px;">Yükleniyor...</div>
+    </div>
+
     <div id="tab-sale" class="tab">
         <h3>Satış & Dijital Sertifika</h3>
         <div class="card">
@@ -181,8 +212,8 @@
             <input type="text" id="edit-cert" placeholder="Sertifika No (Örn: UBE-RAW-001)">
             <input type="text" id="edit-owner" placeholder="Alıcı / Koleksiyoner İsmi">
             <div class="btn-group">
-                <button onclick="handleSaleUpdate()" style="flex: 2;">SATIŞ DURUMUNU KAYDET</button>
-                <button onclick="generatePDF()" class="secondary" style="flex: 1;">PDF SERTİFİKA AL</button>
+                <button onclick="handleSaleUpdate()" style="flex: 2;">SATIŞ VE SERTİFİKA KAYDET</button>
+                <button onclick="generatePDF()" class="secondary" style="flex: 1;">PDF SERTİFİKA İNDİR</button>
             </div>
         </div>
     </div>
@@ -233,7 +264,7 @@
                 </div>
                 <label style="display: flex; align-items: center; gap: 10px; font-size: 12px; cursor: pointer;">
                     <input type="checkbox" id="s-maintenance" style="width:16px; height:16px; margin:0;"> 
-                    Bakım Modunu Aktifleştir (Siteyi ziyaretçilere kapatır)
+                    Bakım Modunu Aktifleştir
                 </label>
             </div>
             
@@ -247,7 +278,7 @@
     let currentPortfolio = { projects: [] };
     let currentSettings = {};
 
-    // --- UTILS (Yardımcı Fonksiyonlar) ---
+    // --- UTILS ---
     const u2b = (s) => btoa(unescape(encodeURIComponent(s)));
     const b2u = (s) => decodeURIComponent(escape(atob(s)));
     
@@ -301,6 +332,7 @@
     async function initDashboard() {
         await loadSettings();
         await refreshInventory();
+        await refreshOrders();
         await refreshGuestbook();
     }
 
@@ -317,9 +349,7 @@
     function updateFilePreview(input) {
         const p = document.getElementById('file-preview');
         p.innerHTML = '';
-        Array.from(input.files).forEach(f => {
-            p.innerHTML += `<span class="file-badge">${f.name}</span>`;
-        });
+        Array.from(input.files).forEach(f => { p.innerHTML += `<span class="file-badge">${f.name}</span>`; });
     }
 
     async function processImage(file, artworkTitle, index) {
@@ -368,9 +398,11 @@
             let data = JSON.parse(b2u(d.content));
             data.projects.unshift({ 
                 title, 
-                category: document.getElementById('f-cat').value, 
+                category: document.getElementById('f-cat').value,
+                price: document.getElementById('f-price').value || "", 
                 image: paths.join(','), 
                 mapLink: document.getElementById('f-map').value,
+                certCode: "",
                 isHidden: false,
                 isSale: false
             });
@@ -378,11 +410,12 @@
             
             document.getElementById('f-title').value = '';
             document.getElementById('f-cat').value = '';
+            document.getElementById('f-price').value = '';
             document.getElementById('f-map').value = '';
             document.getElementById('file-preview').innerHTML = '';
             
             showToast("Eser başarıyla yayınlandı!");
-            refreshInventory();
+            await refreshInventory();
             switchTab('inv', document.querySelectorAll('.nav-link')[2]);
         } catch(e) { showToast("Yükleme sırasında hata oluştu.", true); }
         showLoading(false);
@@ -394,7 +427,7 @@
             const d = await ghAction('content/portfolio.json');
             currentPortfolio = JSON.parse(b2u(d.content));
             
-            // Update Dashboard Stats
+            // Stats
             document.getElementById('stat-total').innerText = currentPortfolio.projects.length;
             document.getElementById('stat-sold').innerText = currentPortfolio.projects.filter(p => p.isSale).length;
 
@@ -405,7 +438,11 @@
                             ${p.isHidden ? '<span class="badge hidden">GİZLİ</span>' : ''}
                             ${p.isSale ? '<span class="badge sold">SATILDI</span>' : ''}
                         </b>
-                        <small>${p.category || 'Kategorisiz'}</small>
+                        <small>
+                            <span style="color:var(--accent);">Kategori:</span> ${p.category || 'Belirtilmedi'} &nbsp;|&nbsp; 
+                            <span style="color:var(--accent);">Fiyat:</span> ${p.price || 'Belirtilmedi'} &nbsp;|&nbsp; 
+                            <span style="color:var(--accent);">Sertifika No:</span> ${p.certCode || 'Yok'}
+                        </small>
                     </div>
                     <div class="btn-group">
                         <button class="secondary" title="Yukarı Taşı" onclick="moveItem(${i},-1)">▲</button>
@@ -417,8 +454,12 @@
                 </div>
             `).join('') || "<p style='color:#777;'>Henüz eser eklenmemiş.</p>";
             
-            document.getElementById('sale-select').innerHTML = '<option value="">Eser Seçin</option>' + 
+            // Populate select for Sale & Orders
+            const optionsHtml = '<option value="">Eser Seçin</option>' + 
                 currentPortfolio.projects.map((p, i) => `<option value="${i}">${p.title}</option>`).join('');
+            document.getElementById('sale-select').innerHTML = optionsHtml;
+            document.getElementById('new-o-artwork').innerHTML = optionsHtml;
+
         } catch(e) { console.log(e); document.getElementById('inventory-list').innerHTML = "Veri okunamadı."; }
     }
 
@@ -454,7 +495,7 @@
                                 body: JSON.stringify({ message: "Resim Çöp Kutusuna Taşındı", sha: info.sha })
                             });
                         }
-                    } catch(e) { console.log("Görsel zaten silinmiş."); }
+                    } catch(e) {}
                 }
             }
 
@@ -472,6 +513,7 @@
         document.getElementById('edit-idx').value = i;
         document.getElementById('edit-title').value = p.title;
         document.getElementById('edit-cat').value = p.category || "";
+        document.getElementById('edit-price-direct').value = p.price || "";
         document.getElementById('edit-map').value = p.mapLink || "";
         document.getElementById('edit-modal').style.display = 'flex';
     }
@@ -485,6 +527,7 @@
         let data = JSON.parse(b2u(d.content));
         data.projects[i].title = document.getElementById('edit-title').value;
         data.projects[i].category = document.getElementById('edit-cat').value;
+        data.projects[i].price = document.getElementById('edit-price-direct').value;
         data.projects[i].mapLink = document.getElementById('edit-map').value;
         await ghAction('content/portfolio.json', 'PUT', data, d.sha);
         closeEditModal(); 
@@ -505,6 +548,146 @@
         await ghAction('content/portfolio.json', 'PUT', data, d.sha);
         await refreshInventory();
         showLoading(false);
+    }
+
+    // --- SİPARİŞ & TALEP YÖNETİMİ (YENİ) ---
+    async function refreshOrders() {
+        try {
+            const d = await ghAction('content/orders.json');
+            const list = JSON.parse(b2u(d.content)).orders || [];
+            
+            const pendingCount = list.filter(o => o.status === 'Bekliyor').length;
+            document.getElementById('stat-orders').innerText = pendingCount;
+
+            document.getElementById('orders-list').innerHTML = list.map((o, i) => `
+                <div class="item-row" style="background: ${o.status === 'Bekliyor' ? 'rgba(255, 179, 0, 0.05)' : 'transparent'};">
+                    <div class="item-info">
+                        <b>${o.customerName} <span class="badge ${o.status === 'Bekliyor' ? 'pending' : 'sold'}">${o.status}</span></b>
+                        <small style="color:#aaa;">Eser: <span style="color:#fff;">${o.artwork}</span> | İletişim: ${o.contact} | Tarih: ${o.date}</small>
+                    </div>
+                    <div class="btn-group">
+                        ${o.status === 'Bekliyor' ? `<button class="success" title="Siparişi Tamamla" onclick="updateOrderStatus(${i}, 'Tamamlandı')">✓ ONAYLA</button>` : ''}
+                        <button class="danger" onclick="deleteOrder(${i})">SİL</button>
+                    </div>
+                </div>
+            `).reverse().join('') || "<p style='color:#777;'>Henüz kayıtlı bir sipariş bulunmuyor.</p>";
+        } catch(e) {
+            document.getElementById('orders-list').innerHTML = "<p style='color:#777;'>Sipariş sistemi başlatılmamış. İlk siparişi ekleyerek başlatabilirsiniz.</p>";
+        }
+    }
+
+    async function addNewOrder() {
+        const name = document.getElementById('new-o-name').value;
+        const contact = document.getElementById('new-o-contact').value;
+        const artworkIdx = document.getElementById('new-o-artwork').value;
+        
+        if(!name || artworkIdx === "") return showToast("Müşteri adı ve Eser seçimi zorunludur.", true);
+        showLoading(true);
+        
+        const artworkTitle = currentPortfolio.projects[artworkIdx].title;
+        let sha = null;
+        let oData = { orders: [] };
+        
+        try {
+            const d = await ghAction('content/orders.json');
+            oData = JSON.parse(b2u(d.content));
+            sha = d.sha;
+        } catch(e) { console.log("İlk sipariş dosyası oluşturuluyor."); }
+        
+        oData.orders.push({
+            customerName: name,
+            contact: contact,
+            artwork: artworkTitle,
+            status: "Bekliyor",
+            date: new Date().toLocaleDateString()
+        });
+        
+        await ghAction('content/orders.json', 'PUT', oData, sha);
+        
+        document.getElementById('new-o-name').value = '';
+        document.getElementById('new-o-contact').value = '';
+        document.getElementById('new-o-artwork').value = '';
+        showToast("Sipariş sisteme eklendi!");
+        await refreshOrders();
+        showLoading(false);
+    }
+
+    async function updateOrderStatus(i, newStatus) {
+        showLoading(true);
+        try {
+            const d = await ghAction('content/orders.json');
+            let data = JSON.parse(b2u(d.content));
+            // Because we reverse() in map, calculate correct index
+            const actualIndex = data.orders.length - 1 - i; 
+            data.orders[actualIndex].status = newStatus;
+            await ghAction('content/orders.json', 'PUT', data, d.sha);
+            showToast("Sipariş durumu güncellendi.");
+            await refreshOrders();
+        } catch(e) { showToast("Hata oluştu.", true); }
+        showLoading(false);
+    }
+
+    async function deleteOrder(i) {
+        if(!confirm("Siparişi silmek istediğinize emin misiniz?")) return;
+        showLoading(true);
+        try {
+            const d = await ghAction('content/orders.json');
+            let data = JSON.parse(b2u(d.content));
+            const actualIndex = data.orders.length - 1 - i;
+            data.orders.splice(actualIndex, 1);
+            await ghAction('content/orders.json', 'PUT', data, d.sha);
+            showToast("Sipariş listeden kaldırıldı.");
+            await refreshOrders();
+        } catch(e) { showToast("Hata oluştu.", true); }
+        showLoading(false);
+    }
+
+    // --- SATIŞ VE SERTİFİKA ---
+    function fillSaleFields(idx) {
+        if(idx === "") return;
+        const p = currentPortfolio.projects[idx];
+        document.getElementById('edit-price').value = p.price || "";
+        document.getElementById('edit-cert').value = p.certCode || `UBE-${Math.floor(Math.random()*10000)}`;
+        document.getElementById('edit-owner').value = p.owner || "";
+    }
+
+    async function handleSaleUpdate() {
+        const idx = document.getElementById('sale-select').value;
+        if(idx === "") return showToast("Lütfen bir eser seçin", true);
+        showLoading(true);
+        const d = await ghAction('content/portfolio.json');
+        let pData = JSON.parse(b2u(d.content));
+        
+        pData.projects[idx].price = document.getElementById('edit-price').value;
+        pData.projects[idx].certCode = document.getElementById('edit-cert').value;
+        pData.projects[idx].owner = document.getElementById('edit-owner').value;
+        pData.projects[idx].isSale = true;
+        
+        await ghAction('content/portfolio.json', 'PUT', pData, d.sha);
+        showToast("Eser satış ve sertifika bilgileri kaydedildi!");
+        await refreshInventory();
+        showLoading(false);
+    }
+
+    function generatePDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l', 'mm', 'a4');
+        const idx = document.getElementById('sale-select').value;
+        if(idx === "") return showToast("PDF oluşturmak için önce eser seçin.", true);
+        
+        const title = currentPortfolio.projects[idx].title;
+        const cert = document.getElementById('edit-cert').value || "UBE-2026";
+        const owner = document.getElementById('edit-owner').value || "COLLECTOR";
+        
+        doc.setFillColor(10, 10, 10); doc.rect(0, 0, 297, 210, 'F');
+        doc.setDrawColor(168, 127, 74); doc.setLineWidth(1); doc.rect(10, 10, 277, 190);
+        doc.setTextColor(168, 127, 74); doc.setFontSize(40); doc.text("UBE RAW", 148, 60, {align:"center"});
+        doc.setFontSize(12); doc.text("CERTIFICATE OF AUTHENTICITY", 148, 75, {align:"center"});
+        doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.text(title.toUpperCase(), 148, 110, {align:"center"});
+        doc.setTextColor(168, 127, 74); doc.setFontSize(14); doc.text(`Sertifika No: ${cert}`, 148, 130, {align:"center"});
+        doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.text(`Koleksiyoner: ${owner}`, 148, 170, {align:"center"});
+        doc.save(`UBE-RAW-CERT-${cert}.pdf`);
+        showToast("Sertifika PDF olarak indirildi.");
     }
 
     // --- AYARLAR ---
@@ -610,52 +793,6 @@
         showLoading(false);
     }
 
-    // --- SATIŞ VE SERTİFİKA ---
-    function fillSaleFields(idx) {
-        if(idx === "") return;
-        const p = currentPortfolio.projects[idx];
-        document.getElementById('edit-price').value = p.price || "";
-        document.getElementById('edit-cert').value = p.certCode || `UBE-${Math.floor(Math.random()*10000)}`;
-        document.getElementById('edit-owner').value = p.owner || "";
-    }
-
-    async function handleSaleUpdate() {
-        const idx = document.getElementById('sale-select').value;
-        if(idx === "") return showToast("Lütfen bir eser seçin", true);
-        showLoading(true);
-        const d = await ghAction('content/portfolio.json');
-        let pData = JSON.parse(b2u(d.content));
-        pData.projects[idx].price = document.getElementById('edit-price').value;
-        pData.projects[idx].certCode = document.getElementById('edit-cert').value;
-        pData.projects[idx].owner = document.getElementById('edit-owner').value;
-        pData.projects[idx].isSale = true;
-        await ghAction('content/portfolio.json', 'PUT', pData, d.sha);
-        showToast("Satış durumu sisteme kaydedildi!");
-        await refreshInventory();
-        showLoading(false);
-    }
-
-    function generatePDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4');
-        const idx = document.getElementById('sale-select').value;
-        if(idx === "") return showToast("PDF oluşturmak için önce eser seçin.", true);
-        
-        const title = currentPortfolio.projects[idx].title;
-        const cert = document.getElementById('edit-cert').value || "UBE-2026";
-        const owner = document.getElementById('edit-owner').value || "COLLECTOR";
-        
-        doc.setFillColor(10, 10, 10); doc.rect(0, 0, 297, 210, 'F');
-        doc.setDrawColor(168, 127, 74); doc.setLineWidth(1); doc.rect(10, 10, 277, 190);
-        doc.setTextColor(168, 127, 74); doc.setFontSize(40); doc.text("UBE RAW", 148, 60, {align:"center"});
-        doc.setFontSize(12); doc.text("CERTIFICATE OF AUTHENTICITY", 148, 75, {align:"center"});
-        doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.text(title.toUpperCase(), 148, 110, {align:"center"});
-        doc.setTextColor(168, 127, 74); doc.setFontSize(14); doc.text(`Sertifika No: ${cert}`, 148, 130, {align:"center"});
-        doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.text(`Koleksiyoner: ${owner}`, 148, 170, {align:"center"});
-        doc.save(`UBE-RAW-CERT-${cert}.pdf`);
-        showToast("Sertifika PDF olarak indirildi.");
-    }
-
     // --- SEKME DEĞİŞTİRME ---
     function switchTab(t, el) {
         document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
@@ -664,11 +801,8 @@
         el.classList.add('active');
     }
 
-    // --- BAŞLANGIÇ KONTROLÜ ---
-    if(localStorage.getItem('uber_t')) {
-        // Otomatik girişte direkt listeleri yükle
-        auth();
-    }
+    // --- BAŞLANGIÇ ---
+    if(localStorage.getItem('uber_t')) { auth(); }
 </script>
 </body>
 </html>
