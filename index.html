@@ -8,150 +8,195 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500&family=Inter:wght@200;400&display=swap" rel="stylesheet">
     <style>
         :root { --bg: #0a0a0a; --text: #e5e5e5; --accent: #a87f4a; --border: #1e1e1e; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; scroll-behavior: smooth; }
         
+        /* Bakım Modu */
         #maintenance-screen { position: fixed; inset: 0; background: #000; z-index: 999999; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        #maintenance-screen h1 { font-family: 'Cormorant Garamond', serif; color: var(--accent); letter-spacing: 10px; text-transform: uppercase; }
+        #maintenance-screen h1 { font-family: 'Cormorant Garamond', serif; color: var(--accent); letter-spacing: 10px; text-transform: uppercase; margin-bottom: 10px; }
 
-        nav { padding: 30px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--accent); background: #000; position: sticky; top:0; z-index: 1000; }
-        .logo h1 { font-family: 'Cormorant Garamond', serif; font-size: 26px; letter-spacing: 6px; margin: 0; color: var(--accent); text-transform: uppercase; cursor: pointer; }
+        /* Navigasyon */
+        nav { padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.9); position: sticky; top:0; z-index: 1000; backdrop-filter: blur(10px); }
+        .logo-container { cursor: pointer; display: flex; align-items: center; }
+        .logo-container img { height: 40px; width: auto; object-fit: contain; }
+        .logo-container h1 { font-family: 'Cormorant Garamond', serif; font-size: 24px; letter-spacing: 5px; margin: 0; color: var(--accent); text-transform: uppercase; }
         
-        .social-links a { color: #666; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; text-decoration: none; transition: 0.3s; margin-left: 20px; }
-        .social-links a:hover { color: var(--accent); }
+        .nav-menu { display: flex; gap: 30px; align-items: center; }
+        .nav-menu a { color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; text-decoration: none; transition: 0.3s; }
+        .nav-menu a:hover { color: var(--accent); }
 
-        #news-bar { background: var(--accent); color: #000; padding: 10px 5%; font-size: 11px; font-weight: bold; text-align: center; display: none; text-transform: uppercase; }
-        .bio-sec { padding: 40px 5%; text-align: center; max-width: 700px; margin: 0 auto; color: #999; font-size: 13px; line-height: 1.8; display: none; }
-        
-        .filters { padding: 20px 5%; display: flex; gap: 25px; overflow-x: auto; border-bottom: 1px solid var(--border); background: #0d0d0d; }
-        .filter-btn { color: #666; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; transition: 0.3s; white-space: nowrap; }
-        .filter-btn.active { color: var(--accent); border-bottom: 1px solid var(--accent); }
+        /* Duyuru Barı */
+        #news-bar { background: var(--accent); color: #000; padding: 12px 5%; font-size: 10px; font-weight: bold; text-align: center; display: none; text-transform: uppercase; letter-spacing: 1px; }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 40px; padding: 40px 5%; }
-        .artwork { border: 1px solid var(--border); transition: 0.4s; background: #000; position: relative; overflow: hidden; }
-        .artwork:hover { border-color: var(--accent); transform: translateY(-5px); }
+        /* Biyografi */
+        .bio-sec { padding: 80px 5% 40px 5%; text-align: center; max-width: 800px; margin: 0 auto; color: #aaa; font-size: 14px; line-height: 1.8; display: none; }
         
-        /* MULTI-PHOTO SLIDER */
-        .slider-container { position: relative; aspect-ratio: 1/1; overflow: hidden; background: #111; }
-        .slider-track { display: flex; transition: transform 0.5s ease-in-out; height: 100%; }
+        /* Filtreler */
+        .filters { padding: 20px 5%; display: flex; justify-content: center; gap: 25px; overflow-x: auto; background: #000; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); position: sticky; top: 81px; z-index: 999; }
+        .filter-btn { color: #555; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; transition: 0.3s; white-space: nowrap; padding-bottom: 5px; }
+        .filter-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+
+        /* Galeri Izgarası */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 30px; padding: 40px 5%; }
+        .artwork { border: 1px solid var(--border); background: #0d0d0d; position: relative; overflow: hidden; transition: 0.4s; }
+        .artwork:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        /* Slider */
+        .slider-container { position: relative; aspect-ratio: 1/1; overflow: hidden; background: #000; }
+        .slider-track { display: flex; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); height: 100%; }
         .slider-track img { width: 100%; height: 100%; object-fit: cover; flex-shrink: 0; cursor: zoom-in; }
-        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: #fff; border: none; padding: 10px; cursor: pointer; font-size: 18px; z-index: 5; display: none; }
-        .artwork:hover .slider-btn { display: block; }
+        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: var(--accent); border: none; width: 40px; height: 40px; cursor: pointer; font-size: 18px; z-index: 5; opacity: 0; transition: 0.3s; }
+        .artwork:hover .slider-btn { opacity: 1; }
         .btn-prev { left: 0; } .btn-next { right: 0; }
 
-        .info { padding: 25px; border-top: 1px solid var(--border); }
-        .info h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; margin: 0; color: #fff; }
-        .info p { font-size: 9px; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 2px; }
+        .info { padding: 20px; }
+        .info p { font-size: 9px; color: var(--accent); text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 2px; font-weight: bold; }
+        .info h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; margin: 0; color: #fff; font-weight: 300; }
         
-        .map-link { display: inline-block; margin-top: 10px; font-size: 10px; color: var(--accent); text-decoration: none; border: 1px solid var(--accent); padding: 5px 10px; transition: 0.3s; }
+        .map-link { display: inline-block; margin-top: 15px; font-size: 9px; color: var(--accent); text-decoration: none; border: 1px solid var(--accent); padding: 6px 12px; transition: 0.3s; letter-spacing: 1px; }
         .map-link:hover { background: var(--accent); color: #000; }
 
-        .sale-tag { background: var(--accent); color: #000; font-size: 10px; padding: 5px 12px; position: absolute; top: 15px; right: 15px; font-weight: bold; z-index: 10; }
+        .sale-tag { background: var(--accent); color: #000; font-size: 10px; padding: 6px 12px; position: absolute; top: 15px; right: 15px; font-weight: bold; z-index: 10; letter-spacing: 1px; }
         
-        .cert-sec { padding: 60px 5%; background: #050505; border-top: 1px solid var(--border); text-align: center; }
-        .cert-box { max-width: 500px; margin: 0 auto; border: 1px dashed var(--accent); padding: 40px; margin-bottom: 40px; }
-        input, textarea { background: #000; border: 1px solid #333; color: #fff; padding: 12px; width: 80%; text-align: center; margin-bottom: 15px; font-family: inherit; }
-        .btn-accent { background: var(--accent); border: none; padding: 12px 30px; color: #000; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 11px; }
+        /* Sertifika & Guestbook Bölümleri */
+        .cert-sec { padding: 80px 5%; background: #050505; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 40px; justify-content: center; }
+        .cert-box { flex: 1; min-width: 300px; max-width: 500px; border: 1px solid var(--border); padding: 40px; text-align: center; background: #080808; }
+        .cert-box h2 { font-family:'Cormorant Garamond'; color:var(--accent); letter-spacing: 3px; font-size: 24px; margin-bottom: 25px; }
         
-        #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.98); display: none; justify-content: center; align-items: center; z-index: 10000; }
-        #lightbox img { max-width: 95vw; max-height: 90vh; border: 1px solid var(--accent); }
-        footer { padding: 40px 5%; text-align: center; color: #444; font-size: 10px; letter-spacing: 4px; border-top: 1px solid var(--border); }
+        input, textarea { background: #000; border: 1px solid #222; color: #fff; padding: 14px; width: 100%; text-align: center; margin-bottom: 15px; box-sizing: border-box; font-family: inherit; font-size: 13px; }
+        input:focus { border-color: var(--accent); outline: none; }
+        
+        .btn-accent { background: var(--accent); border: none; padding: 14px 40px; color: #000; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 11px; letter-spacing: 2px; width: 100%; transition: 0.3s; }
+        .btn-accent:hover { filter: brightness(1.1); }
+
+        .guestbook-list { padding: 40px 5%; text-align: center; max-width: 900px; margin: 0 auto; }
+        .message-item { margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid #111; }
+        .message-item p { font-size: 15px; font-style: italic; color: #ccc; margin-bottom: 10px; }
+        .message-item small { color: var(--accent); text-transform: uppercase; letter-spacing: 2px; font-size: 10px; }
+
+        #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
+        #lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; border: 1px solid #222; }
+
+        footer { padding: 60px 5%; text-align: center; color: #444; font-size: 10px; letter-spacing: 5px; border-top: 1px solid var(--border); text-transform: uppercase; }
+
+        @media (max-width: 768px) {
+            .nav-menu { display: none; } /* Mobil menü için geliştirilebilir */
+            .grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
 <div id="maintenance-screen">
-    <h1 id="m-title">YAPIM AŞAMASINDA</h1>
-    <p>UBE RAW | STUDIO</p>
+    <h1 id="m-title">UNDER CONSTRUCTION</h1>
+    <p style="color: #666; letter-spacing: 4px;">UBE RAW | STUDIO</p>
 </div>
 
 <div id="news-bar"></div>
+
 <nav>
-    <div class="logo" onclick="location.reload()"><h1>UBE RAW</h1></div>
-    <div class="social-links" id="social-nav"></div>
+    <div class="logo-container" id="logo-area" onclick="window.scrollTo(0,0)">
+        <h1 id="text-logo">UBE RAW</h1>
+    </div>
+    <div class="nav-menu" id="nav-links">
+        <a href="#main-grid" id="menu-port-text">WORKS</a>
+        <a href="#cert-area" id="menu-cont-text">CONTACT</a>
+        <div id="social-nav" style="display: inline-flex; gap: 15px; margin-left: 15px;"></div>
+    </div>
 </nav>
 
 <div class="bio-sec" id="bio-sec"></div>
 <div class="filters" id="cat-nav"></div>
 <div class="grid" id="main-grid"></div>
 
-<section class="cert-sec">
+<section class="cert-sec" id="cert-area">
     <div class="cert-box">
-        <h2 style="font-family:'Cormorant Garamond'; color:var(--accent); letter-spacing: 3px;">VERIFICATION</h2>
+        <h2>VERIFICATION</h2>
+        <p style="font-size: 11px; color: #666; margin-bottom: 20px;">Eserinizin orijinalliğini sertifika kodu ile sorgulayın.</p>
         <input type="text" id="cert-input" placeholder="SERTİFİKA KODU">
-        <br>
         <button class="btn-accent" onclick="checkCert()">SORGULA</button>
-        <div id="cert-result" style="margin-top:20px;"></div>
+        <div id="cert-result" style="margin-top:20px; font-size: 12px;"></div>
     </div>
 
-    <div class="cert-box" style="border-style: solid; border-width: 1px;">
-        <h2 style="font-family:'Cormorant Garamond'; color:var(--accent); letter-spacing: 3px;">GUESTBOOK</h2>
+    <div class="cert-box">
+        <h2>GUESTBOOK</h2>
         <input type="text" id="g-name" placeholder="İSMİNİZ">
         <textarea id="g-msg" rows="3" placeholder="MESAJINIZ"></textarea>
-        <br>
         <button class="btn-accent" id="send-btn" onclick="sendGuest()">MESAJI GÖNDER</button>
     </div>
 </section>
 
-<div class="guestbook-sec" id="guestbook-list" style="padding: 40px 5%; text-align: center;"></div>
+<div class="guestbook-list" id="guestbook-list"></div>
 
 <div id="lightbox" onclick="this.style.display='none'"><img id="l-img"></div>
 <footer id="footer-copy">UBE RAW ART & DESIGN</footer>
 
 <script>
-    const base = "/uberaw/";
+    // GitHub Pages kullanıyorsanız repo adını buraya ekleyin, aksi takdirde "/" bırakın.
+    const base = "/uberaw/"; 
     let allWorks = [];
 
     async function init() {
-        const settings = await fetch(`${base}content/settings.json?v=${Math.random()}`).then(r => r.json()).catch(() => ({}));
-        const portfolio = await fetch(`${base}content/portfolio.json?v=${Math.random()}`).then(r => r.json()).catch(() => ({ projects: [] }));
-        const news = await fetch(`${base}content/news.json?v=${Math.random()}`).then(r => r.json()).catch(() => ({ announcements: [], guestbook: [] }));
+        try {
+            const [settings, portfolio, news] = await Promise.all([
+                fetch(`${base}content/settings.json?v=${Date.now()}`).then(r => r.json()),
+                fetch(`${base}content/portfolio.json?v=${Date.now()}`).then(r => r.json()),
+                fetch(`${base}content/news.json?v=${Date.now()}`).then(r => r.json())
+            ]);
 
-        // TEMA VE AYARLARI UYGULA
-        if (settings.themeColor) document.documentElement.style.setProperty('--accent', settings.themeColor);
-        if (settings.maintenanceMode) {
-            document.getElementById('maintenance-screen').style.display = 'flex';
-            return;
+            // 1. Bakım Modu Kontrolü
+            if (settings.maintenanceMode) {
+                document.getElementById('maintenance-screen').style.display = 'flex';
+                return;
+            }
+
+            // 2. Tema ve Logo Uygulama
+            if (settings.themeColor) document.documentElement.style.setProperty('--accent', settings.themeColor);
+            
+            // Logo kontrolü (images/logo.png varsa onu bas)
+            const logoImg = new Image();
+            logoImg.src = `${base}images/logo.png?v=${Date.now()}`;
+            logoImg.onload = () => {
+                document.getElementById('logo-area').innerHTML = `<img src="${logoImg.src}" alt="UBE RAW">`;
+            };
+
+            document.getElementById('site-title').innerText = settings.siteTitle || "UBE RAW";
+            document.getElementById('footer-copy').innerText = settings.footerText || "UBE RAW © 2026";
+            document.getElementById('menu-port-text').innerText = settings.menuPortfolio || "WORKS";
+            document.getElementById('menu-cont-text').innerText = settings.menuContact || "CONTACT";
+
+            if (settings.bio) {
+                const bio = document.getElementById('bio-sec');
+                bio.innerHTML = settings.bio.replace(/\n/g, '<br>');
+                bio.style.display = 'block';
+            }
+
+            // 3. Sosyal Medya
+            let socialHTML = "";
+            if (settings.instagram) socialHTML += `<a href="${settings.instagram.includes('http') ? settings.instagram : 'https://instagram.com/'+settings.instagram}" target="_blank" style="color:var(--accent)">IG</a>`;
+            if (settings.whatsapp) socialHTML += `<a href="https://wa.me/${settings.whatsapp.replace(/[^0-9]/g, '')}" target="_blank" style="color:var(--accent)">WA</a>`;
+            document.getElementById('social-nav').innerHTML = socialHTML;
+
+            // 4. Eserler ve Filtreleme
+            allWorks = portfolio.projects || [];
+            const cats = ['HEPSİ', ...new Set(allWorks.map(w => w.category).filter(c => c))];
+            document.getElementById('cat-nav').innerHTML = cats.map(c => `
+                <span class="filter-btn ${c==='HEPSİ'?'active':''}" onclick="render('${c}', this)">${c}</span>
+            `).join('');
+
+            // 5. Ziyaretçi Defteri
+            if(news.guestbook?.length) {
+                document.getElementById('guestbook-list').innerHTML = news.guestbook.map(g => `
+                    <div class="message-item">
+                        <p>"${g.message}"</p>
+                        <small>— ${g.name} (${g.date || ''})</small>
+                    </div>
+                `).reverse().join('');
+            }
+
+            render('HEPSİ');
+        } catch (err) {
+            console.error("Veri yükleme hatası:", err);
         }
-
-        document.getElementById('site-title').innerText = settings.siteTitle || "UBE RAW";
-        document.getElementById('footer-copy').innerText = settings.footerText || "UBE RAW © 2026";
-        
-        if (settings.bio) {
-            const bio = document.getElementById('bio-sec');
-            bio.innerHTML = settings.bio.replace(/\n/g, '<br>');
-            bio.style.display = 'block';
-        }
-
-        // SOSYAL MEDYA
-        let socialHTML = "";
-        if (settings.instagram) socialHTML += `<a href="${settings.instagram.includes('http') ? settings.instagram : 'https://instagram.com/'+settings.instagram}" target="_blank">INSTAGRAM</a>`;
-        if (settings.whatsapp) socialHTML += `<a href="https://wa.me/${settings.whatsapp.replace(/[^0-9]/g, '')}" target="_blank">WHATSAPP</a>`;
-        document.getElementById('social-nav').innerHTML = socialHTML;
-
-        // ESERLER VE FİLTRE
-        allWorks = portfolio.projects || [];
-        const cats = ['HEPSİ', ...new Set(allWorks.map(w => w.category))];
-        document.getElementById('cat-nav').innerHTML = cats.map(c => `
-            <span class="filter-btn ${c==='HEPSİ'?'active':''}" onclick="render('${c}', this)">${c}</span>
-        `).join('');
-
-        // DUYURU VE ZİYARETÇİ DEFTERİ
-        if(news.announcements?.length) {
-            const nb = document.getElementById('news-bar');
-            nb.style.display = 'block';
-            nb.innerText = news.announcements[0].title + ": " + news.announcements[0].body;
-        }
-
-        if(news.guestbook?.length) {
-            document.getElementById('guestbook-list').innerHTML = news.guestbook.map(g => `
-                <div style="margin-bottom:30px;">
-                    <p style="font-size:14px; font-style:italic;">"${g.message}"</p>
-                    <small style="color:var(--accent); text-transform:uppercase; letter-spacing:2px;">— ${g.name}</small>
-                </div>
-            `).reverse().join('');
-        }
-
-        render('HEPSİ');
     }
 
     function render(cat, btn) {
@@ -163,13 +208,13 @@
         const grid = document.getElementById('main-grid');
         
         grid.innerHTML = filtered.map((w, idx) => {
-            const imgs = w.image.split(',');
+            const imgs = (w.image || "").split(',');
             return `
             <div class="artwork">
-                ${w.isSale ? `<div class="sale-tag">${w.price || 'Fiyat Alınız'}</div>` : ''}
+                ${w.isSale ? `<div class="sale-tag">${w.price || 'SATIŞTA'}</div>` : ''}
                 <div class="slider-container" id="slider-${idx}">
                     <div class="slider-track" id="track-${idx}">
-                        ${imgs.map(img => `<img src="${base}${img}" onclick="openL(this.src)">`).join('')}
+                        ${imgs.map(img => `<img src="${base}${img.trim()}" onclick="openL(this.src)" loading="lazy">`).join('')}
                     </div>
                     ${imgs.length > 1 ? `
                         <button class="slider-btn btn-prev" onclick="moveSlider(${idx}, -1)">❮</button>
@@ -177,9 +222,9 @@
                     ` : ''}
                 </div>
                 <div class="info">
-                    <p>${w.category}</p>
+                    <p>${w.category || 'ART'}</p>
                     <h3>${w.title}</h3>
-                    ${w.mapLink ? `<a href="${w.mapLink}" target="_blank" class="map-link">📍 KONUMU GÖR</a>` : ''}
+                    ${w.mapLink ? `<a href="${w.mapLink}" target="_blank" class="map-link">📍 LOKASYON</a>` : ''}
                 </div>
             </div>
         `}).join('');
@@ -189,38 +234,52 @@
     function moveSlider(idx, dir) {
         const track = document.getElementById(`track-${idx}`);
         const count = track.querySelectorAll('img').length;
-        if (!sliderPositions[idx]) sliderPositions[idx] = 0;
+        if (sliderPositions[idx] === undefined) sliderPositions[idx] = 0;
         
         sliderPositions[idx] = (sliderPositions[idx] + dir + count) % count;
         track.style.transform = `translateX(-${sliderPositions[idx] * 100}%)`;
     }
 
-    function openL(s) { document.getElementById('l-img').src = s; document.getElementById('lightbox').style.display = 'flex'; }
+    function openL(s) { 
+        document.getElementById('l-img').src = s; 
+        document.getElementById('lightbox').style.display = 'flex'; 
+    }
 
     function checkCert() {
         const val = document.getElementById('cert-input').value.trim().toUpperCase();
+        if(!val) return;
         const match = allWorks.find(w => w.certCode?.toUpperCase() === val);
-        document.getElementById('cert-result').innerHTML = match ? 
-            `<span style="color:#4CAF50;">✔ DOĞRULANDI: ${match.title}</span>` : 
-            `<span style="color:#ff4444;">✘ KAYIT BULUNAMADI</span>`;
+        const res = document.getElementById('cert-result');
+        if(match) {
+            res.innerHTML = `<span style="color:#4CAF50; font-weight:bold;">✔ BU ESER ORİJİNALDİR: ${match.title}</span>`;
+        } else {
+            res.innerHTML = `<span style="color:#ff4444;">✘ KAYIT BULUNAMADI</span>`;
+        }
     }
 
     async function sendGuest() {
-        // Formspree entegrasyonu korunmuştur
         const name = document.getElementById('g-name').value.trim();
         const msg = document.getElementById('g-msg').value.trim();
-        if(!name || !msg) return alert("Eksik alan!");
+        if(!name || !msg) return alert("Lütfen tüm alanları doldurun.");
         
         const btn = document.getElementById('send-btn');
         btn.innerText = "GÖNDERİLİYOR...";
+        btn.disabled = true;
         
+        // Formspree ID'nizi buraya yazın
         fetch("https://formspree.io/f/mjgjewqn", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, message: msg })
         }).then(() => {
-            alert("Mesajınız iletildi, onay sonrası yayınlanacaktır.");
+            alert("Mesajınız iletildi. Onaylandıktan sonra yayınlanacaktır.");
+            document.getElementById('g-name').value = "";
+            document.getElementById('g-msg').value = "";
             btn.innerText = "MESAJI GÖNDER";
+            btn.disabled = false;
+        }).catch(() => {
+            alert("Bir hata oluştu.");
+            btn.disabled = false;
         });
     }
 
