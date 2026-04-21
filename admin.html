@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>UBE RAW | Studio OS</title>
+    <title>UBE RAW | Studio Management</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root { --accent: #a87f4a; --bg: #000; --card: #0d0d0d; }
@@ -12,20 +12,13 @@
         .nav-link { padding: 15px 0; cursor: pointer; font-size: 11px; text-transform: uppercase; color: #666; transition: 0.3s; position: relative; }
         .nav-link.active { color: var(--accent); font-weight: bold; border-left: 2px solid var(--accent); padding-left: 10px; }
         .badge { background: #ff4444; width: 8px; height: 8px; border-radius: 50%; position: absolute; right: 0; top: 18px; display: none; }
-        
         .main { margin-left: 300px; padding: 60px; width: 100%; max-width: 900px; }
         .tab { display: none; } .tab.active { display: block; }
         .card { background: var(--card); border: 1px solid #1a1a1a; padding: 25px; margin-bottom: 20px; }
-        
-        .section-title { color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 20px 0 10px 0; border-bottom: 1px solid #222; padding-bottom: 5px; }
+        .section-title { color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 20px 0 10px 0; border-bottom: 1px solid #222; padding-bottom: 5px; }
         input, select, textarea { width: 100%; background: #000; border: 1px solid #222; color: #fff; padding: 12px; margin: 10px 0; box-sizing: border-box; font-family: inherit; }
-        button { background: var(--accent); color: #000; border: none; padding: 15px; width: 100%; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; transition: 0.3s; }
-        button:hover { filter: brightness(1.2); }
-        
+        button { background: var(--accent); color: #000; border: none; padding: 15px; width: 100%; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
         .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #111; font-size: 13px; }
-        .order-btns { display: flex; gap: 5px; }
-        .order-btn { background: #222; color: #fff; padding: 5px 10px; font-size: 10px; width: auto; margin: 0; }
-        
         #login { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .helper-text { font-size: 10px; color: #555; margin-top: -8px; margin-bottom: 10px; }
     </style>
@@ -36,42 +29,33 @@
     <div style="width: 280px; text-align: center;">
         <h2 style="color:var(--accent); letter-spacing: 5px;">UBE RAW</h2>
         <input type="password" id="token" placeholder="GitHub Token">
-        <button onclick="auth()">GİRİŞ YAP</button>
+        <button onclick="auth()">SİSTEME GİRİŞ</button>
     </div>
 </div>
 
 <div class="sidebar">
-    <h2>UBE RAW ADMIN</h2>
-    <div class="nav-link active" onclick="switchTab('add', this)">Eser & Proje Ekle</div>
-    <div class="nav-link" onclick="switchTab('inv', this)">Sıralama & Envanter</div>
+    <h2>UBE RAW</h2>
+    <div class="nav-link active" onclick="switchTab('add', this)">Eser Ekle</div>
+    <div class="nav-link" onclick="switchTab('inv', this)">Envanter & Sıra</div>
     <div class="nav-link" onclick="switchTab('sale', this)">Satış & Sertifika</div>
     <div class="nav-link" onclick="switchTab('guest', this)">Mesajlar <span id="msg-badge" class="badge"></span></div>
-    <div class="nav-link" onclick="switchTab('news', this)">Duyurular</div>
-    <div class="nav-link" onclick="switchTab('config', this)">Sistem Ayarları</div>
+    <div class="nav-link" onclick="switchTab('config', this)">Site Ayarları</div>
 </div>
 
 <div class="main">
     <div id="tab-add" class="tab active">
-        <h3>Yeni Kayıt (Eser veya Kamusal Proje)</h3>
+        <h3>Yeni Eser Kaydı</h3>
         <div class="card">
-            <div class="section-title">Görseller</div>
             <input type="file" id="f-file" multiple>
-            <div class="helper-text">Birden fazla seçebilirsiniz. İlk seçilen kapak fotoğrafı olur.</div>
-            
-            <div class="section-title">Temel Bilgiler</div>
-            <input type="text" id="f-title" placeholder="Eser/Proje Adı">
-            <input type="text" id="f-cat" placeholder="Kategori (Örn: Wall Relief, Urban Awareness)">
-            
-            <div class="section-title">Konum Bilgisi (Sadece Kamusal Projeler İçin)</div>
-            <input type="text" id="f-map" placeholder="Google Maps Koordinat veya Link (Opsiyonel)">
-            
+            <input type="text" id="f-title" placeholder="Eser Adı">
+            <input type="text" id="f-cat" placeholder="Kategori (Wall Relief, Sculpture vb.)">
+            <input type="text" id="f-map" placeholder="Harita Koordinat/Link (Opsiyonel)">
             <button onclick="handleUpload()">YAYINLA</button>
         </div>
     </div>
 
     <div id="tab-inv" class="tab">
-        <h3>Vitrin Sıralaması ve Yönetim</h3>
-        <p class="helper-text">Okları kullanarak eserlerin ana sayfadaki yerini değiştirebilirsiniz.</p>
+        <h3>Envanter Yönetimi</h3>
         <div id="inventory-list" class="card">Yükleniyor...</div>
     </div>
 
@@ -79,13 +63,12 @@
         <h3>Satış & Dijital Sertifika</h3>
         <div class="card">
             <select id="sale-select" onchange="fillSaleFields(this.value)"><option value="">Eser Seçin</option></select>
-            <input type="text" id="edit-price" placeholder="Fiyat (Örn: 18.000 TL)">
-            <input type="text" id="edit-cert" placeholder="Sertifika No (Örn: UBE-RAW-2026-001)">
-            <input type="text" id="edit-owner" placeholder="Alıcı İsmi (Sertifika için)">
-            
+            <input type="text" id="edit-price" placeholder="Fiyat Bilgisi">
+            <input type="text" id="edit-cert" placeholder="Sertifika Numarası">
+            <input type="text" id="edit-owner" placeholder="Alıcı / Koleksiyoner İsmi">
             <div style="display: flex; gap: 10px;">
                 <button onclick="handleSaleUpdate()" style="flex: 2;">BİLGİLERİ KAYDET</button>
-                <button onclick="generatePDF()" style="background: #222; color: #fff; flex: 1;">PDF SERTİFİKA</button>
+                <button onclick="generatePDF()" style="background: #222; color: #fff; flex: 1;">PDF ÜRET</button>
             </div>
         </div>
     </div>
@@ -96,36 +79,25 @@
     </div>
 
     <div id="tab-config" class="tab">
-        <h3>Sistem & Tema Ayarları</h3>
+        <h3>Site Genel Ayarları</h3>
         <div class="card">
-            <div class="section-title">Görsel Kimlik (Tema)</div>
-            <label class="helper-text">Sitenin ana vurgu rengini seçin:</label>
-            <input type="color" id="s-theme" value="#a87f4a">
-            
-            <div class="section-title">Durum Kontrolü</div>
-            <div style="display: flex; gap: 20px; background: #111; padding: 15px; border-radius: 5px;">
-                <input type="checkbox" id="s-maintenance" style="width: auto;"> 
-                <label>Bakım Modu Aktif</label>
-            </div>
-
-            <div class="section-title">Stüdyo Bilgileri</div>
+            <div class="section-title">Tema & Görünüm</div>
+            <input type="color" id="s-theme" style="height:50px;">
             <input type="text" id="s-title" placeholder="Site Başlığı">
-            <textarea id="s-bio" rows="4" placeholder="Biyografi"></textarea>
+            <textarea id="s-bio" rows="4" placeholder="Sanatçı Biyografisi"></textarea>
             
-            <div class="section-title">İletişim</div>
-            <input type="text" id="s-instagram" placeholder="Instagram">
+            <div class="section-title">İletişim & Sosyal</div>
+            <input type="text" id="s-instagram" placeholder="Instagram Kullanıcı Adı veya Link">
             <input type="text" id="s-whatsapp" placeholder="WhatsApp (90...)">
-
-            <button onclick="handleSettingsUpdate()" style="background: #4CAF50; color: white;">TÜM SİSTEMİ GÜNCELLE</button>
-        </div>
-    </div>
-
-    <div id="tab-news" class="tab">
-        <h3>Duyuru Yönetimi</h3>
-        <div class="card">
-            <input type="text" id="n-title" placeholder="Duyuru Başlığı">
-            <textarea id="n-body" rows="3" placeholder="Duyuru Detayı"></textarea>
-            <button onclick="handleNewsUpdate()">DUYURUYU YAYINLA</button>
+            
+            <div class="section-title">Footer & Alt Metin</div>
+            <input type="text" id="s-footer" placeholder="Footer Metni">
+            
+            <div class="section-title">Sistem Durumu</div>
+            <div style="background:#111; padding:15px; display:flex; gap:15px;">
+                <input type="checkbox" id="s-maintenance" style="width:auto;"> Bakım Modunu Aktif Et
+            </div>
+            <button onclick="handleSettingsUpdate()" style="background:#4CAF50; color:white;">DEĞİŞİKLİKLERİ KAYDET</button>
         </div>
     </div>
 </div>
@@ -134,7 +106,6 @@
     const REPO = "uberaw/uberaw";
     let currentPortfolio = { projects: [] };
 
-    // UTF-8 GÜVENLİ ENCODING
     const u2b = (s) => btoa(unescape(encodeURIComponent(s)));
     const b2u = (s) => decodeURIComponent(escape(atob(s)));
 
@@ -146,7 +117,7 @@
         };
         if (data) {
             options.body = JSON.stringify({
-                message: "Studio Update",
+                message: "Studio OS Update",
                 content: u2b(JSON.stringify(data, null, 2)),
                 sha: sha
             });
@@ -165,13 +136,13 @@
                 document.getElementById('login').style.display = 'none';
                 initDashboard();
             }
-        } catch(e) { alert("Erişim reddedildi."); localStorage.removeItem('uber_t'); }
+        } catch(e) { alert("Bağlantı Hatası!"); localStorage.removeItem('uber_t'); }
     }
 
     async function initDashboard() {
-        loadSettings();
-        refreshInventory();
-        checkNewMessages();
+        await loadSettings();
+        await refreshInventory();
+        await refreshGuestbook();
     }
 
     async function loadSettings() {
@@ -182,81 +153,61 @@
         document.getElementById('s-bio').value = s.bio || "";
         document.getElementById('s-instagram').value = s.instagram || "";
         document.getElementById('s-whatsapp').value = s.whatsapp || "";
+        document.getElementById('s-footer').value = s.footerText || "";
         document.getElementById('s-maintenance').checked = s.maintenanceMode || false;
-        // Dinamik CSS güncelleme
-        document.documentElement.style.setProperty('--accent', s.themeColor || "#a87f4a");
     }
 
     async function refreshInventory() {
         const d = await ghAction('content/portfolio.json');
         currentPortfolio = JSON.parse(b2u(d.content));
-        const list = document.getElementById('inventory-list');
-        list.innerHTML = currentPortfolio.projects.map((p, i) => `
+        document.getElementById('inventory-list').innerHTML = currentPortfolio.projects.map((p, i) => `
             <div class="item-row">
-                <div style="display:flex; align-items:center; gap:15px;">
-                    <img src="${p.image.split(',')[0]}" style="width:40px; height:40px; object-fit:cover;">
-                    <span>${p.title} <small style="color:#444">(${p.category})</small></span>
-                </div>
-                <div class="order-btns">
-                    <button class="order-btn" onclick="moveItem(${i}, -1)">▲</button>
-                    <button class="order-btn" onclick="moveItem(${i}, 1)">▼</button>
-                    <button class="order-btn" style="background:#442222;" onclick="handleDelete(${i})">SİL</button>
+                <span>${p.title}</span>
+                <div>
+                    <button style="width:auto; padding:5px 10px; margin:0; background:#333; color:#fff;" onclick="moveItem(${i},-1)">▲</button>
+                    <button style="width:auto; padding:5px 10px; margin:0; background:#333; color:#fff;" onclick="moveItem(${i},1)">▼</button>
+                    <button style="width:auto; padding:5px 10px; margin:0; background:#500; color:#fff;" onclick="handleDelete(${i})">SİL</button>
                 </div>
             </div>
         `).join('');
-
+        
         document.getElementById('sale-select').innerHTML = '<option value="">Eser Seçin</option>' + 
             currentPortfolio.projects.map((p, i) => `<option value="${i}">${p.title}</option>`).join('');
     }
 
-    async function moveItem(index, direction) {
-        const newIndex = index + direction;
-        if (newIndex < 0 || newIndex >= currentPortfolio.projects.length) return;
-        const temp = currentPortfolio.projects[index];
-        currentPortfolio.projects[index] = currentPortfolio.projects[newIndex];
-        currentPortfolio.projects[newIndex] = temp;
-        
-        const d = await ghAction('content/portfolio.json');
-        await ghAction('content/portfolio.json', 'PUT', currentPortfolio, d.sha);
-        refreshInventory();
+    async function refreshGuestbook() {
+        try {
+            const d = await ghAction('content/news.json');
+            const nData = JSON.parse(b2u(d.content));
+            const list = nData.guestbook || [];
+            document.getElementById('guest-list').innerHTML = list.length ? list.map((g, i) => `
+                <div class="item-row">
+                    <span><b>${g.name}:</b> ${g.message}</span>
+                    <button style="width:auto; padding:5px; background:#500; color:#fff;" onclick="handleGuestDelete(${i})">SİL</button>
+                </div>
+            `).reverse().join('') : "Henüz mesaj yok.";
+        } catch(e) { document.getElementById('guest-list').innerHTML = "Hata oluştu."; }
     }
 
-    async function handleUpload() {
-        const files = document.getElementById('f-file').files;
-        const title = document.getElementById('f-title').value;
-        const cat = document.getElementById('f-cat').value;
-        const map = document.getElementById('f-map').value;
+    function fillSaleFields(idx) {
+        if(idx === "") return;
+        const p = currentPortfolio.projects[idx];
+        document.getElementById('edit-price').value = p.price || "";
+        document.getElementById('edit-cert').value = p.certCode || "";
+        document.getElementById('edit-owner').value = p.owner || "";
+    }
 
-        if(!files.length || !title) return alert("Başlık ve en az bir görsel zorunludur.");
-
-        let uploadedPaths = [];
-        for(let file of files) {
-            const path = `images/uploads/${Date.now()}_${file.name}`;
-            const reader = new FileReader();
-            const uploadPromise = new Promise(resolve => {
-                reader.onload = async (e) => {
-                    await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
-                        method: 'PUT',
-                        headers: { 'Authorization': `token ${localStorage.getItem('uber_t')}` },
-                        body: JSON.stringify({ message: "IMG", content: e.target.result.split(',')[1] })
-                    });
-                    resolve(path);
-                };
-            });
-            reader.readAsDataURL(file);
-            uploadedPaths.push(await uploadPromise);
-        }
-
+    async function handleSaleUpdate() {
+        const idx = document.getElementById('sale-select').value;
+        if(idx==="") return;
         const d = await ghAction('content/portfolio.json');
         let pData = JSON.parse(b2u(d.content));
-        pData.projects.unshift({
-            title, category: cat, 
-            image: uploadedPaths.join(','), 
-            mapLink: map,
-            date: new Date().toISOString()
-        });
+        pData.projects[idx].price = document.getElementById('edit-price').value;
+        pData.projects[idx].certCode = document.getElementById('edit-cert').value;
+        pData.projects[idx].owner = document.getElementById('edit-owner').value;
+        pData.projects[idx].isSale = true;
         await ghAction('content/portfolio.json', 'PUT', pData, d.sha);
-        alert("Eser ve tüm görseller başarıyla yüklendi!");
+        alert("Güncellendi!");
         refreshInventory();
     }
 
@@ -268,65 +219,99 @@
         s.bio = document.getElementById('s-bio').value;
         s.instagram = document.getElementById('s-instagram').value;
         s.whatsapp = document.getElementById('s-whatsapp').value;
+        s.footerText = document.getElementById('s-footer').value;
         s.maintenanceMode = document.getElementById('s-maintenance').checked;
-        
         await ghAction('content/settings.json', 'PUT', s, d.sha);
-        alert("Sistem ayarları güncellendi!");
-        location.reload();
+        alert("Ayarlar Kaydedildi!");
     }
 
     function generatePDF() {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('landscape');
-        const title = document.getElementById('f-title').value || "Sanat Eseri";
-        const cert = document.getElementById('edit-cert').value || "N/A";
-        const owner = document.getElementById('edit-owner').value || "Değerli Koleksiyoner";
+        const doc = new jsPDF('l', 'mm', 'a4');
+        const idx = document.getElementById('sale-select').value;
+        const title = idx !== "" ? currentPortfolio.projects[idx].title : "ESER";
+        const cert = document.getElementById('edit-cert').value || "UBE-2026";
+        const owner = document.getElementById('edit-owner').value || "Koleksiyoner";
 
-        doc.setFillColor(10, 10, 10);
-        doc.rect(0, 0, 297, 210, 'F');
-        doc.setDrawColor(168, 127, 74);
-        doc.setLineWidth(1);
-        doc.rect(10, 10, 277, 190);
+        doc.setFillColor(10, 10, 10); doc.rect(0, 0, 297, 210, 'F');
+        doc.setDrawColor(168, 127, 74); doc.setLineWidth(1); doc.rect(10, 10, 277, 190);
         
-        doc.setTextColor(168, 127, 74);
-        doc.setFontSize(30);
-        doc.text("UBE RAW", 148, 50, { align: "center" });
+        doc.setTextColor(168, 127, 74); doc.setFontSize(40); doc.text("UBE RAW", 148, 60, {align:"center"});
+        doc.setFontSize(12); doc.text("CERTIFICATE OF AUTHENTICITY", 148, 75, {align:"center"});
         
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(14);
-        doc.text("CERTIFICATE OF AUTHENTICITY", 148, 70, { align: "center" });
+        doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.text(title.toUpperCase(), 148, 110, {align:"center"});
+        doc.setTextColor(168, 127, 74); doc.setFontSize(14); doc.text(`Sertifika No: ${cert}`, 148, 130, {align:"center"});
+        doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.text(`Koleksiyoner: ${owner}`, 148, 170, {align:"center"});
         
-        doc.setFontSize(22);
-        doc.text(title.toUpperCase(), 148, 110, { align: "center" });
-        
-        doc.setFontSize(12);
-        doc.text(`Certificate No: ${cert}`, 148, 130, { align: "center" });
-        doc.text(`Collector: ${owner}`, 148, 145, { align: "center" });
-        
-        doc.setFontSize(10);
-        doc.text("Bu belge, eserin Ubeydullah Bayrak (UBE RAW) tarafından üretilen", 148, 170, { align: "center" });
-        doc.text("orijinal bir sanat eseri olduğunu tasdik eder.", 148, 178, { align: "center" });
-        
-        doc.save(`UBE-RAW-Sertifika-${cert}.pdf`);
+        doc.save(`UBE-RAW-CERT-${cert}.pdf`);
     }
 
-    async function checkNewMessages() {
-        const d = await ghAction('content/news.json');
-        const n = JSON.parse(b2u(d.content));
-        if(n.guestbook?.length > 0) {
-            document.getElementById('msg-badge').style.display = 'block';
+    async function handleUpload() {
+        const files = document.getElementById('f-file').files;
+        const title = document.getElementById('f-title').value;
+        if(!files.length || !title) return alert("Dosya ve başlık seçin!");
+
+        let paths = [];
+        for(let f of files) {
+            const path = `images/uploads/${Date.now()}_${f.name}`;
+            const reader = new FileReader();
+            const p = new Promise(res => {
+                reader.onload = async (e) => {
+                    await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `token ${localStorage.getItem('uber_t')}` },
+                        body: JSON.stringify({ message: "IMG", content: e.target.result.split(',')[1] })
+                    });
+                    res(path);
+                };
+            });
+            reader.readAsDataURL(f);
+            paths.push(await p);
         }
+
+        const d = await ghAction('content/portfolio.json');
+        let data = JSON.parse(b2u(d.content));
+        data.projects.unshift({ title, category: document.getElementById('f-cat').value, image: paths.join(','), mapLink: document.getElementById('f-map').value });
+        await ghAction('content/portfolio.json', 'PUT', data, d.sha);
+        alert("Eklendi!");
+        refreshInventory();
     }
 
-    function switchTab(n, el) {
+    async function handleGuestDelete(i) {
+        const d = await ghAction('content/news.json');
+        let data = JSON.parse(b2u(d.content));
+        data.guestbook.splice(data.guestbook.length - 1 - i, 1);
+        await ghAction('content/news.json', 'PUT', data, d.sha);
+        refreshGuestbook();
+    }
+
+    async function moveItem(i, dir) {
+        const ni = i + dir;
+        if(ni < 0 || ni >= currentPortfolio.projects.length) return;
+        const temp = currentPortfolio.projects[i];
+        currentPortfolio.projects[i] = currentPortfolio.projects[ni];
+        currentPortfolio.projects[ni] = temp;
+        const d = await ghAction('content/portfolio.json');
+        await ghAction('content/portfolio.json', 'PUT', currentPortfolio, d.sha);
+        refreshInventory();
+    }
+
+    async function handleDelete(i) {
+        if(!confirm("Silinsin mi?")) return;
+        const d = await ghAction('content/portfolio.json');
+        let data = JSON.parse(b2u(d.content));
+        data.projects.splice(i, 1);
+        await ghAction('content/portfolio.json', 'PUT', data, d.sha);
+        refreshInventory();
+    }
+
+    function switchTab(t, el) {
         document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-        document.getElementById('tab-'+n).classList.add('active');
+        document.getElementById('tab-'+t).classList.add('active');
         document.querySelectorAll('.nav-link').forEach(x => x.classList.remove('active'));
         el.classList.add('active');
-        if(n === 'guest') refreshGuestbook();
     }
 
-    // (Diğer yardımcı fonksiyonlar: refreshGuestbook, handleDelete vb. mevcut yapıda korunmuştur)
     if(localStorage.getItem('uber_t')) auth();
 </script>
 </body>
