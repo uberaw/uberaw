@@ -1,6 +1,12 @@
 {
   "projects": [
     {
+      "title": "Plastic Age Series 2",
+      "category": "Plastic Age Series",
+      "image": "images/uploads/plastic-age-series-2-1776761874307-0.jpg,images/uploads/plastic-age-series-2-1776761875428-1.jpg,images/uploads/plastic-age-series-2-1776761876515-2.jpg",
+      "mapLink": ""
+    },
+    {
       "title": "Plastic Age Series",
       "category": "Plastic Age Series",
       "image": "images/uploads/plastic-age-series-1776761837888-0.jpg,images/uploads/plastic-age-series-1776761839248-1.jpg,images/uploads/plastic-age-series-1776761840479-2.jpg,images/uploads/plastic-age-series-1776761841779-3.jpg",
