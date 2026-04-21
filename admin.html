@@ -11,16 +11,16 @@
         .sidebar h2 { color: var(--accent); letter-spacing: 3px; font-size: 16px; margin-bottom: 40px; }
         .nav-link { padding: 15px 0; cursor: pointer; font-size: 11px; text-transform: uppercase; color: #666; transition: 0.3s; position: relative; }
         .nav-link.active { color: var(--accent); font-weight: bold; border-left: 2px solid var(--accent); padding-left: 10px; }
-        .badge { background: #ff4444; width: 8px; height: 8px; border-radius: 50%; position: absolute; right: 0; top: 18px; display: none; }
         .main { margin-left: 300px; padding: 60px; width: 100%; max-width: 900px; }
         .tab { display: none; } .tab.active { display: block; }
         .card { background: var(--card); border: 1px solid #1a1a1a; padding: 25px; margin-bottom: 20px; }
         .section-title { color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 20px 0 10px 0; border-bottom: 1px solid #222; padding-bottom: 5px; }
         input, select, textarea { width: 100%; background: #000; border: 1px solid #222; color: #fff; padding: 12px; margin: 10px 0; box-sizing: border-box; font-family: inherit; }
-        button { background: var(--accent); color: #000; border: none; padding: 15px; width: 100%; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
+        button { background: var(--accent); color: #000; border: none; padding: 15px; width: 100%; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; transition: 0.2s; }
+        button:hover { opacity: 0.8; }
         .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #111; font-size: 13px; }
         #login { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .helper-text { font-size: 10px; color: #555; margin-top: -8px; margin-bottom: 10px; }
+        .approval-box { background: #111; padding: 20px; border: 1px dashed var(--accent); margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -38,7 +38,7 @@
     <div class="nav-link active" onclick="switchTab('add', this)">Eser Ekle</div>
     <div class="nav-link" onclick="switchTab('inv', this)">Envanter & Sıra</div>
     <div class="nav-link" onclick="switchTab('sale', this)">Satış & Sertifika</div>
-    <div class="nav-link" onclick="switchTab('guest', this)">Mesajlar <span id="msg-badge" class="badge"></span></div>
+    <div class="nav-link" onclick="switchTab('guest', this)">Mesajlar</div>
     <div class="nav-link" onclick="switchTab('config', this)">Site Ayarları</div>
 </div>
 
@@ -76,6 +76,14 @@
     <div id="tab-guest" class="tab">
         <h3>Ziyaretçi Mesajları</h3>
         <div id="guest-list" class="card">Yükleniyor...</div>
+        
+        <div class="approval-box">
+            <div class="section-title">Yeni Mesaj Onayla</div>
+            <p style="font-size: 11px; color: #777;">Formspree (E-posta) üzerinden gelen mesajı buraya girerek onaylayabilirsiniz.</p>
+            <input type="text" id="new-g-name" placeholder="Ziyaretçi İsmi">
+            <textarea id="new-g-msg" rows="3" placeholder="Mesaj Metni"></textarea>
+            <button onclick="approveNewMessage()" style="background:#4CAF50; color:white;">MESAJI SİTEDE YAYINLA</button>
+        </div>
     </div>
 
     <div id="tab-config" class="tab">
@@ -85,17 +93,13 @@
             <input type="color" id="s-theme" style="height:50px;">
             <input type="text" id="s-title" placeholder="Site Başlığı">
             <textarea id="s-bio" rows="4" placeholder="Sanatçı Biyografisi"></textarea>
-            
             <div class="section-title">İletişim & Sosyal</div>
-            <input type="text" id="s-instagram" placeholder="Instagram Kullanıcı Adı veya Link">
+            <input type="text" id="s-instagram" placeholder="Instagram">
             <input type="text" id="s-whatsapp" placeholder="WhatsApp (90...)">
-            
-            <div class="section-title">Footer & Alt Metin</div>
             <input type="text" id="s-footer" placeholder="Footer Metni">
-            
-            <div class="section-title">Sistem Durumu</div>
-            <div style="background:#111; padding:15px; display:flex; gap:15px;">
-                <input type="checkbox" id="s-maintenance" style="width:auto;"> Bakım Modunu Aktif Et
+            <div class="section-title">Sistem</div>
+            <div style="background:#111; padding:15px; display:flex; gap:15px; align-items: center;">
+                <input type="checkbox" id="s-maintenance" style="width:auto; margin:0;"> Bakım Modu
             </div>
             <button onclick="handleSettingsUpdate()" style="background:#4CAF50; color:white;">DEĞİŞİKLİKLERİ KAYDET</button>
         </div>
@@ -117,7 +121,7 @@
         };
         if (data) {
             options.body = JSON.stringify({
-                message: "Studio OS Update",
+                message: "Studio Update",
                 content: u2b(JSON.stringify(data, null, 2)),
                 sha: sha
             });
@@ -135,8 +139,8 @@
             if(res.sha) {
                 document.getElementById('login').style.display = 'none';
                 initDashboard();
-            }
-        } catch(e) { alert("Bağlantı Hatası!"); localStorage.removeItem('uber_t'); }
+            } else { throw new Error(); }
+        } catch(e) { alert("Yetki Hatası! Tokenı kontrol edin."); localStorage.removeItem('uber_t'); }
     }
 
     async function initDashboard() {
@@ -170,7 +174,6 @@
                 </div>
             </div>
         `).join('');
-        
         document.getElementById('sale-select').innerHTML = '<option value="">Eser Seçin</option>' + 
             currentPortfolio.projects.map((p, i) => `<option value="${i}">${p.title}</option>`).join('');
     }
@@ -185,8 +188,35 @@
                     <span><b>${g.name}:</b> ${g.message}</span>
                     <button style="width:auto; padding:5px; background:#500; color:#fff;" onclick="handleGuestDelete(${i})">SİL</button>
                 </div>
-            `).reverse().join('') : "Henüz mesaj yok.";
-        } catch(e) { document.getElementById('guest-list').innerHTML = "Hata oluştu."; }
+            `).reverse().join('') : "Henüz onaylanmış mesaj yok.";
+        } catch(e) { document.getElementById('guest-list').innerHTML = "Mesajlar yüklenemedi."; }
+    }
+
+    async function approveNewMessage() {
+        const name = document.getElementById('new-g-name').value;
+        const msg = document.getElementById('new-g-msg').value;
+        if(!name || !msg) return alert("Eksik alan!");
+
+        const d = await ghAction('content/news.json');
+        let nData = JSON.parse(b2u(d.content));
+        if(!nData.guestbook) nData.guestbook = [];
+        
+        nData.guestbook.push({ name, message: msg, date: new Date().toLocaleDateString() });
+        await ghAction('content/news.json', 'PUT', nData, d.sha);
+        
+        document.getElementById('new-g-name').value = "";
+        document.getElementById('new-g-msg').value = "";
+        alert("Mesaj Yayınlandı!");
+        refreshGuestbook();
+    }
+
+    async function handleGuestDelete(i) {
+        if(!confirm("Bu mesajı kaldırmak istediğinize emin misiniz?")) return;
+        const d = await ghAction('content/news.json');
+        let nData = JSON.parse(b2u(d.content));
+        nData.guestbook.splice(nData.guestbook.length - 1 - i, 1);
+        await ghAction('content/news.json', 'PUT', nData, d.sha);
+        refreshGuestbook();
     }
 
     function fillSaleFields(idx) {
@@ -199,7 +229,7 @@
 
     async function handleSaleUpdate() {
         const idx = document.getElementById('sale-select').value;
-        if(idx==="") return;
+        if(idx==="") return alert("Eser seçin!");
         const d = await ghAction('content/portfolio.json');
         let pData = JSON.parse(b2u(d.content));
         pData.projects[idx].price = document.getElementById('edit-price').value;
@@ -229,27 +259,24 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('l', 'mm', 'a4');
         const idx = document.getElementById('sale-select').value;
-        const title = idx !== "" ? currentPortfolio.projects[idx].title : "ESER";
-        const cert = document.getElementById('edit-cert').value || "UBE-2026";
-        const owner = document.getElementById('edit-owner').value || "Koleksiyoner";
+        const title = idx !== "" ? currentPortfolio.projects[idx].title : "ARTWORK";
+        const cert = document.getElementById('edit-cert').value || "CERT-2026";
+        const owner = document.getElementById('edit-owner').value || "COLLECTOR";
 
         doc.setFillColor(10, 10, 10); doc.rect(0, 0, 297, 210, 'F');
         doc.setDrawColor(168, 127, 74); doc.setLineWidth(1); doc.rect(10, 10, 277, 190);
-        
         doc.setTextColor(168, 127, 74); doc.setFontSize(40); doc.text("UBE RAW", 148, 60, {align:"center"});
         doc.setFontSize(12); doc.text("CERTIFICATE OF AUTHENTICITY", 148, 75, {align:"center"});
-        
         doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.text(title.toUpperCase(), 148, 110, {align:"center"});
-        doc.setTextColor(168, 127, 74); doc.setFontSize(14); doc.text(`Sertifika No: ${cert}`, 148, 130, {align:"center"});
-        doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.text(`Koleksiyoner: ${owner}`, 148, 170, {align:"center"});
-        
+        doc.setTextColor(168, 127, 74); doc.setFontSize(14); doc.text(`Registration No: ${cert}`, 148, 130, {align:"center"});
+        doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.text(`Collector: ${owner}`, 148, 175, {align:"center"});
         doc.save(`UBE-RAW-CERT-${cert}.pdf`);
     }
 
     async function handleUpload() {
         const files = document.getElementById('f-file').files;
         const title = document.getElementById('f-title').value;
-        if(!files.length || !title) return alert("Dosya ve başlık seçin!");
+        if(!files.length || !title) return alert("Dosya ve başlık gerekli!");
 
         let paths = [];
         for(let f of files) {
@@ -260,7 +287,7 @@
                     await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
                         method: 'PUT',
                         headers: { 'Authorization': `token ${localStorage.getItem('uber_t')}` },
-                        body: JSON.stringify({ message: "IMG", content: e.target.result.split(',')[1] })
+                        body: JSON.stringify({ message: "UPLOAD", content: e.target.result.split(',')[1] })
                     });
                     res(path);
                 };
@@ -271,18 +298,16 @@
 
         const d = await ghAction('content/portfolio.json');
         let data = JSON.parse(b2u(d.content));
-        data.projects.unshift({ title, category: document.getElementById('f-cat').value, image: paths.join(','), mapLink: document.getElementById('f-map').value });
+        data.projects.unshift({ 
+            title, 
+            category: document.getElementById('f-cat').value, 
+            image: paths.join(','), 
+            mapLink: document.getElementById('f-map').value,
+            isSale: false
+        });
         await ghAction('content/portfolio.json', 'PUT', data, d.sha);
-        alert("Eklendi!");
+        alert("Eser Eklendi!");
         refreshInventory();
-    }
-
-    async function handleGuestDelete(i) {
-        const d = await ghAction('content/news.json');
-        let data = JSON.parse(b2u(d.content));
-        data.guestbook.splice(data.guestbook.length - 1 - i, 1);
-        await ghAction('content/news.json', 'PUT', data, d.sha);
-        refreshGuestbook();
     }
 
     async function moveItem(i, dir) {
