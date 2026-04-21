@@ -1,4 +1,10 @@
 {
   "announcements": [],
-  "guestbook": []
+  "guestbook": [
+    {
+      "name": "Pablo Picasso",
+      "message": "Resim yapmak, günlük tutmanın bir diğer yoludur.",
+      "date": "21.04.2026"
+    }
+  ]
 }
