@@ -10,7 +10,7 @@
         
         /* Sidebar */
         .sidebar { width: 260px; height: 100vh; border-right: 1px solid var(--border); padding: 30px; position: fixed; background: #050505; z-index: 100; box-sizing: border-box; }
-        .sidebar h2 { color: var(--accent); letter-spacing: 3px; font-size: 16px; margin-bottom: 40px; border-bottom: 1px solid var(--accent); padding-bottom: 10px; }
+        .sidebar h2 { color: var(--accent); letter-spacing: 3px; font-size: 16px; margin-bottom: 40px; border-bottom: 1px solid var(--accent); padding-bottom: 10px; line-height: 1.4; }
         .nav-link { padding: 15px 12px; cursor: pointer; font-size: 11px; text-transform: uppercase; color: #666; transition: 0.3s; margin-bottom: 5px; border-radius: 4px; display: flex; align-items: center; gap: 10px; }
         .nav-link:hover { background: #111; color: #fff; }
         .nav-link.active { color: #000; background: var(--accent); font-weight: bold; }
@@ -110,7 +110,7 @@
 </div>
 
 <div class="sidebar">
-    <h2>UBE RAW</h2>
+    <h2>UBE<br>RAW</h2>
     <div class="nav-link active" onclick="switchTab('dash', this)">📊 Ana Ekran</div>
     <div class="nav-link" onclick="switchTab('add', this)">✨ Eser Ekle</div>
     <div class="nav-link" onclick="switchTab('inv', this)">📦 Envanter</div>
@@ -294,6 +294,13 @@
     }
 
     function logout() { localStorage.removeItem('uber_t'); location.reload(); }
+
+    function switchTab(tabId, element) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        element.classList.add('active');
+    }
 
     // --- GITHUB API ACTION ---
     async function ghAction(path, method = 'GET', data = null, sha = null) {
@@ -550,7 +557,7 @@
         showLoading(false);
     }
 
-    // --- SİPARİŞ & TALEP YÖNETİMİ (YENİ) ---
+    // --- SİPARİŞ & TALEP YÖNETİMİ ---
     async function refreshOrders() {
         try {
             const d = await ghAction('content/orders.json');
@@ -580,229 +587,282 @@
         const name = document.getElementById('new-o-name').value;
         const contact = document.getElementById('new-o-contact').value;
         const artworkIdx = document.getElementById('new-o-artwork').value;
-        
-        if(!name || artworkIdx === "") return showToast("Müşteri adı ve Eser seçimi zorunludur.", true);
+
+        if(!name || !contact || !artworkIdx) return showToast("Lütfen tüm alanları doldurun.", true);
+
+        const artwork = currentPortfolio.projects[artworkIdx].title;
+        const date = new Date().toLocaleDateString('tr-TR');
+
         showLoading(true);
-        
-        const artworkTitle = currentPortfolio.projects[artworkIdx].title;
-        let sha = null;
-        let oData = { orders: [] };
-        
         try {
-            const d = await ghAction('content/orders.json');
-            oData = JSON.parse(b2u(d.content));
-            sha = d.sha;
-        } catch(e) { console.log("İlk sipariş dosyası oluşturuluyor."); }
-        
-        oData.orders.push({
-            customerName: name,
-            contact: contact,
-            artwork: artworkTitle,
-            status: "Bekliyor",
-            date: new Date().toLocaleDateString()
-        });
-        
-        await ghAction('content/orders.json', 'PUT', oData, sha);
-        
-        document.getElementById('new-o-name').value = '';
-        document.getElementById('new-o-contact').value = '';
-        document.getElementById('new-o-artwork').value = '';
-        showToast("Sipariş sisteme eklendi!");
-        await refreshOrders();
+            let d, data;
+            try {
+                d = await ghAction('content/orders.json');
+                data = JSON.parse(b2u(d.content));
+            } catch(e) {
+                data = { orders: [] };
+            }
+            data.orders.push({ customerName: name, contact: contact, artwork: artwork, date: date, status: 'Bekliyor' });
+            await ghAction('content/orders.json', 'PUT', data, d ? d.sha : null);
+            
+            document.getElementById('new-o-name').value = '';
+            document.getElementById('new-o-contact').value = '';
+            document.getElementById('new-o-artwork').value = '';
+            
+            showToast("Yeni sipariş / talep başarıyla eklendi.");
+            await refreshOrders();
+        } catch(e) { showToast("Sipariş eklenirken hata oluştu.", true); }
         showLoading(false);
     }
 
-    async function updateOrderStatus(i, newStatus) {
+    async function updateOrderStatus(i, status) {
         showLoading(true);
         try {
             const d = await ghAction('content/orders.json');
             let data = JSON.parse(b2u(d.content));
-            // Because we reverse() in map, calculate correct index
-            const actualIndex = data.orders.length - 1 - i; 
-            data.orders[actualIndex].status = newStatus;
+            data.orders[i].status = status;
             await ghAction('content/orders.json', 'PUT', data, d.sha);
             showToast("Sipariş durumu güncellendi.");
             await refreshOrders();
-        } catch(e) { showToast("Hata oluştu.", true); }
+        } catch(e) { showToast("Güncelleme hatası", true); }
         showLoading(false);
     }
 
     async function deleteOrder(i) {
-        if(!confirm("Siparişi silmek istediğinize emin misiniz?")) return;
+        if(!confirm("Bu siparişi kalıcı olarak silmek istediğinize emin misiniz?")) return;
         showLoading(true);
         try {
             const d = await ghAction('content/orders.json');
             let data = JSON.parse(b2u(d.content));
-            const actualIndex = data.orders.length - 1 - i;
-            data.orders.splice(actualIndex, 1);
+            data.orders.splice(i, 1);
             await ghAction('content/orders.json', 'PUT', data, d.sha);
-            showToast("Sipariş listeden kaldırıldı.");
+            showToast("Sipariş silindi.");
             await refreshOrders();
-        } catch(e) { showToast("Hata oluştu.", true); }
+        } catch(e) { showToast("Silme hatası", true); }
         showLoading(false);
     }
 
     // --- SATIŞ VE SERTİFİKA ---
-    function fillSaleFields(idx) {
-        if(idx === "") return;
-        const p = currentPortfolio.projects[idx];
-        document.getElementById('edit-price').value = p.price || "";
-        document.getElementById('edit-cert').value = p.certCode || `UBE-${Math.floor(Math.random()*10000)}`;
-        document.getElementById('edit-owner').value = p.owner || "";
+    function fillSaleFields(i) {
+        if(!i) {
+            document.getElementById('edit-price').value = '';
+            document.getElementById('edit-cert').value = '';
+            return;
+        }
+        const p = currentPortfolio.projects[i];
+        document.getElementById('edit-price').value = p.price || '';
+        document.getElementById('edit-cert').value = p.certCode || `UBE-RAW-${Math.floor(1000 + Math.random() * 9000)}`;
     }
 
     async function handleSaleUpdate() {
-        const idx = document.getElementById('sale-select').value;
-        if(idx === "") return showToast("Lütfen bir eser seçin", true);
+        const i = document.getElementById('sale-select').value;
+        if(!i) return showToast("Önce bir eser seçmelisiniz.", true);
+
         showLoading(true);
-        const d = await ghAction('content/portfolio.json');
-        let pData = JSON.parse(b2u(d.content));
-        
-        pData.projects[idx].price = document.getElementById('edit-price').value;
-        pData.projects[idx].certCode = document.getElementById('edit-cert').value;
-        pData.projects[idx].owner = document.getElementById('edit-owner').value;
-        pData.projects[idx].isSale = true;
-        
-        await ghAction('content/portfolio.json', 'PUT', pData, d.sha);
-        showToast("Eser satış ve sertifika bilgileri kaydedildi!");
-        await refreshInventory();
+        try {
+            const d = await ghAction('content/portfolio.json');
+            let data = JSON.parse(b2u(d.content));
+            data.projects[i].isSale = true;
+            data.projects[i].price = document.getElementById('edit-price').value;
+            data.projects[i].certCode = document.getElementById('edit-cert').value;
+            await ghAction('content/portfolio.json', 'PUT', data, d.sha);
+            
+            showToast("Satış ve sertifika bilgileri sisteme kaydedildi.");
+            await refreshInventory();
+            document.getElementById('edit-owner').value = ''; 
+        } catch(e) { showToast("Kaydetme hatası", true); }
         showLoading(false);
     }
 
     function generatePDF() {
+        const i = document.getElementById('sale-select').value;
+        if(!i) return showToast("Lütfen sertifikalandırılacak eseri seçin.", true);
+        
+        const p = currentPortfolio.projects[i];
+        const owner = document.getElementById('edit-owner').value || 'Değerli Koleksiyoner';
+        const certCode = document.getElementById('edit-cert').value || 'UBE-RAW-0000';
+        
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4');
-        const idx = document.getElementById('sale-select').value;
-        if(idx === "") return showToast("PDF oluşturmak için önce eser seçin.", true);
+        const doc = new jsPDF({ orientation: "landscape" });
         
-        const title = currentPortfolio.projects[idx].title;
-        const cert = document.getElementById('edit-cert').value || "UBE-2026";
-        const owner = document.getElementById('edit-owner').value || "COLLECTOR";
+        // Basit Sertifika Tasarımı
+        doc.setFillColor(5, 5, 5);
+        doc.rect(0, 0, 297, 210, 'F');
+        doc.setDrawColor(168, 127, 74); // accent color
+        doc.setLineWidth(2);
+        doc.rect(10, 10, 277, 190);
         
-        doc.setFillColor(10, 10, 10); doc.rect(0, 0, 297, 210, 'F');
-        doc.setDrawColor(168, 127, 74); doc.setLineWidth(1); doc.rect(10, 10, 277, 190);
-        doc.setTextColor(168, 127, 74); doc.setFontSize(40); doc.text("UBE RAW", 148, 60, {align:"center"});
-        doc.setFontSize(12); doc.text("CERTIFICATE OF AUTHENTICITY", 148, 75, {align:"center"});
-        doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.text(title.toUpperCase(), 148, 110, {align:"center"});
-        doc.setTextColor(168, 127, 74); doc.setFontSize(14); doc.text(`Sertifika No: ${cert}`, 148, 130, {align:"center"});
-        doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.text(`Koleksiyoner: ${owner}`, 148, 170, {align:"center"});
-        doc.save(`UBE-RAW-CERT-${cert}.pdf`);
-        showToast("Sertifika PDF olarak indirildi.");
+        doc.setTextColor(168, 127, 74);
+        doc.setFontSize(30);
+        doc.text("CERTIFICATE OF AUTHENTICITY", 148.5, 50, { align: "center" });
+        
+        doc.setTextColor(200, 200, 200);
+        doc.setFontSize(14);
+        doc.text("This document certifies that the artwork detailed below is an original creation.", 148.5, 75, { align: "center" });
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(22);
+        doc.text(p.title.toUpperCase(), 148.5, 105, { align: "center" });
+        
+        doc.setTextColor(150, 150, 150);
+        doc.setFontSize(12);
+        doc.text(`Certificate No: ${certCode}`, 148.5, 125, { align: "center" });
+        doc.text(`Medium/Category: ${p.category || 'Mixed Media'}`, 148.5, 135, { align: "center" });
+        doc.text(`Acquired By: ${owner}`, 148.5, 145, { align: "center" });
+        
+        doc.setTextColor(168, 127, 74);
+        doc.setFontSize(14);
+        doc.text("UBE RAW STUDIO", 148.5, 180, { align: "center" });
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Issued Date: ${new Date().toLocaleDateString('tr-TR')}`, 148.5, 190, { align: "center" });
+        
+        doc.save(`UBE_RAW_CERTIFICATE_${certCode}.pdf`);
     }
 
-    // --- AYARLAR ---
+    // --- ZİYARETÇİ DEFTERİ ---
+    async function refreshGuestbook() {
+        try {
+            const d = await ghAction('content/guestbook.json');
+            const list = JSON.parse(b2u(d.content)).messages || [];
+            
+            document.getElementById('stat-msg').innerText = list.length;
+            document.getElementById('guest-list').innerHTML = list.map((m, i) => `
+                <div class="item-row">
+                    <div class="item-info">
+                        <b>${m.name}</b>
+                        <small style="color:#ccc; font-style: italic;">"${m.message}"</small>
+                        <small style="color:var(--accent);">${m.date}</small>
+                    </div>
+                    <div class="btn-group">
+                        <button class="danger" onclick="deleteMessage(${i})">SİL</button>
+                    </div>
+                </div>
+            `).reverse().join('') || "<p style='color:#777;'>Ziyaretçi defteri henüz boş.</p>";
+        } catch(e) {
+            document.getElementById('guest-list').innerHTML = "<p style='color:#777;'>Ziyaretçi defteri sistemi başlatılmamış.</p>";
+        }
+    }
+
+    async function approveNewMessage() {
+        const name = document.getElementById('new-g-name').value;
+        const msg = document.getElementById('new-g-msg').value;
+
+        if(!name || !msg) return showToast("İsim ve mesaj alanları zorunludur.", true);
+
+        showLoading(true);
+        try {
+            let d, data;
+            try {
+                d = await ghAction('content/guestbook.json');
+                data = JSON.parse(b2u(d.content));
+            } catch(e) { data = { messages: [] }; }
+            
+            data.messages.push({ name: name, message: msg, date: new Date().toLocaleDateString('tr-TR') });
+            await ghAction('content/guestbook.json', 'PUT', data, d ? d.sha : null);
+            
+            document.getElementById('new-g-name').value = '';
+            document.getElementById('new-g-msg').value = '';
+            showToast("Referans/Mesaj başarıyla eklendi.");
+            await refreshGuestbook();
+        } catch(e) { showToast("Mesaj eklenirken hata oluştu.", true); }
+        showLoading(false);
+    }
+
+    async function deleteMessage(i) {
+        if(!confirm("Bu mesajı kalıcı olarak silmek istediğinize emin misiniz?")) return;
+        showLoading(true);
+        try {
+            const d = await ghAction('content/guestbook.json');
+            let data = JSON.parse(b2u(d.content));
+            data.messages.splice(i, 1);
+            await ghAction('content/guestbook.json', 'PUT', data, d.sha);
+            showToast("Mesaj silindi.");
+            await refreshGuestbook();
+        } catch(e) { showToast("Silme hatası", true); }
+        showLoading(false);
+    }
+
+    // --- SİTE AYARLARI ---
     async function loadSettings() {
         try {
             const d = await ghAction('content/settings.json');
-            const s = JSON.parse(b2u(d.content));
-            document.getElementById('s-theme').value = s.themeColor || "#a87f4a";
-            document.getElementById('s-title').value = s.siteTitle || "";
-            document.getElementById('s-bio').value = s.bio || "";
-            document.getElementById('s-seo').value = s.seoDesc || "";
-            document.getElementById('s-instagram').value = s.instagram || "";
-            document.getElementById('s-whatsapp').value = s.whatsapp || "";
-            document.getElementById('s-footer').value = s.footerText || "";
-            document.getElementById('s-maintenance').checked = s.maintenanceMode || false;
-            document.getElementById('m-portfolio').value = s.menuPortfolio || "WORKS";
-            document.getElementById('m-contact').value = s.menuContact || "CONTACT";
-        } catch(e) { console.log("Ayarlar okunamadı"); }
+            currentSettings = JSON.parse(b2u(d.content));
+            
+            document.getElementById('s-title').value = currentSettings.title || '';
+            document.getElementById('s-bio').value = currentSettings.bio || '';
+            document.getElementById('s-seo').value = currentSettings.seo || '';
+            document.getElementById('m-portfolio').value = currentSettings.menuPortfolio || '';
+            document.getElementById('m-contact').value = currentSettings.menuContact || '';
+            document.getElementById('s-instagram').value = currentSettings.instagram || '';
+            document.getElementById('s-whatsapp').value = currentSettings.whatsapp || '';
+            document.getElementById('s-footer').value = currentSettings.footer || '';
+            document.getElementById('s-theme').value = currentSettings.theme || '#a87f4a';
+            document.getElementById('s-maintenance').checked = currentSettings.maintenance || false;
+            
+            // Apply accent theme to dashboard if loaded
+            if(currentSettings.theme) {
+                document.documentElement.style.setProperty('--accent', currentSettings.theme);
+            }
+        } catch(e) { console.log("Ayarlar dosyası okunamadı veya henüz oluşturulmadı."); }
     }
 
     async function handleSettingsUpdate() {
         showLoading(true);
-        const d = await ghAction('content/settings.json');
-        let s = JSON.parse(b2u(d.content));
-        s.themeColor = document.getElementById('s-theme').value;
-        s.siteTitle = document.getElementById('s-title').value;
-        s.bio = document.getElementById('s-bio').value;
-        s.seoDesc = document.getElementById('s-seo').value;
-        s.instagram = document.getElementById('s-instagram').value;
-        s.whatsapp = document.getElementById('s-whatsapp').value;
-        s.footerText = document.getElementById('s-footer').value;
-        s.maintenanceMode = document.getElementById('s-maintenance').checked;
-        s.menuPortfolio = document.getElementById('m-portfolio').value;
-        s.menuContact = document.getElementById('m-contact').value;
-        await ghAction('content/settings.json', 'PUT', s, d.sha);
-        showToast("Tüm site ayarları kaydedildi!");
+        try {
+            let d, sha = null;
+            try { 
+                d = await ghAction('content/settings.json'); 
+                sha = d.sha; 
+            } catch(e) {}
+            
+            const data = {
+                title: document.getElementById('s-title').value,
+                bio: document.getElementById('s-bio').value,
+                seo: document.getElementById('s-seo').value,
+                menuPortfolio: document.getElementById('m-portfolio').value,
+                menuContact: document.getElementById('m-contact').value,
+                instagram: document.getElementById('s-instagram').value,
+                whatsapp: document.getElementById('s-whatsapp').value,
+                footer: document.getElementById('s-footer').value,
+                theme: document.getElementById('s-theme').value,
+                maintenance: document.getElementById('s-maintenance').checked
+            };
+            
+            await ghAction('content/settings.json', 'PUT', data, sha);
+            document.documentElement.style.setProperty('--accent', data.theme);
+            showToast("Site genel ayarları başarıyla güncellendi.");
+        } catch(e) { showToast("Ayarlar güncellenirken hata oluştu.", true); }
         showLoading(false);
     }
 
     async function uploadLogo() {
         const file = document.getElementById('s-logo-file').files[0];
         if(!file) return showToast("Lütfen bir logo dosyası seçin.", true);
+        
         showLoading(true);
         const reader = new FileReader();
         reader.onload = async (e) => {
             const content = e.target.result.split(',')[1];
-            let oldSha = null;
-            try { const old = await ghAction('images/logo.png'); oldSha = old.sha; } catch(e) {}
-            await fetch(`https://api.github.com/repos/${REPO}/contents/images/logo.png`, {
-                method: 'PUT',
-                headers: { 'Authorization': `token ${localStorage.getItem('uber_t')}` },
-                body: JSON.stringify({ message: "Logo Update", content, sha: oldSha })
-            });
-            showToast("Site logosu başarıyla güncellendi!");
+            try {
+                let sha = null;
+                try {
+                    const ex = await ghAction('images/logo.png');
+                    sha = ex.sha;
+                } catch(err) {}
+                
+                await fetch(`https://api.github.com/repos/${REPO}/contents/images/logo.png`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${localStorage.getItem('uber_t')}` },
+                    body: JSON.stringify({ message: `Upload/Update Site Logo`, content: content, sha: sha })
+                });
+                showToast("Logo başarıyla sunucuya yüklendi.");
+                document.getElementById('s-logo-file').value = '';
+            } catch(err) { showToast("Logo yüklenirken hata oluştu.", true); }
             showLoading(false);
         };
         reader.readAsDataURL(file);
     }
-
-    // --- ZİYARETÇİ MESAJLARI ---
-    async function refreshGuestbook() {
-        try {
-            const d = await ghAction('content/news.json');
-            const list = JSON.parse(b2u(d.content)).guestbook || [];
-            document.getElementById('stat-msg').innerText = list.length;
-            document.getElementById('guest-list').innerHTML = list.map((g, i) => `
-                <div class="item-row">
-                    <div class="item-info">
-                        <b>${g.name}</b>
-                        <small style="color:#aaa;">${g.message}</small>
-                    </div>
-                    <button class="danger" onclick="handleGuestDelete(${i})">SİL</button>
-                </div>
-            `).reverse().join('') || "<p style='color:#777;'>Henüz onaylanmış mesaj yok.</p>";
-        } catch(e) {}
-    }
-
-    async function approveNewMessage() {
-        const name = document.getElementById('new-g-name').value;
-        const msg = document.getElementById('new-g-msg').value;
-        if(!name || !msg) return showToast("İsim ve mesaj alanı boş bırakılamaz.", true);
-        showLoading(true);
-        const d = await ghAction('content/news.json');
-        let nData = JSON.parse(b2u(d.content));
-        if(!nData.guestbook) nData.guestbook = [];
-        nData.guestbook.push({ name, message: msg, date: new Date().toLocaleDateString() });
-        await ghAction('content/news.json', 'PUT', nData, d.sha);
-        document.getElementById('new-g-name').value = '';
-        document.getElementById('new-g-msg').value = '';
-        showToast("Mesaj deftere eklendi!");
-        await refreshGuestbook();
-        showLoading(false);
-    }
-
-    async function handleGuestDelete(i) {
-        showLoading(true);
-        const d = await ghAction('content/news.json');
-        let data = JSON.parse(b2u(d.content));
-        data.guestbook.splice(data.guestbook.length - 1 - i, 1);
-        await ghAction('content/news.json', 'PUT', data, d.sha);
-        showToast("Mesaj silindi.");
-        await refreshGuestbook();
-        showLoading(false);
-    }
-
-    // --- SEKME DEĞİŞTİRME ---
-    function switchTab(t, el) {
-        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-        document.getElementById('tab-'+t).classList.add('active');
-        document.querySelectorAll('.nav-link').forEach(x => x.classList.remove('active'));
-        el.classList.add('active');
-    }
-
-    // --- BAŞLANGIÇ ---
-    if(localStorage.getItem('uber_t')) { auth(); }
 </script>
 </body>
 </html>
