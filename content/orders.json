@@ -1,11 +1,3 @@
 {
-  "orders": [
-    {
-      "customerName": "hasan",
-      "contact": "5353",
-      "artwork": "Erkek Portre",
-      "date": "23.04.2026",
-      "status": "Tamamlandı"
-    }
-  ]
+  "orders": []
 }
