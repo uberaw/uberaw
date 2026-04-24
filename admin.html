@@ -578,38 +578,40 @@
                     </div>
                 </div>
             `).reverse().join('') || "<p style='color:#777;'>Henüz kayıtlı bir sipariş bulunmuyor.</p>";
-        } catch(e) {
-            document.getElementById('orders-list').innerHTML = "<p style='color:#777;'>Sipariş sistemi başlatılmamış. İlk siparişi ekleyerek başlatabilirsiniz.</p>";
-        }
+        } catch(e) { document.getElementById('orders-list').innerHTML = "Veri okunamadı veya dosya henüz oluşturulmamış."; }
     }
 
+    // --- EKSİK KALAN VE TAMAMLANAN FONKSİYONLAR ---
+    
     async function addNewOrder() {
         const name = document.getElementById('new-o-name').value;
         const contact = document.getElementById('new-o-contact').value;
-        const artworkIdx = document.getElementById('new-o-artwork').value;
-
-        if(!name || !contact || !artworkIdx) return showToast("Lütfen tüm alanları doldurun.", true);
-
-        const artwork = currentPortfolio.projects[artworkIdx].title;
-        const date = new Date().toLocaleDateString('tr-TR');
-
+        const artIdx = document.getElementById('new-o-artwork').value;
+        
+        if(!name || !contact || artIdx === "") return showToast("Lütfen tüm alanları doldurun.", true);
+        
         showLoading(true);
         try {
-            let d, data;
-            try {
-                d = await ghAction('content/orders.json');
-                data = JSON.parse(b2u(d.content));
-            } catch(e) {
-                data = { orders: [] };
-            }
-            data.orders.push({ customerName: name, contact: contact, artwork: artwork, date: date, status: 'Bekliyor' });
-            await ghAction('content/orders.json', 'PUT', data, d ? d.sha : null);
+            const artworkName = currentPortfolio.projects[artIdx].title;
+            const d = await ghAction('content/orders.json');
+            let data = JSON.parse(b2u(d.content));
+            if(!data.orders) data.orders = [];
+            
+            data.orders.push({
+                customerName: name,
+                contact: contact,
+                artwork: artworkName,
+                status: "Bekliyor",
+                date: new Date().toLocaleDateString('tr-TR')
+            });
+            
+            await ghAction('content/orders.json', 'PUT', data, d.sha);
+            showToast("Yeni sipariş başarıyla eklendi.");
             
             document.getElementById('new-o-name').value = '';
             document.getElementById('new-o-contact').value = '';
             document.getElementById('new-o-artwork').value = '';
             
-            showToast("Yeni sipariş / talep başarıyla eklendi.");
             await refreshOrders();
         } catch(e) { showToast("Sipariş eklenirken hata oluştu.", true); }
         showLoading(false);
@@ -624,12 +626,12 @@
             await ghAction('content/orders.json', 'PUT', data, d.sha);
             showToast("Sipariş durumu güncellendi.");
             await refreshOrders();
-        } catch(e) { showToast("Güncelleme hatası", true); }
+        } catch(e) { showToast("Durum güncellenirken hata oluştu.", true); }
         showLoading(false);
     }
 
     async function deleteOrder(i) {
-        if(!confirm("Bu siparişi kalıcı olarak silmek istediğinize emin misiniz?")) return;
+        if(!confirm("Bu siparişi silmek istediğinize emin misiniz?")) return;
         showLoading(true);
         try {
             const d = await ghAction('content/orders.json');
@@ -638,230 +640,188 @@
             await ghAction('content/orders.json', 'PUT', data, d.sha);
             showToast("Sipariş silindi.");
             await refreshOrders();
-        } catch(e) { showToast("Silme hatası", true); }
+        } catch(e) { showToast("Sipariş silinirken hata oluştu.", true); }
         showLoading(false);
     }
 
-    // --- SATIŞ VE SERTİFİKA ---
-    function fillSaleFields(i) {
-        if(!i) {
-            document.getElementById('edit-price').value = '';
-            document.getElementById('edit-cert').value = '';
+    function fillSaleFields(val) {
+        if(val === "") {
+            document.getElementById('edit-price').value = "";
+            document.getElementById('edit-cert').value = "";
             return;
         }
-        const p = currentPortfolio.projects[i];
-        document.getElementById('edit-price').value = p.price || '';
-        document.getElementById('edit-cert').value = p.certCode || `UBE-RAW-${Math.floor(1000 + Math.random() * 9000)}`;
+        const p = currentPortfolio.projects[val];
+        document.getElementById('edit-price').value = p.price || "";
+        document.getElementById('edit-cert').value = p.certCode || "";
     }
 
     async function handleSaleUpdate() {
-        const i = document.getElementById('sale-select').value;
-        if(!i) return showToast("Önce bir eser seçmelisiniz.", true);
-
+        const val = document.getElementById('sale-select').value;
+        if(val === "") return showToast("Lütfen önce sertifikalandırılacak eseri seçin.", true);
+        
         showLoading(true);
         try {
             const d = await ghAction('content/portfolio.json');
             let data = JSON.parse(b2u(d.content));
-            data.projects[i].isSale = true;
-            data.projects[i].price = document.getElementById('edit-price').value;
-            data.projects[i].certCode = document.getElementById('edit-cert').value;
-            await ghAction('content/portfolio.json', 'PUT', data, d.sha);
             
-            showToast("Satış ve sertifika bilgileri sisteme kaydedildi.");
+            data.projects[val].price = document.getElementById('edit-price').value;
+            data.projects[val].certCode = document.getElementById('edit-cert').value;
+            data.projects[val].owner = document.getElementById('edit-owner').value;
+            data.projects[val].isSale = true;
+            
+            await ghAction('content/portfolio.json', 'PUT', data, d.sha);
+            showToast("Satış ve sertifika bilgileri güncellendi.");
             await refreshInventory();
-            document.getElementById('edit-owner').value = ''; 
-        } catch(e) { showToast("Kaydetme hatası", true); }
+        } catch(e) { showToast("Bilgiler güncellenirken hata oluştu.", true); }
         showLoading(false);
     }
 
     function generatePDF() {
-        const i = document.getElementById('sale-select').value;
-        if(!i) return showToast("Lütfen sertifikalandırılacak eseri seçin.", true);
+        const val = document.getElementById('sale-select').value;
+        if(val === "") return showToast("Sertifikasını indirmek istediğiniz eseri seçin.", true);
         
-        const p = currentPortfolio.projects[i];
-        const owner = document.getElementById('edit-owner').value || 'Değerli Koleksiyoner';
-        const certCode = document.getElementById('edit-cert').value || 'UBE-RAW-0000';
+        const p = currentPortfolio.projects[val];
+        const owner = document.getElementById('edit-owner').value;
         
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ orientation: "landscape" });
+        const doc = new jsPDF();
         
-        // Basit Sertifika Tasarımı
-        doc.setFillColor(5, 5, 5);
-        doc.rect(0, 0, 297, 210, 'F');
-        doc.setDrawColor(168, 127, 74); // accent color
-        doc.setLineWidth(2);
-        doc.rect(10, 10, 277, 190);
-        
-        doc.setTextColor(168, 127, 74);
-        doc.setFontSize(30);
-        doc.text("CERTIFICATE OF AUTHENTICITY", 148.5, 50, { align: "center" });
-        
-        doc.setTextColor(200, 200, 200);
-        doc.setFontSize(14);
-        doc.text("This document certifies that the artwork detailed below is an original creation.", 148.5, 75, { align: "center" });
-        
-        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
         doc.setFontSize(22);
-        doc.text(p.title.toUpperCase(), 148.5, 105, { align: "center" });
+        doc.text("UBE RAW - ORIJINALLIK SERTIFIKASI", 20, 30);
         
-        doc.setTextColor(150, 150, 150);
-        doc.setFontSize(12);
-        doc.text(`Certificate No: ${certCode}`, 148.5, 125, { align: "center" });
-        doc.text(`Medium/Category: ${p.category || 'Mixed Media'}`, 148.5, 135, { align: "center" });
-        doc.text(`Acquired By: ${owner}`, 148.5, 145, { align: "center" });
-        
-        doc.setTextColor(168, 127, 74);
+        doc.setFont("helvetica", "normal");
         doc.setFontSize(14);
-        doc.text("UBE RAW STUDIO", 148.5, 180, { align: "center" });
-        doc.setFontSize(10);
-        doc.setTextColor(100, 100, 100);
-        doc.text(`Issued Date: ${new Date().toLocaleDateString('tr-TR')}`, 148.5, 190, { align: "center" });
+        doc.text(`Eser Adı: ${p.title}`, 20, 50);
+        doc.text(`Kategori: ${p.category || '-'}`, 20, 60);
+        doc.text(`Sertifika Numarası: ${p.certCode || '-'}`, 20, 70);
+        doc.text(`Koleksiyoner: ${owner || '-'}`, 20, 80);
+        doc.text(`Tarih: ${new Date().toLocaleDateString('tr-TR')}`, 20, 90);
         
-        doc.save(`UBE_RAW_CERTIFICATE_${certCode}.pdf`);
+        doc.save(`${p.title}-Sertifika.pdf`);
     }
 
-    // --- ZİYARETÇİ DEFTERİ ---
     async function refreshGuestbook() {
         try {
             const d = await ghAction('content/guestbook.json');
             const list = JSON.parse(b2u(d.content)).messages || [];
             
             document.getElementById('stat-msg').innerText = list.length;
-            document.getElementById('guest-list').innerHTML = list.map((m, i) => `
+            document.getElementById('guest-list').innerHTML = list.map(m => `
                 <div class="item-row">
                     <div class="item-info">
                         <b>${m.name}</b>
-                        <small style="color:#ccc; font-style: italic;">"${m.message}"</small>
-                        <small style="color:var(--accent);">${m.date}</small>
-                    </div>
-                    <div class="btn-group">
-                        <button class="danger" onclick="deleteMessage(${i})">SİL</button>
+                        <small style="color:#aaa;">${m.message}</small>
                     </div>
                 </div>
-            `).reverse().join('') || "<p style='color:#777;'>Ziyaretçi defteri henüz boş.</p>";
-        } catch(e) {
-            document.getElementById('guest-list').innerHTML = "<p style='color:#777;'>Ziyaretçi defteri sistemi başlatılmamış.</p>";
-        }
+            `).reverse().join('') || "<p style='color:#777;'>Henüz onaylanmış bir ziyaretçi mesajı bulunmuyor.</p>";
+        } catch(e) { document.getElementById('guest-list').innerHTML = "Mesajlar okunamadı veya dosya henüz oluşturulmamış."; }
     }
 
     async function approveNewMessage() {
         const name = document.getElementById('new-g-name').value;
         const msg = document.getElementById('new-g-msg').value;
-
-        if(!name || !msg) return showToast("İsim ve mesaj alanları zorunludur.", true);
-
+        if(!name || !msg) return showToast("Ziyaretçi adı ve mesaj içeriği zorunludur.", true);
+        
         showLoading(true);
         try {
-            let d, data;
-            try {
-                d = await ghAction('content/guestbook.json');
-                data = JSON.parse(b2u(d.content));
-            } catch(e) { data = { messages: [] }; }
+            const d = await ghAction('content/guestbook.json');
+            let data = JSON.parse(b2u(d.content));
+            if(!data.messages) data.messages = [];
             
-            data.messages.push({ name: name, message: msg, date: new Date().toLocaleDateString('tr-TR') });
-            await ghAction('content/guestbook.json', 'PUT', data, d ? d.sha : null);
+            data.messages.push({
+                name: name,
+                message: msg,
+                date: new Date().toLocaleDateString('tr-TR')
+            });
+            
+            await ghAction('content/guestbook.json', 'PUT', data, d.sha);
+            showToast("Ziyaretçi mesajı onaylandı ve eklendi.");
             
             document.getElementById('new-g-name').value = '';
             document.getElementById('new-g-msg').value = '';
-            showToast("Referans/Mesaj başarıyla eklendi.");
             await refreshGuestbook();
         } catch(e) { showToast("Mesaj eklenirken hata oluştu.", true); }
         showLoading(false);
     }
 
-    async function deleteMessage(i) {
-        if(!confirm("Bu mesajı kalıcı olarak silmek istediğinize emin misiniz?")) return;
-        showLoading(true);
-        try {
-            const d = await ghAction('content/guestbook.json');
-            let data = JSON.parse(b2u(d.content));
-            data.messages.splice(i, 1);
-            await ghAction('content/guestbook.json', 'PUT', data, d.sha);
-            showToast("Mesaj silindi.");
-            await refreshGuestbook();
-        } catch(e) { showToast("Silme hatası", true); }
-        showLoading(false);
-    }
-
-    // --- SİTE AYARLARI ---
     async function loadSettings() {
         try {
             const d = await ghAction('content/settings.json');
-            currentSettings = JSON.parse(b2u(d.content));
+            const s = JSON.parse(b2u(d.content));
             
-            document.getElementById('s-title').value = currentSettings.title || '';
-            document.getElementById('s-bio').value = currentSettings.bio || '';
-            document.getElementById('s-seo').value = currentSettings.seo || '';
-            document.getElementById('m-portfolio').value = currentSettings.menuPortfolio || '';
-            document.getElementById('m-contact').value = currentSettings.menuContact || '';
-            document.getElementById('s-instagram').value = currentSettings.instagram || '';
-            document.getElementById('s-whatsapp').value = currentSettings.whatsapp || '';
-            document.getElementById('s-footer').value = currentSettings.footer || '';
-            document.getElementById('s-theme').value = currentSettings.theme || '#a87f4a';
-            document.getElementById('s-maintenance').checked = currentSettings.maintenance || false;
+            document.getElementById('s-title').value = s.title || "";
+            document.getElementById('s-bio').value = s.bio || "";
+            document.getElementById('s-seo').value = s.seo || "";
+            document.getElementById('m-portfolio').value = s.menuPortfolio || "";
+            document.getElementById('m-contact').value = s.menuContact || "";
+            document.getElementById('s-instagram').value = s.instagram || "";
+            document.getElementById('s-whatsapp').value = s.whatsapp || "";
+            document.getElementById('s-footer').value = s.footer || "";
+            document.getElementById('s-theme').value = s.theme || "#a87f4a";
+            document.getElementById('s-maintenance').checked = s.maintenance || false;
             
-            // Apply accent theme to dashboard if loaded
-            if(currentSettings.theme) {
-                document.documentElement.style.setProperty('--accent', currentSettings.theme);
-            }
-        } catch(e) { console.log("Ayarlar dosyası okunamadı veya henüz oluşturulmadı."); }
+            document.documentElement.style.setProperty('--accent', s.theme || "#a87f4a");
+        } catch(e) { console.log("Site ayarları yüklenemedi."); }
     }
 
     async function handleSettingsUpdate() {
         showLoading(true);
         try {
-            let d, sha = null;
-            try { 
-                d = await ghAction('content/settings.json'); 
-                sha = d.sha; 
-            } catch(e) {}
+            const d = await ghAction('content/settings.json');
+            let data = JSON.parse(b2u(d.content));
             
-            const data = {
-                title: document.getElementById('s-title').value,
-                bio: document.getElementById('s-bio').value,
-                seo: document.getElementById('s-seo').value,
-                menuPortfolio: document.getElementById('m-portfolio').value,
-                menuContact: document.getElementById('m-contact').value,
-                instagram: document.getElementById('s-instagram').value,
-                whatsapp: document.getElementById('s-whatsapp').value,
-                footer: document.getElementById('s-footer').value,
-                theme: document.getElementById('s-theme').value,
-                maintenance: document.getElementById('s-maintenance').checked
-            };
+            data.title = document.getElementById('s-title').value;
+            data.bio = document.getElementById('s-bio').value;
+            data.seo = document.getElementById('s-seo').value;
+            data.menuPortfolio = document.getElementById('m-portfolio').value;
+            data.menuContact = document.getElementById('m-contact').value;
+            data.instagram = document.getElementById('s-instagram').value;
+            data.whatsapp = document.getElementById('s-whatsapp').value;
+            data.footer = document.getElementById('s-footer').value;
+            data.theme = document.getElementById('s-theme').value;
+            data.maintenance = document.getElementById('s-maintenance').checked;
             
-            await ghAction('content/settings.json', 'PUT', data, sha);
+            await ghAction('content/settings.json', 'PUT', data, d.sha);
+            
             document.documentElement.style.setProperty('--accent', data.theme);
-            showToast("Site genel ayarları başarıyla güncellendi.");
+            showToast("Tüm site ayarları başarıyla güncellendi!");
         } catch(e) { showToast("Ayarlar güncellenirken hata oluştu.", true); }
         showLoading(false);
     }
 
     async function uploadLogo() {
-        const file = document.getElementById('s-logo-file').files[0];
-        if(!file) return showToast("Lütfen bir logo dosyası seçin.", true);
+        const fileInput = document.getElementById('s-logo-file');
+        if(!fileInput.files.length) return showToast("Lütfen yüklemek için bir logo dosyası seçin.", true);
         
         showLoading(true);
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const content = e.target.result.split(',')[1];
-            try {
+        try {
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async (event) => {
+                const base64 = event.target.result.split(',')[1];
+                const fileName = `images/logo.png`; 
+                
                 let sha = null;
                 try {
-                    const ex = await ghAction('images/logo.png');
-                    sha = ex.sha;
-                } catch(err) {}
+                    const info = await ghAction(fileName);
+                    sha = info.sha;
+                } catch(e) {} // Dosya henüz yoksa hatayı yoksay
                 
-                await fetch(`https://api.github.com/repos/${REPO}/contents/images/logo.png`, {
+                await fetch(`https://api.github.com/repos/${REPO}/contents/${fileName}`, {
                     method: 'PUT',
                     headers: { 'Authorization': `token ${localStorage.getItem('uber_t')}` },
-                    body: JSON.stringify({ message: `Upload/Update Site Logo`, content: content, sha: sha })
+                    body: JSON.stringify({ message: `Logo Update`, content: base64, sha })
                 });
-                showToast("Logo başarıyla sunucuya yüklendi.");
-                document.getElementById('s-logo-file').value = '';
-            } catch(err) { showToast("Logo yüklenirken hata oluştu.", true); }
+                
+                showToast("Logo başarıyla yüklendi!");
+                showLoading(false);
+            };
+        } catch(e) {
+            showToast("Logo yüklenirken bir hata oluştu.", true);
             showLoading(false);
-        };
-        reader.readAsDataURL(file);
+        }
     }
 </script>
 </body>
