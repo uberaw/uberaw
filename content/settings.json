@@ -1,15 +1,12 @@
 {
-  "siteTitle": "UBE-RAW | Art & Design",
-  "logoUrl": "images/logo.png",
-  "footerText": "2026 UBE-RAW",
-  "contactEmail": "",
+  "title": "",
+  "bio": "Resim, kişiliğimin sonsuz süren bir dakikasıdır. Salvador Dali",
+  "seo": "",
+  "menuPortfolio": "WORKS",
+  "menuContact": "CONTACT",
   "instagram": "",
   "whatsapp": "",
-  "siteDesc": "",
-  "bio": "Resim, kişiliğimin sonsuz süren bir dakikasıdır. - Salvador Dali",
-  "analyticsId": "",
-  "maintenanceMode": false,
-  "themeColor": "#c26700",
-  "menuPortfolio": "WORKS",
-  "menuContact": "CONTACT"
+  "footer": "",
+  "theme": "#a87f4a",
+  "maintenance": false
 }
