@@ -27,16 +27,6 @@
       "createdDate": "19.04.2026",
       "addedDate": "28.04.2026 00:10:48",
       "exhibitions": []
-    },
-    {
-      "title": "Plastic Age Series",
-      "category": "Sculpture",
-      "image": "images/uploads/sample.jpg",
-      "description": "Sample description",
-      "price": "5000TL",
-      "date": "2026",
-      "certCode": "UBE-001",
-      "isDeleted": true
     }
   ]
 }
