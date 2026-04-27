@@ -1,4 +1,16 @@
 {
-  "announcements": [],
-  "guestbook": []
+  "announcements": [
+    {
+      "title": "Yeni Sergi Yakında!",
+      "content": "Kaide Studio & Brew açılışı için hazırlıklarımız devam ediyor.",
+      "date": "2026-04-28"
+    }
+  ],
+  "guestbook": [
+    {
+      "name": "Sistem",
+      "content": "Hoş geldiniz.",
+      "date": "2026-04-28"
+    }
+  ]
 }
