@@ -6,7 +6,7 @@
     <meta name="description" id="meta-desc" content="UBE RAW | Art & Design Studio">
     <title id="site-title">UBE RAW | Art & Design Studio</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Inter:wght@200;300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Inter:wght@200;400;600&display=swap" rel="stylesheet">
     
     <style>
         :root { 
@@ -45,23 +45,23 @@
 
         /* --- HEADER --- */
         header { 
-            padding: 40px; 
+            padding: 30px 5%; 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             border-bottom: 1px solid var(--border);
-            position: sticky; top: 0; background: rgba(5,5,5,0.8); backdrop-filter: blur(10px); z-index: 100;
+            position: sticky; top: 0; background: rgba(5,5,5,0.8); backdrop-filter: blur(15px); z-index: 100;
         }
         .logo { 
             font-family: 'Cormorant Garamond', serif; 
-            font-size: 26px; 
-            letter-spacing: 5px; 
+            font-size: 24px; 
+            letter-spacing: 4px; 
             color: var(--accent); 
             text-decoration: none; 
             font-weight: 500;
             text-transform: uppercase;
         }
-        nav { display: flex; gap: 30px; }
+        nav { display: flex; gap: 25px; }
         nav a { 
             color: var(--text); 
             text-decoration: none; 
@@ -75,48 +75,52 @@
 
         /* --- HERO --- */
         .hero { 
-            padding: 120px 40px; 
+            padding: 100px 5%; 
             text-align: center; 
-            max-width: 900px; 
+            max-width: 1000px; 
             margin: 0 auto; 
         }
         .hero h1 { 
             font-family: 'Cormorant Garamond', serif; 
-            font-size: clamp(32px, 6vw, 54px); 
+            font-size: clamp(28px, 5vw, 48px); 
             font-weight: 300; 
             margin-bottom: 30px; 
             font-style: italic; 
             color: #fff;
-            line-height: 1.2;
+            line-height: 1.3;
         }
         .hero p { 
-            font-size: 13px; 
+            font-size: 12px; 
             letter-spacing: 1px; 
             color: #777; 
-            max-width: 600px; 
+            max-width: 700px; 
             margin: 0 auto;
+            text-transform: uppercase;
         }
 
-        /* --- PORTFOLIO --- */
+        /* --- GRID SİSTEMİ --- */
         .section-title { 
-            padding: 60px 40px 20px; 
-            text-align: center; 
+            padding: 60px 5% 20px; 
             font-family: 'Cormorant Garamond', serif; 
-            font-size: 32px; 
-            letter-spacing: 6px; 
+            font-size: 28px; 
+            letter-spacing: 5px; 
             color: var(--accent); 
-            text-transform: uppercase; 
+            text-transform: uppercase;
+            text-align: center;
         }
+        
         .portfolio-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
             gap: 1px; 
-            padding: 1px;
             background: var(--border);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
         }
+
         .project-card { 
             position: relative; 
-            aspect-ratio: 4/5; 
+            aspect-ratio: 1/1; 
             overflow: hidden; 
             cursor: pointer; 
             background: #000; 
@@ -124,20 +128,41 @@
         .project-card img { 
             width: 100%; height: 100%; 
             object-fit: cover; 
-            transition: 1.5s cubic-bezier(0.19, 1, 0.22, 1);
-            opacity: 0.8;
+            transition: 1.2s cubic-bezier(0.2, 1, 0.3, 1);
+            opacity: 0.7;
         }
-        .project-card:hover img { transform: scale(1.05); opacity: 1; }
+        .project-card:hover img { transform: scale(1.08); opacity: 1; }
         
         .project-info { 
             position: absolute; inset: 0; 
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); 
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%); 
             display: flex; flex-direction: column; justify-content: flex-end; 
-            padding: 40px; opacity: 0; transition: 0.5s; 
+            padding: 30px; opacity: 0; transition: 0.4s; 
         }
         .project-card:hover .project-info { opacity: 1; }
-        .project-info h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #fff; margin-bottom: 5px; }
-        .project-info p { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); }
+        .project-info h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: #fff; }
+        .project-info p { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); }
+
+        /* --- BİLGİ ALANLARI (News, Workshops, Guestbook) --- */
+        .content-sections { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .info-box { padding: 60px 5%; border-right: 1px solid var(--border); }
+        .info-box:last-child { border-right: none; }
+        .info-box h3 { 
+            font-family: 'Cormorant Garamond', serif; 
+            font-size: 20px; margin-bottom: 30px; 
+            color: var(--accent); letter-spacing: 3px; text-transform: uppercase;
+        }
+
+        .item-row { padding: 20px 0; border-bottom: 1px solid var(--border); }
+        .item-row:last-child { border-bottom: none; }
+        .item-row small { color: var(--accent); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
+        .item-row h4 { font-size: 15px; color: #eee; margin: 5px 0; font-weight: 400; }
+        .item-row p { font-size: 13px; color: #666; }
 
         /* --- MODAL --- */
         .modal { 
@@ -148,133 +173,103 @@
             overflow-y: auto; 
         }
         .close-modal { 
-            position: fixed; top: 30px; right: 40px; 
-            cursor: pointer; font-size: 40px; color: #fff; z-index: 1100;
-            font-weight: 200;
+            position: fixed; top: 25px; right: 30px; 
+            cursor: pointer; font-size: 35px; color: #fff; z-index: 1100;
         }
         .modal-content { 
-            max-width: 1100px; margin: 100px auto; 
-            display: grid; grid-template-columns: 1.5fr 1fr; gap: 60px; padding: 0 40px;
+            max-width: 1200px; margin: 80px auto; 
+            display: grid; grid-template-columns: 1.2fr 1fr; gap: 50px; padding: 0 5%;
         }
-        .modal-images { display: flex; flex-direction: column; gap: 20px; }
+        .modal-images { display: flex; flex-direction: column; gap: 15px; }
         .modal-images img { width: 100%; border: 1px solid var(--border); }
         
-        .modal-details { position: sticky; top: 140px; height: fit-content; }
-        .modal-details h2 { font-family: 'Cormorant Garamond', serif; font-size: 42px; color: var(--accent); margin-bottom: 20px; }
-        .modal-details .desc { color: #888; font-size: 15px; margin-bottom: 30px; white-space: pre-line; }
-        .price-tag { 
-            display: inline-block; padding: 12px 30px; 
-            border: 1px solid var(--accent); color: var(--accent); 
-            font-size: 13px; letter-spacing: 2px;
-        }
+        .modal-details { position: sticky; top: 100px; height: fit-content; }
+        .modal-details h2 { font-family: 'Cormorant Garamond', serif; font-size: 36px; color: var(--accent); margin-bottom: 15px; }
+        .modal-details .price { font-size: 18px; color: #fff; margin-bottom: 20px; display: block; }
+        .modal-details .desc { color: #888; font-size: 15px; white-space: pre-line; }
 
-        /* --- INFO SECTIONS --- */
-        .info-grid { 
-            display: grid; grid-template-columns: 1fr 1fr; 
-            gap: 0; border-top: 1px solid var(--border); 
-        }
-        .info-box { padding: 80px 40px; border-right: 1px solid var(--border); }
-        .info-box:last-child { border-right: none; }
-        .info-box h3 { 
-            font-family: 'Cormorant Garamond', serif; 
-            font-size: 24px; margin-bottom: 40px; 
-            color: var(--accent); letter-spacing: 4px; text-transform: uppercase;
-        }
-        .list-item { padding: 25px 0; border-bottom: 1px solid var(--border); }
-        .list-item:last-child { border-bottom: none; }
-        .list-item small { color: var(--accent); display: block; margin-bottom: 8px; font-size: 10px; letter-spacing: 1px; }
-        .list-item h4 { font-weight: 500; font-size: 16px; color: #eee; }
-
-        /* --- CERTIFICATE & FOOTER --- */
-        .cert-section { 
-            padding: 100px 40px; text-align: center; 
-            background: #030303; border-top: 1px solid var(--border); 
+        /* --- SERTİFİKA & FOOTER --- */
+        .cert-verify { 
+            padding: 80px 5%; text-align: center; background: #030303; 
         }
         .cert-input { 
             background: transparent; border: none; border-bottom: 1px solid var(--border);
-            padding: 15px; color: #fff; width: 100%; max-width: 400px; 
-            text-align: center; font-size: 18px; font-family: 'Cormorant Garamond', serif;
-            margin-bottom: 20px; transition: 0.3s;
+            padding: 10px; color: #fff; width: 100%; max-width: 300px; 
+            text-align: center; font-size: 16px; margin-bottom: 20px;
         }
-        .cert-input:focus { border-color: var(--accent); }
-        .cert-btn { 
-            background: var(--accent); border: none; padding: 15px 40px; 
-            color: #000; cursor: pointer; font-weight: 700; font-size: 11px; 
-            letter-spacing: 2px; transition: 0.3s;
+        .btn { 
+            background: var(--accent); border: none; padding: 12px 30px; 
+            color: #000; cursor: pointer; font-weight: 600; font-size: 11px; 
+            letter-spacing: 2px; text-transform: uppercase;
         }
-        .cert-btn:hover { opacity: 0.8; }
 
-        footer { padding: 80px 40px; text-align: center; border-top: 1px solid var(--border); }
-        .social-links { display: flex; justify-content: center; gap: 30px; margin-bottom: 40px; }
-        .social-links a { color: #555; text-decoration: none; font-size: 11px; letter-spacing: 2px; transition: 0.3s; }
-        .social-links a:hover { color: var(--accent); }
-        .copyright { font-size: 9px; letter-spacing: 2px; color: #444; text-transform: uppercase; }
+        footer { padding: 60px 5%; text-align: center; border-top: 1px solid var(--border); }
+        .socials { display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; }
+        .socials a { color: #555; text-decoration: none; font-size: 10px; letter-spacing: 1px; }
+        .socials a:hover { color: var(--accent); }
 
-        /* --- MOBILE --- */
-        @media (max-width: 900px) {
-            header { flex-direction: column; gap: 20px; padding: 20px; }
-            nav { gap: 15px; }
-            .modal-content { grid-template-columns: 1fr; margin-top: 60px; }
-            .modal-details { position: relative; top: 0; padding-bottom: 60px; }
-            .info-grid { grid-template-columns: 1fr; }
-            .info-box { border-right: none; border-bottom: 1px solid var(--border); }
-            .hero { padding: 60px 20px; }
+        @media (max-width: 800px) {
+            .modal-content { grid-template-columns: 1fr; }
+            .modal-details { position: relative; top: 0; }
+            header { flex-direction: column; gap: 15px; }
         }
     </style>
 </head>
 <body>
 
     <div id="maintenance-screen">
-        <h1 id="m-title">STÜDYO GÜNCELLENİYOR</h1>
-        <p id="m-desc">Kısa bir süre sonra tekrar görüşmek üzere.</p>
+        <h1 id="m-title">GÜNCELENİYOR</h1>
+        <p id="m-desc">Sanat durağımız kısa bir süreliğine bakımda.</p>
     </div>
 
     <header>
         <a href="#" class="logo" id="header-logo">UBE RAW</a>
-        <nav>
-            <a href="#works" id="menu-portfolio">WORKS</a>
-            <a href="#news">JOURNAL</a>
-            <a href="#workshops">WORKSHOPS</a>
-            <a href="#contact" id="menu-contact">CONTACT</a>
+        <nav id="main-nav">
+            <a href="#portfolio" id="nav-port">WORKS</a>
+            <a href="#info">JOURNAL</a>
+            <a href="#contact" id="nav-cont">CONTACT</a>
         </nav>
     </header>
 
     <section class="hero">
-        <h1 id="hero-bio">"Sanat, ruhun her yerini temizleyen bir toz alıcıdır."</h1>
-        <p id="hero-desc">UBE RAW | Art & Design Studio</p>
+        <h1 id="hero-bio">Yükleniyor...</h1>
+        <p id="hero-desc">Art & Design Studio</p>
     </section>
 
-    <div class="section-title" id="works">PORTFOLIO</div>
+    <div class="section-title" id="portfolio">PORTFOLIO</div>
     <div class="portfolio-grid" id="portfolio-grid"></div>
 
-    <div class="info-grid">
-        <div class="info-box" id="news">
-            <h3>JOURNAL</h3>
-            <div id="announcements-list"></div>
+    <section class="content-sections" id="info">
+        <div class="info-box">
+            <h3>ANNOUNCEMENTS</h3>
+            <div id="news-list"></div>
         </div>
-
-        <div class="info-box" id="workshops">
+        <div class="info-box">
             <h3>WORKSHOPS</h3>
-            <div id="workshops-list"></div>
+            <div id="workshop-list"></div>
         </div>
-    </div>
+        <div class="info-box">
+            <h3>VISITORS</h3>
+            <div id="guest-list"></div>
+        </div>
+    </section>
 
-    <section class="cert-section">
-        <h3 style="margin-bottom:30px; font-family:'Cormorant Garamond'; letter-spacing:4px; font-weight:300;">ESER DOĞRULAMA</h3>
-        <input type="text" id="cert-code" class="cert-input" placeholder="Sertifika Numarasını Giriniz">
+    <section class="cert-verify">
+        <h3 style="margin-bottom:20px; font-family:'Cormorant Garamond'; letter-spacing:3px;">ESER DOĞRULAMA</h3>
+        <input type="text" id="cert-code" class="cert-input" placeholder="Sertifika No Giriniz">
         <br>
-        <button class="cert-btn" onclick="verifyCert()">SORGULA</button>
-        <div id="cert-result" style="margin-top:30px; font-size:13px; letter-spacing:1px;"></div>
+        <button class="btn" onclick="checkCert()">DOĞRULA</button>
+        <p id="cert-result" style="margin-top:20px; font-size:12px;"></p>
     </section>
 
     <footer id="contact">
-        <div class="social-links" id="social-links"></div>
-        <div class="copyright" id="footer-text">UBE RAW © 2026 | ALL RIGHTS RESERVED</div>
+        <div class="socials" id="social-links"></div>
+        <div style="font-size:9px; color:#444; letter-spacing:2px;" id="footer-copy"></div>
     </footer>
 
     <div id="project-modal" class="modal">
         <span class="close-modal" onclick="closeModal()">×</span>
-        <div class="modal-content" id="modal-content"></div>
+        <div class="modal-content" id="modal-inner"></div>
     </div>
 
     <script>
@@ -282,57 +277,61 @@
 
         async function init() {
             try {
-                // Verileri Admin Panelinin kaydettiği konumlardan çek
-                const [sRes, pRes, nRes, wRes] = await Promise.all([
-                    fetch('content/settings.json').then(r => r.json()),
-                    fetch('content/portfolio.json').then(r => r.json()),
-                    fetch('content/news.json').then(r => r.json()),
-                    fetch('content/workshops.json').then(r => r.json())
+                const fetchJson = async (url) => {
+                    const r = await fetch(url + '?v=' + Date.now());
+                    return r.ok ? r.json() : null;
+                };
+
+                const [s, p, n, w] = await Promise.all([
+                    fetchJson('content/settings.json'),
+                    fetchJson('content/portfolio.json'),
+                    fetchJson('content/news.json'),
+                    fetchJson('content/workshops.json')
                 ]);
 
-                siteData.settings = sRes;
-                siteData.portfolio = pRes.projects || [];
-                siteData.news = nRes;
-                siteData.workshops = wRes.workshops || [];
+                siteData.settings = s || {};
+                siteData.portfolio = p ? (p.projects || []) : [];
+                siteData.news = n || { announcements: [], guestbook: [] };
+                siteData.workshops = w ? (w.workshops || []) : [];
 
-                applySettings();
-                renderPortfolio();
-                renderNews();
-                renderWorkshops();
-                renderSocials();
-
-            } catch (e) {
-                console.error("Yükleme Hatası:", e);
-                // Eğer JSON'lar yoksa boş başlat
+                renderAll();
+            } catch (err) {
+                console.error("Veri yükleme hatası:", err);
             }
         }
 
-        function applySettings() {
+        function renderAll() {
             const s = siteData.settings;
-            if(!s) return;
-
-            document.documentElement.style.setProperty('--accent', s.theme || '#a87f4a');
-            document.title = s.title || "UBE RAW";
-            document.getElementById('header-logo').innerText = s.title || "UBE RAW";
-            document.getElementById('hero-bio').innerText = s.bio || "";
-            document.getElementById('footer-text').innerText = s.footer || "UBE RAW © 2026";
             
-            if(s.menuPortfolio) document.getElementById('menu-portfolio').innerText = s.menuPortfolio;
-            if(s.menuContact) document.getElementById('menu-contact').innerText = s.menuContact;
-
-            if(s.maintenance) {
-                document.getElementById('maintenance-screen').style.display = 'flex';
+            // Ayarlar
+            if(s.theme) document.documentElement.style.setProperty('--accent', s.theme);
+            if(s.title) {
+                document.getElementById('site-title').innerText = s.title;
+                document.getElementById('header-logo').innerText = s.title;
             }
-        }
+            if(s.bio) document.getElementById('hero-bio').innerText = s.bio;
+            if(s.footer) document.getElementById('footer-copy').innerText = s.footer;
+            if(s.maintenance) document.getElementById('maintenance-screen').style.display = 'flex';
+            
+            if(s.menuPortfolio) document.getElementById('nav-port').innerText = s.menuPortfolio;
+            if(s.menuContact) document.getElementById('nav-cont').innerText = s.menuContact;
 
-        function renderPortfolio() {
+            // Sosyal Medya
+            const socialWrap = document.getElementById('social-links');
+            let socHtml = '';
+            if(s.instagram) socHtml += `<a href="https://instagram.com/${s.instagram}" target="_blank">INSTAGRAM</a>`;
+            if(s.behance) socHtml += `<a href="https://behance.net/${s.behance}" target="_blank">BEHANCE</a>`;
+            if(s.whatsapp) socHtml += `<a href="https://wa.me/${s.whatsapp}" target="_blank">WHATSAPP</a>`;
+            if(s.email) socHtml += `<a href="mailto:${s.email}">EMAIL</a>`;
+            socialWrap.innerHTML = socHtml;
+
+            // Portfolyo
             const grid = document.getElementById('portfolio-grid');
             grid.innerHTML = siteData.portfolio.map(p => {
-                const images = p.image ? p.image.split(',') : [];
-                const cover = images[0] || 'images/default.jpg';
+                const firstImg = p.image ? p.image.split(',')[0].trim() : '';
                 return `
                     <div class="project-card" onclick="openProject('${p.title}')">
-                        <img src="${cover}" alt="${p.title}" loading="lazy">
+                        <img src="${firstImg}" alt="${p.title}" loading="lazy">
                         <div class="project-info">
                             <p>${p.category}</p>
                             <h3>${p.title}</h3>
@@ -340,6 +339,38 @@
                     </div>
                 `;
             }).join('');
+
+            // Duyurular
+            const nList = document.getElementById('news-list');
+            const anns = siteData.news.announcements || [];
+            nList.innerHTML = anns.length ? anns.map(a => `
+                <div class="item-row">
+                    <small>${a.date}</small>
+                    <h4>${a.title}</h4>
+                    <p>${a.content}</p>
+                </div>
+            `).join('') : '<p style="font-size:11px; color:#444;">Henüz duyuru yok.</p>';
+
+            // Atölyeler
+            const wList = document.getElementById('workshop-list');
+            wList.innerHTML = siteData.workshops.length ? siteData.workshops.map(w => `
+                <div class="item-row">
+                    <small>${w.date} | ${w.location}</small>
+                    <h4>${w.name}</h4>
+                    <p>Kontenjan: ${w.enrolled || 0} / ${w.capacity}</p>
+                </div>
+            `).join('') : '<p style="font-size:11px; color:#444;">Planlanmış atölye yok.</p>';
+
+            // Ziyaretçi Defteri
+            const gList = document.getElementById('guest-list');
+            const guests = siteData.news.guestbook || [];
+            gList.innerHTML = guests.length ? guests.map(g => `
+                <div class="item-row">
+                    <small>${g.date}</small>
+                    <h4>${g.name}</h4>
+                    <p>"${g.content}"</p>
+                </div>
+            `).join('') : '<p style="font-size:11px; color:#444;">Henüz yorum yok.</p>';
         }
 
         function openProject(title) {
@@ -347,18 +378,18 @@
             if(!p) return;
 
             const modal = document.getElementById('project-modal');
-            const content = document.getElementById('modal-content');
+            const inner = document.getElementById('modal-inner');
             
-            const imagesHtml = p.image.split(',').map(img => `<img src="${img.trim()}" loading="lazy">`).join('');
+            const imgs = p.image ? p.image.split(',').map(src => `<img src="${src.trim()}" loading="lazy">`).join('') : '';
 
-            content.innerHTML = `
-                <div class="modal-images">${imagesHtml}</div>
+            inner.innerHTML = `
+                <div class="modal-images">${imgs}</div>
                 <div class="modal-details">
-                    <p style="text-transform:uppercase; color:var(--accent); letter-spacing:3px; font-size:11px; margin-bottom:10px;">${p.category}</p>
+                    <p style="text-transform:uppercase; color:var(--accent); letter-spacing:2px; font-size:10px;">${p.category}</p>
                     <h2>${p.title}</h2>
-                    <div class="desc">${p.description || "Bu eser için bir açıklama girilmemiş."}</div>
-                    ${p.price ? `<div class="price-tag">${p.price}</div>` : ''}
-                    ${p.mapLink ? `<br><br><a href="${p.mapLink}" target="_blank" style="color:var(--accent); font-size:11px; text-decoration:none; border-bottom:1px solid;">KONUMU GÖR</a>` : ''}
+                    ${p.price ? `<span class="price">${p.price}</span>` : ''}
+                    <div class="desc">${p.description || 'Bu eser hakkında henüz detaylı bilgi girilmemiş.'}</div>
+                    ${p.mapLink ? `<br><a href="${p.mapLink}" target="_blank" class="btn" style="display:inline-block; margin-top:20px; text-decoration:none;">KONUMU GÖR</a>` : ''}
                 </div>
             `;
             
@@ -371,68 +402,20 @@
             document.body.style.overflow = 'auto';
         }
 
-        function renderNews() {
-            const list = document.getElementById('announcements-list');
-            const items = siteData.news.announcements || [];
-            if(items.length === 0) {
-                list.innerHTML = "<p style='font-size:12px; color:#444;'>Şu an için yeni bir duyuru bulunmamaktadır.</p>";
-                return;
-            }
-            list.innerHTML = items.map(a => `
-                <div class="list-item">
-                    <small>${a.date}</small>
-                    <h4>${a.title}</h4>
-                    <p style="font-size:13px; color:#666; margin-top:5px;">${a.content}</p>
-                </div>
-            `).join('');
-        }
-
-        function renderWorkshops() {
-            const list = document.getElementById('workshops-list');
-            if(siteData.workshops.length === 0) {
-                list.innerHTML = "<p style='font-size:12px; color:#444;'>Yakın zamanda planlanmış atölye çalışması bulunmuyor.</p>";
-                return;
-            }
-            list.innerHTML = siteData.workshops.map(w => `
-                <div class="list-item">
-                    <small>${w.date} · ${w.location}</small>
-                    <h4>${w.name}</h4>
-                    <p style="font-size:11px; color:#555; margin-top:5px;">Kontenjan: ${w.enrolled || 0} / ${w.capacity}</p>
-                </div>
-            `).join('');
-        }
-
-        function renderSocials() {
-            const s = siteData.settings;
-            const container = document.getElementById('social-links');
-            let html = "";
-            
-            if(s.instagram) html += `<a href="https://instagram.com/${s.instagram}" target="_blank">INSTAGRAM</a>`;
-            if(s.behance) html += `<a href="https://behance.net/${s.behance}" target="_blank">BEHANCE</a>`;
-            if(s.whatsapp) html += `<a href="https://wa.me/${s.whatsapp}" target="_blank">WHATSAPP</a>`;
-            if(s.email) html += `<a href="mailto:${s.email}">EMAIL</a>`;
-            if(s.phone) html += `<a href="tel:${s.phone}">PHONE</a>`;
-            
-            container.innerHTML = html;
-        }
-
-        function verifyCert() {
-            const val = document.getElementById('cert-code').value.trim().toUpperCase();
+        function checkCert() {
+            const code = document.getElementById('cert-code').value.trim().toUpperCase();
             const res = document.getElementById('cert-result');
-            if(!val) return;
+            if(!code) return;
 
-            const match = siteData.portfolio.find(p => p.certCode && p.certCode.toUpperCase() === val);
+            const match = siteData.portfolio.find(p => p.certCode && p.certCode.toUpperCase() === code);
             if(match) {
-                res.innerHTML = `<span style="color:#4CAF50">✔ ONAYLANDI: <strong>${match.title}</strong> isimli eser orijinal UBE RAW üretimidir.</span>`;
+                res.innerHTML = `<span style="color:#4CAF50">✔ ONAYLANDI: ${match.title}</span>`;
             } else {
-                res.innerHTML = `<span style="color:#ff4444">✘ GEÇERSİZ: Bu kod ile kayıtlı bir eser bulunamadı.</span>`;
+                res.innerHTML = `<span style="color:#ff4444">✘ KAYIT BULUNAMADI</span>`;
             }
         }
 
-        window.onclick = function(e) {
-            if (e.target == document.getElementById('project-modal')) closeModal();
-        }
-
+        window.onclick = (e) => { if(e.target.className === 'modal') closeModal(); };
         window.onload = init;
     </script>
 </body>
