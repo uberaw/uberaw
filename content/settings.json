@@ -1,14 +1,16 @@
 {
+  "title": "UBE RAW | Art & Design Studio",
   "theme": "#a87f4a",
   "maintenance": false,
-  "goal": 20,
-  "timeout": 120,
   "bio": "Resim, kişiliğimin sonsuz süren bir dakikasıdır. Salvador Dali",
+  "footer": "UBE RAW © 2026",
+  "instagram": "uberaw",
   "phone": "",
+  "whatsapp": "",
+  "behance": "",
   "email": "",
   "address": "",
-  "instagram": "",
-  "behance": "",
-  "portfolio": "",
-  "seo": ""
+  "menuPortfolio": "WORKS",
+  "menuContact": "CONTACT",
+  "ai_key": "BURAYA_ANTHROPIC_VEYA_OPENAI_ANAHTARINI_YAZ"
 }
