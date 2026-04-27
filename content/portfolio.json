@@ -69,8 +69,8 @@
       "mapLink": "",
       "price": "2500TL",
       "certCode": "UBE-RAW-3430",
-      "owner": "Ubey",
-      "isSale": true,
+      "owner": "",
+      "isSale": false,
       "isHidden": false,
       "deposit": "",
       "isAnonSale": false
