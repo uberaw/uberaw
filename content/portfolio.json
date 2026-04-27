@@ -79,13 +79,20 @@
       "costNote": "",
       "incShipping": true,
       "incVat": true,
-      "dimensions": "",
+      "dimensions": "50x70",
       "weight": "",
       "material": "",
       "stage": "Tamamlandı",
       "location": "",
       "isDraft": false,
-      "isReserved": false
+      "isReserved": false,
+      "subCategory": "",
+      "collection": "",
+      "installmentNote": "",
+      "isFeatured": true,
+      "edition": "",
+      "exhibitions": [],
+      "description": ""
     }
   ]
 }
