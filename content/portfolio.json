@@ -73,7 +73,18 @@
       "isSale": false,
       "isHidden": false,
       "deposit": "",
-      "isAnonSale": false
+      "isAnonSale": false,
+      "currency": "TRY",
+      "oldPrice": "",
+      "costNote": "",
+      "incShipping": true,
+      "incVat": true,
+      "dimensions": "",
+      "weight": "",
+      "material": "",
+      "stage": "Tamamlandı",
+      "location": "",
+      "isDraft": false
     }
   ]
 }
