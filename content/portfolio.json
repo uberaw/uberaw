@@ -16,7 +16,7 @@
       "stage": "Tamamlandı",
       "location": "",
       "edition": "",
-      "description": "",
+      "description": "karakalem",
       "certCode": "UBE-26-002",
       "isDraft": false,
       "isFeatured": true,
@@ -29,7 +29,11 @@
       "exhibitions": [
         "Sergi"
       ],
-      "isReserved": false
+      "isReserved": false,
+      "oldPrice": "2500",
+      "installmentNote": "",
+      "incShipping": true,
+      "incVat": true
     }
   ]
 }
