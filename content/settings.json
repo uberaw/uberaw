@@ -1,16 +1,20 @@
 {
-  "title": "UBE RAW | Art & Design Studio",
   "theme": "#a87f4a",
   "maintenance": false,
+  "goal": 20,
+  "timeout": 120,
   "bio": "Resim, kişiliğimin sonsuz süren bir dakikasıdır. Salvador Dali",
-  "footer": "UBE RAW © 2026",
-  "instagram": "uberaw",
   "phone": "",
-  "whatsapp": "",
-  "behance": "",
   "email": "",
   "address": "",
-  "menuPortfolio": "WORKS",
-  "menuContact": "CONTACT",
-  "ai_key": "aaaaaa"
+  "instagram": "uberaw",
+  "behance": "",
+  "portfolio": "",
+  "seo": "",
+  "gemini_key": "AIzaSyBqzsLJ56KVN6rMLQNxL3-iUmaNDnslGHg",
+  "gemini_pro": false,
+  "watermark": true,
+  "qr_cert": true,
+  "watermark_text": "UBE RAW",
+  "site_url": "https://uberaw.com/eser/"
 }
