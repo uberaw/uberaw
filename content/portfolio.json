@@ -7,7 +7,8 @@
       "description": "Sample description",
       "price": "5000TL",
       "date": "2026",
-      "certCode": "UBE-001"
+      "certCode": "UBE-001",
+      "isDeleted": true
     }
   ]
 }
