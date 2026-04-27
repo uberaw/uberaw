@@ -2,1181 +2,2215 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>UBE RAW | Studio Management v3.8 PRO</title>
+    <title>UBE RAW | Studio OS v4.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #a87f4a; --bg: #000; --card: #0d0d0d; --border: #222; --text: #ccc; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; display: flex; overflow-x: hidden; }
-        
-        /* Sidebar */
-        .sidebar { width: 260px; height: 100vh; border-right: 1px solid var(--border); padding: 30px; position: fixed; background: #050505; z-index: 100; box-sizing: border-box; }
-        .sidebar h2 { color: var(--accent); letter-spacing: 3px; font-size: 16px; margin-bottom: 40px; border-bottom: 1px solid var(--accent); padding-bottom: 10px; line-height: 1.4; }
-        .nav-link { padding: 15px 12px; cursor: pointer; font-size: 11px; text-transform: uppercase; color: #666; transition: 0.3s; margin-bottom: 5px; border-radius: 4px; display: flex; align-items: center; gap: 10px; }
-        .nav-link:hover { background: #111; color: #fff; }
-        .nav-link.active { color: #000; background: var(--accent); font-weight: bold; }
+        :root {
+            --accent: #a87f4a;
+            --accent-dim: rgba(168,127,74,0.15);
+            --bg: #000;
+            --card: #080808;
+            --card2: #0d0d0d;
+            --border: #1e1e1e;
+            --text: #bbb;
+            --text-dim: #555;
+            --sidebar-w: 240px;
+        }
+        * { box-sizing: border-box; }
+        body { background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; margin: 0; display: flex; overflow-x: hidden; font-size: 12px; }
 
-        /* Main Content */
-        .main { margin-left: 260px; padding: 60px; width: 100%; max-width: 1100px; box-sizing: border-box; }
-        .tab { display: none; animation: fadeIn 0.4s ease; } 
+        /* ── SIDEBAR ── */
+        .sidebar { width: var(--sidebar-w); height: 100vh; border-right: 1px solid var(--border); padding: 0; position: fixed; background: #020202; z-index: 100; display: flex; flex-direction: column; overflow-y: auto; }
+        .sidebar-brand { padding: 28px 24px 20px; border-bottom: 1px solid var(--border); }
+        .sidebar-brand h2 { color: var(--accent); letter-spacing: 6px; font-size: 22px; margin: 0 0 4px 0; font-family: 'Cormorant Garamond', serif; font-weight: 300; }
+        .sidebar-brand span { font-size: 9px; color: var(--text-dim); letter-spacing: 3px; text-transform: uppercase; }
+        .nav-section { padding: 16px 16px 4px; font-size: 8px; color: var(--text-dim); letter-spacing: 3px; text-transform: uppercase; }
+        .nav-link { padding: 10px 16px; cursor: pointer; font-size: 10px; text-transform: uppercase; color: #555; transition: 0.2s; margin: 1px 8px; border-radius: 3px; display: flex; align-items: center; gap: 10px; letter-spacing: 1px; }
+        .nav-link:hover { background: #0f0f0f; color: #999; }
+        .nav-link.active { color: #000; background: var(--accent); font-weight: 600; }
+        .nav-link .nav-icon { font-size: 13px; width: 18px; text-align: center; }
+        .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid var(--border); }
+        .sidebar-version { font-size: 8px; color: #333; letter-spacing: 2px; margin-bottom: 8px; text-align: center; }
+
+        /* ── MAIN ── */
+        .main { margin-left: var(--sidebar-w); padding: 40px 50px; width: calc(100% - var(--sidebar-w)); min-height: 100vh; }
+        .tab { display: none; animation: fadeIn 0.3s ease; }
         .tab.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* UI Elements */
-        .card { background: var(--card); border: 1px solid #1a1a1a; padding: 25px; margin-bottom: 25px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-        .section-title { color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px; }
-        .section-title::after { content: ""; height: 1px; background: #222; flex: 1; }
-        
-        input, select, textarea { width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 14px; margin: 10px 0; border-radius: 4px; font-family: inherit; box-sizing: border-box; transition: 0.3s; }
-        input:focus, textarea:focus, select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 1px var(--accent); }
-        input[type="checkbox"] { width: auto; }
-        
-        .btn-group { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-        button { background: var(--accent); color: #000; border: none; padding: 14px 20px; cursor: pointer; font-weight: bold; text-transform: uppercase; border-radius: 4px; transition: 0.2s; font-size: 12px; }
-        button:hover { filter: brightness(1.2); transform: translateY(-1px); }
-        button.secondary { background: #222; color: #fff; }
-        button.danger { background: #500; color: #fff; }
-        button.warning { background: #b8860b; color: #fff; }
-        button.success { background: #2e7d32; color: #fff; }
-        button.small { padding: 8px 12px; font-size: 10px; }
+        /* ── PAGE HEADER ── */
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+        .page-header h2 { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; color: #fff; margin: 0; letter-spacing: 2px; }
+        .page-header small { display: block; font-size: 9px; color: var(--text-dim); letter-spacing: 2px; margin-top: 3px; }
 
-        /* Dashboard Stats */
-        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-box { background: #0a0a0a; border: 1px solid var(--border); padding: 20px; border-radius: 8px; text-align: center; border-top: 3px solid var(--accent); }
-        .stat-box h3 { font-size: 28px; color: #fff; margin: 0 0 10px 0; }
-        .stat-box p { margin: 0; font-size: 10px; text-transform: uppercase; color: #777; letter-spacing: 1px; }
+        /* ── CARDS ── */
+        .card { background: var(--card); border: 1px solid var(--border); padding: 24px; margin-bottom: 20px; border-radius: 4px; }
+        .card.dark { background: #040404; }
+        .section-title { color: var(--accent); font-size: 9px; text-transform: uppercase; letter-spacing: 3px; margin: 20px 0 12px 0; display: flex; align-items: center; gap: 12px; }
+        .section-title::after { content: ""; height: 1px; background: var(--border); flex: 1; }
 
-        /* Drag & Drop Zone */
-        .drop-zone { border: 2px dashed #333; padding: 40px; text-align: center; background: #050505; border-radius: 8px; cursor: pointer; transition: 0.3s; margin: 10px 0; position: relative; }
-        .drop-zone.dragover { border-color: var(--accent); background: #111; }
+        /* ── FORM ELEMENTS ── */
+        input, select, textarea { width: 100%; background: #000; border: 1px solid var(--border); color: #e0e0e0; padding: 11px 13px; margin: 6px 0; border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 11px; box-sizing: border-box; transition: border-color 0.2s; }
+        input:focus, textarea:focus, select:focus { border-color: var(--accent); outline: none; }
+        input[type="checkbox"] { width: auto; margin: 0; accent-color: var(--accent); }
+        input[type="color"] { padding: 2px; height: 34px; cursor: pointer; }
+        label { font-size: 10px; color: #777; display: block; margin-top: 8px; margin-bottom: 2px; letter-spacing: 1px; }
+        .label-inline { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #aaa; cursor: pointer; }
+
+        /* ── BUTTONS ── */
+        .btn-group { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; align-items: center; }
+        button { background: var(--accent); color: #000; border: none; padding: 11px 18px; cursor: pointer; font-weight: 600; text-transform: uppercase; border-radius: 3px; transition: 0.15s; font-size: 10px; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; }
+        button:hover { filter: brightness(1.15); transform: translateY(-1px); }
+        button:active { transform: translateY(0); }
+        button.secondary { background: #111; color: #888; border: 1px solid var(--border); }
+        button.secondary:hover { color: #fff; border-color: #444; }
+        button.danger { background: #200; color: #f66; border: 1px solid #400; }
+        button.warning { background: #221500; color: #c8940b; border: 1px solid #4a3000; }
+        button.success { background: #0a1a0a; color: #4caf50; border: 1px solid #1a3a1a; }
+        button.info { background: #001220; color: #5bc0de; border: 1px solid #002840; }
+        button.sm { padding: 7px 11px; font-size: 9px; }
+        button.full { width: 100%; margin-top: 12px; padding: 14px; }
+
+        /* ── STAT GRID ── */
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 24px; }
+        .stat-box { background: var(--card); border: 1px solid var(--border); border-top: 2px solid var(--accent); padding: 18px 16px; border-radius: 3px; text-align: center; }
+        .stat-box h3 { font-size: 26px; color: #fff; margin: 0 0 6px 0; font-family: 'Cormorant Garamond', serif; font-weight: 300; }
+        .stat-box p { margin: 0; font-size: 8px; text-transform: uppercase; color: #555; letter-spacing: 2px; }
+
+        /* ── DROP ZONE ── */
+        .drop-zone { border: 1px dashed #333; padding: 36px; text-align: center; background: #040404; border-radius: 4px; cursor: pointer; transition: 0.2s; margin: 8px 0; position: relative; }
+        .drop-zone.dragover { border-color: var(--accent); background: #0a0802; }
         .drop-zone input[type="file"] { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; }
-        .drop-zone p { margin: 0; color: #777; font-size: 13px; }
-        .drop-zone p span { color: var(--accent); font-weight: bold; }
-        #file-preview { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-        .file-badge { background: #222; padding: 5px 10px; border-radius: 4px; font-size: 11px; color: var(--accent); }
+        .drop-zone-text { color: #555; font-size: 12px; }
+        .drop-zone-text span { color: var(--accent); }
+        #file-preview { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .file-badge { background: #111; border: 1px solid var(--border); padding: 4px 10px; border-radius: 3px; font-size: 10px; color: var(--accent); }
 
-        /* Inventory & List */
-        .inv-controls { display: flex; gap: 10px; margin-bottom: 15px; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #111; transition: 0.2s; }
-        .item-row:hover { background: #111; }
-        .item-info { display: flex; flex-direction: column; gap: 6px; flex: 1; }
-        .item-info b { color: #fff; font-size: 14px; display: flex; align-items: center; gap: 8px; }
-        .item-info small { color: #888; font-size: 11px; }
-        .item-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 15px; border: 1px solid #333; }
-        .badge { padding: 3px 8px; border-radius: 4px; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
-        .badge.hidden { background: #333; color: #aaa; border: 1px solid #555; }
-        .badge.sold { background: #1a3a1a; color: #4CAF50; border: 1px solid #4CAF50; }
-        .badge.pending { background: #4a3600; color: #ffb300; border: 1px solid #ffb300; }
-        .badge.draft { background: #222; color: #fff; border: 1px dashed #777; }
-        .badge.vip { background: #4a3600; color: #ffb300; border: 1px solid #ffb300; }
+        /* ── INVENTORY ── */
+        .inv-controls { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+        .inv-controls input, .inv-controls select { margin: 0; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid #0a0a0a; transition: background 0.15s; gap: 12px; }
+        .item-row:hover { background: #0c0c0c; }
+        .item-info { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; }
+        .item-info b { color: #ddd; font-size: 13px; font-family: 'Cormorant Garamond', serif; font-weight: 400; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .item-info small { color: #555; font-size: 10px; line-height: 1.6; }
+        .item-thumb { width: 46px; height: 46px; object-fit: cover; border-radius: 3px; flex-shrink: 0; border: 1px solid #222; }
+        .item-thumb-placeholder { width: 46px; height: 46px; border-radius: 3px; flex-shrink: 0; border: 1px solid #1a1a1a; background: #0a0a0a; display: flex; align-items: center; justify-content: center; color: #333; font-size: 18px; }
 
-        /* Modals & Loading */
-        #edit-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
-        #edit-modal .modal-content { background: var(--card); border: 1px solid var(--accent); padding: 30px; width: 100%; max-width: 600px; border-radius: 8px; max-height: 90vh; overflow-y: auto; }
+        /* ── BADGES ── */
+        .badge { padding: 2px 7px; border-radius: 2px; font-size: 8px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .badge.hidden { background: #111; color: #555; border: 1px solid #222; }
+        .badge.sold { background: #0a1a0a; color: #4CAF50; border: 1px solid #1a3a1a; }
+        .badge.pending { background: #1a1200; color: #ffb300; border: 1px solid #3a2800; }
+        .badge.draft { background: #111; color: #777; border: 1px dashed #333; }
+        .badge.vip { background: #1a1200; color: #ffb300; border: 1px solid #3a2800; }
+        .badge.reserved { background: #001a30; color: #5bc0de; border: 1px solid #003a60; }
+        .badge.consignment { background: #1a0a1a; color: #bb86fc; border: 1px solid #3a1a3a; }
+        .badge.featured { background: #1a1000; color: var(--accent); border: 1px solid #3a2010; }
+        .badge.ap { background: #101a10; color: #81c784; border: 1px solid #1a3a1a; }
+
+        /* ── MODALS ── */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: var(--card2); border: 1px solid var(--accent); padding: 30px; width: 100%; max-width: 620px; border-radius: 4px; max-height: 90vh; overflow-y: auto; }
+        .modal-box h3 { color: var(--accent); margin-top: 0; font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 22px; letter-spacing: 2px; }
+
+        /* ── LOGIN ── */
         #login { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-box { width: 350px; text-align: center; background: var(--card); padding: 40px; border-radius: 8px; border: 1px solid #222; }
-        #loader { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center; flex-direction: column; gap:10px; color: var(--accent); font-weight: bold; letter-spacing: 2px; }
+        .login-box { width: 360px; text-align: center; background: var(--card); padding: 44px 36px; border-radius: 4px; border: 1px solid #111; }
+        .login-box h1 { color: var(--accent); letter-spacing: 8px; margin-bottom: 6px; font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 32px; }
+        .login-box .login-sub { font-size: 9px; color: #333; letter-spacing: 3px; margin-bottom: 28px; }
 
-        /* Toast Notifications */
-        #toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 10001; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: #111; border-left: 4px solid var(--accent); color: #fff; padding: 15px 25px; border-radius: 4px; font-size: 13px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); animation: slideIn 0.3s ease; }
-        .toast.error { border-color: #f44336; }
+        /* ── LOADER ── */
+        #loader { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center; flex-direction: column; gap: 14px; }
+        .loader-ring { width: 36px; height: 36px; border: 2px solid #111; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        #loader-text { color: var(--accent); font-size: 10px; letter-spacing: 4px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── TOAST ── */
+        #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 10001; display: flex; flex-direction: column; gap: 8px; }
+        .toast { background: #0d0d0d; border-left: 3px solid var(--accent); border: 1px solid #1a1a1a; border-left: 3px solid var(--accent); color: #ccc; padding: 12px 20px; border-radius: 3px; font-size: 11px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); animation: slideIn 0.25s ease; max-width: 320px; }
+        .toast.error { border-left-color: #f44336; }
+        .toast.success-toast { border-left-color: #4caf50; }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        
+
+        /* ── GRIDS ── */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+
+        /* ── PROGRESS BAR ── */
+        .progress-bar-wrap { background: #0a0a0a; border-radius: 2px; height: 4px; overflow: hidden; margin-top: 4px; }
+        .progress-bar { height: 100%; background: var(--accent); transition: width 0.3s; }
+
+        /* ── CHART ── */
+        .chart-wrap { position: relative; height: 180px; display: flex; align-items: flex-end; gap: 6px; padding: 0 4px; }
+        .chart-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .chart-bar { width: 100%; background: var(--accent-dim); border-radius: 2px 2px 0 0; border-top: 1px solid var(--accent); transition: height 0.6s ease; position: relative; cursor: pointer; }
+        .chart-bar:hover { background: rgba(168,127,74,0.3); }
+        .chart-label { font-size: 8px; color: #555; text-align: center; letter-spacing: 1px; white-space: nowrap; }
+        .chart-val { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; color: var(--accent); white-space: nowrap; }
+
+        /* ── LOG TABLE ── */
+        .log-row { display: flex; gap: 12px; padding: 8px 12px; border-bottom: 1px solid #0a0a0a; font-size: 10px; }
+        .log-row:hover { background: #050505; }
+        .log-time { color: #444; min-width: 130px; font-size: 9px; }
+        .log-action { color: var(--accent); min-width: 100px; }
+        .log-desc { color: #888; }
+
+        /* ── TABS INSIDE PAGE ── */
+        .inner-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+        .inner-tab-btn { padding: 9px 18px; background: transparent; color: #555; border: none; border-bottom: 2px solid transparent; cursor: pointer; font-size: 10px; letter-spacing: 1px; transform: none; filter: none; }
+        .inner-tab-btn:hover { color: #999; background: transparent; transform: none; filter: none; }
+        .inner-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .inner-tab-panel { display: none; }
+        .inner-tab-panel.active { display: block; }
+
+        /* ── AI BUTTON ── */
+        .ai-btn { background: linear-gradient(135deg, #1a1200 0%, #0d0d0d 100%); color: var(--accent); border: 1px solid #3a2a00; }
+        .ai-btn:hover { background: linear-gradient(135deg, #2a1e00 0%, #1a1a1a 100%); filter: none; }
+
+        /* ── CHECKBOX GROUP ── */
+        .check-group { display: flex; flex-wrap: wrap; gap: 12px; padding: 10px 0; }
+        .check-item { display: flex; align-items: center; gap: 6px; cursor: pointer; color: #999; font-size: 11px; }
+
+        /* ── GOAL TRACKER ── */
+        .goal-display { display: flex; align-items: center; gap: 16px; padding: 14px; background: #040404; border: 1px solid var(--border); border-radius: 3px; }
+        .goal-count { font-size: 36px; font-family: 'Cormorant Garamond', serif; color: var(--accent); font-weight: 300; }
+        .goal-sep { color: #333; font-size: 24px; }
+
+        /* ── HIGHLIGHT INFO BOX ── */
+        .info-box { padding: 12px 16px; border-radius: 3px; border-left: 3px solid var(--accent); background: var(--accent-dim); font-size: 11px; color: #aaa; margin: 10px 0; }
+        .info-box.warn { border-left-color: #ffb300; background: rgba(255,179,0,0.05); }
     </style>
 </head>
 <body>
 
+<!-- LOADER -->
 <div id="loader">
-    <div style="width: 40px; height: 40px; border: 3px solid #222; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <div class="loader-ring"></div>
     <span id="loader-text">İSTEMCİ İŞLENİYOR...</span>
-    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 </div>
 <div id="toast-container"></div>
 
+<!-- LOGIN -->
 <div id="login">
     <div class="login-box">
-        <h2 style="color:var(--accent); letter-spacing: 5px; margin-bottom: 10px;">UBE RAW OS</h2>
-        <p style="font-size: 11px; color: #777; margin-bottom: 20px;" id="login-desc">Sistemi başlatmak için şifrenizi girin.</p>
-        
+        <h1>UBE RAW</h1>
+        <div class="login-sub">STUDIO OPERATING SYSTEM v4.0</div>
+        <p id="login-desc" style="font-size:10px; color:#444; margin-bottom:20px; letter-spacing:1px;">Sistemi başlatmak için şifrenizi girin.</p>
         <input type="password" id="login-pwd" placeholder="Admin Şifresi">
         <input type="password" id="login-token" placeholder="GitHub Token (Sadece ilk girişte)" style="display:none;">
-        
-        <button onclick="auth()" style="width: 100%; margin-top: 15px;">SİSTEME GİRİŞ YAP</button>
-        <button onclick="resetLogin()" class="secondary" style="width: 100%; margin-top: 5px; font-size: 10px;">Token Sıfırla (Cihaz Değişimi)</button>
+        <button onclick="auth()" class="full">SİSTEME GİRİŞ YAP</button>
+        <button onclick="resetLogin()" class="secondary full" style="margin-top:6px; font-size:9px;">Token Sıfırla (Cihaz Değişimi)</button>
     </div>
 </div>
 
-<div id="edit-modal">
-    <div class="modal-content">
-        <h3 id="edit-modal-title" style="color: var(--accent); margin-top: 0;">Eseri Düzenle</h3>
+<!-- EDIT MODAL -->
+<div id="edit-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:680px;">
+        <h3 id="edit-modal-title">✦ Eseri Düzenle</h3>
         <input type="hidden" id="edit-idx">
-        
         <div class="grid-2">
-            <div><label style="font-size: 11px; color:#aaa;">Eser Adı</label><input type="text" id="edit-title"></div>
-            <div><label style="font-size: 11px; color:#aaa;">Kategori</label><input type="text" id="edit-cat"></div>
+            <div><label>Eser Adı</label><input type="text" id="edit-title"></div>
+            <div><label>Ana Kategori</label>
+                <select id="edit-cat">
+                    <option value="">Kategori Seç</option>
+                    <option>Kil Heykel</option><option>Karakalem</option><option>Ahşap Rölyef</option>
+                    <option>Bronz Döküm</option><option>Duvar Rölyefi</option><option>Seramik</option>
+                    <option>Karma Teknik</option><option>Diğer</option>
+                </select>
+            </div>
         </div>
-        
+        <div class="grid-2">
+            <div><label>Alt Kategori / Seri</label><input type="text" id="edit-subcat" placeholder="Örn: İnsan Formu Serisi"></div>
+            <div><label>Koleksiyon / Grup</label><input type="text" id="edit-collection" placeholder="Örn: Arkaik Formlar 2025"></div>
+        </div>
         <div class="section-title">Finans & Fiyatlandırma</div>
         <div class="grid-3">
-            <div>
-                <label style="font-size: 10px; color:#aaa;">Para Birimi</label>
+            <div><label>Para Birimi</label>
                 <select id="edit-currency">
                     <option value="TRY">TRY (₺)</option><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option>
                 </select>
             </div>
-            <div><label style="font-size: 10px; color:#aaa;">Satış Fiyatı</label><input type="text" id="edit-price-direct"></div>
-            <div><label style="font-size: 10px; color:#aaa;">Eski Fiyat (Kampanya)</label><input type="text" id="edit-old-price"></div>
+            <div><label>Satış Fiyatı</label><input type="text" id="edit-price-direct" placeholder="0"></div>
+            <div><label>Eski Fiyat (Kampanya)</label><input type="text" id="edit-old-price" placeholder="0"></div>
         </div>
-        <div class="grid-2">
-            <div><label style="font-size: 10px; color:#aaa;">Gizli Maliyet Notu (Kil/Mesai)</label><input type="text" id="edit-cost"></div>
-            <div><label style="font-size: 10px; color:#aaa;">Sertifika Kodu / SKU</label><input type="text" id="edit-cert-code"></div>
+        <div class="grid-3">
+            <div><label>Gizli Maliyet Notu</label><input type="text" id="edit-cost" placeholder="Kil + Mesai maliyeti"></div>
+            <div><label>Sertifika Kodu / SKU</label><input type="text" id="edit-cert-code"></div>
+            <div><label>Taksit / Vade Notu</label><input type="text" id="edit-installment" placeholder="3x ödeme vb."></div>
         </div>
-        <div style="display: flex; gap: 15px; margin-top: 10px;">
-            <label style="font-size: 11px; color:#aaa;"><input type="checkbox" id="edit-inc-shipping"> Kargo Dahil</label>
-            <label style="font-size: 11px; color:#aaa;"><input type="checkbox" id="edit-inc-vat"> KDV Dahil</label>
+        <div class="check-group">
+            <label class="check-item"><input type="checkbox" id="edit-inc-shipping"> Kargo Dahil</label>
+            <label class="check-item"><input type="checkbox" id="edit-inc-vat"> KDV Dahil</label>
+            <label class="check-item"><input type="checkbox" id="edit-featured"> ⭐ Öne Çıkar (Vitrin)</label>
+            <label class="check-item"><input type="checkbox" id="edit-draft"> Taslak (Sitede Gizle)</label>
         </div>
-
         <div class="section-title">Fiziksel Detaylar & Üretim</div>
         <div class="grid-3">
-            <div><label style="font-size: 10px; color:#aaa;">Boyut (EnxBoyxDer.)</label><input type="text" id="edit-dim"></div>
-            <div><label style="font-size: 10px; color:#aaa;">Ağırlık (kg)</label><input type="text" id="edit-weight"></div>
-            <div><label style="font-size: 10px; color:#aaa;">Materyal</label><input type="text" id="edit-material"></div>
+            <div><label>Boyut (En×Boy×Der. cm)</label><input type="text" id="edit-dim" placeholder="50×70×5"></div>
+            <div><label>Ağırlık (kg)</label><input type="text" id="edit-weight" placeholder="2.5"></div>
+            <div><label>Materyal Etiketleri</label><input type="text" id="edit-material" placeholder="Kil, Bronz, Ceviz"></div>
         </div>
-        <div class="grid-2">
-            <div>
-                <label style="font-size: 10px; color:#aaa;">Üretim Aşaması</label>
+        <div class="grid-3">
+            <div><label>Üretim Aşaması</label>
                 <select id="edit-stage">
                     <option value="Tamamlandı">Tamamlandı</option>
                     <option value="Eskiz Aşamasında">Eskiz Aşamasında</option>
                     <option value="Çamurda / Üretimde">Çamurda / Üretimde</option>
+                    <option value="Döküm Bekliyor">Döküm Bekliyor</option>
+                    <option value="Son İşlemde">Son İşlemde</option>
                 </select>
             </div>
-            <div><label style="font-size: 10px; color:#aaa;">Fiziksel Konum</label><input type="text" id="edit-location"></div>
+            <div><label>Fiziksel Konum</label><input type="text" id="edit-location" placeholder="Alt Kat Galeri"></div>
+            <div><label>Seri No / Kopya</label><input type="text" id="edit-edition" placeholder="1/1 veya 3/10"></div>
         </div>
-
-        <label style="font-size: 11px; color:#aaa;">Harita/Konum & NFT Kontrat Linki</label>
-        <input type="text" id="edit-map">
-        
-        <label style="display: flex; align-items: center; gap: 10px; font-size: 12px; margin-top: 15px;">
-            <input type="checkbox" id="edit-draft"> Bu eseri TASLAK olarak işaretle (Sitede gizlenir)
-        </label>
-
-        <div class="btn-group" style="margin-top: 20px;">
-            <button onclick="saveProjectEdit()" style="flex: 2;">GÜNCELLE</button>
-            <button onclick="closeEditModal()" class="secondary" style="flex: 1;">İPTAL</button>
+        <div><label>Sergi Geçmişi (Virgülle ayırın)</label><input type="text" id="edit-exhibitions" placeholder="İstanbul Art Fair 2024, Galeri X 2023"></div>
+        <div><label>Harita / NFT Kontrat Linki</label><input type="text" id="edit-map"></div>
+        <div><label>AI Açıklama Metni</label><textarea id="edit-description" rows="2" placeholder="Eserin küratörce açıklaması..."></textarea></div>
+        <div class="btn-group" style="margin-top:16px;">
+            <button onclick="saveProjectEdit()" style="flex:2;">GÜNCELLE</button>
+            <button onclick="generateAIDescription()" class="ai-btn" style="flex:1;">🤖 AI METİN</button>
+            <button onclick="closeEditModal()" class="secondary" style="flex:1;">İPTAL</button>
         </div>
     </div>
 </div>
 
-<div id="crm-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;">
-    <div class="modal-content" style="background: var(--card); border: 1px solid var(--accent); padding: 30px; width: 100%; max-width: 500px; border-radius: 8px;">
-        <h3 style="color: var(--accent); margin-top: 0;">Koleksiyoner Profili</h3>
+<!-- CRM MODAL -->
+<div id="crm-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>👤 Koleksiyoner Profili</h3>
         <input type="hidden" id="crm-idx">
         <div class="grid-2">
-            <div><label style="font-size: 11px; color:#aaa;">Ad Soyad *</label><input type="text" id="crm-name"></div>
-            <div><label style="font-size: 11px; color:#aaa;">Telefon</label><input type="text" id="crm-phone"></div>
+            <div><label>Ad Soyad *</label><input type="text" id="crm-name"></div>
+            <div><label>Telefon</label><input type="text" id="crm-phone"></div>
         </div>
-        <input type="text" id="crm-email" placeholder="E-posta Adresi">
-        <input type="text" id="crm-address" placeholder="Teslimat / Fatura Adresi">
         <div class="grid-2">
-            <div><label style="font-size: 11px; color:#aaa;">Doğum Günü / Özel Gün</label><input type="text" id="crm-bday" placeholder="Örn: 15 Mayıs"></div>
-            <div style="display: flex; align-items: flex-end; padding-bottom: 10px;">
-                <label style="font-size: 12px; color:#fff;"><input type="checkbox" id="crm-vip"> VIP Koleksiyoner</label>
-            </div>
+            <div><label>E-posta</label><input type="text" id="crm-email"></div>
+            <div><label>Doğum Günü / Özel Gün</label><input type="text" id="crm-bday" placeholder="15 Mayıs"></div>
         </div>
-        <label style="font-size: 11px; color:#aaa;">Sanat Zevki / Gizli Notlar</label>
-        <textarea id="crm-notes" rows="3" placeholder="Müşteri hakkında hatırlatıcı notlar..."></textarea>
-        
-        <div class="btn-group" style="margin-top: 20px;">
-            <button onclick="saveCRMProfile()" style="flex: 2;">KAYDET</button>
-            <button onclick="document.getElementById('crm-modal').style.display='none';" class="secondary" style="flex: 1;">İPTAL</button>
+        <div><label>Teslimat / Fatura Adresi</label><input type="text" id="crm-address"></div>
+        <div><label>Sanat Zevki / Gizli Notlar</label><textarea id="crm-notes" rows="3" placeholder="Ahşap dokuları seviyor, sergi açılışlarına çağırılmak istiyor..."></textarea></div>
+        <div class="check-group">
+            <label class="check-item"><input type="checkbox" id="crm-vip"> 👑 VIP Koleksiyoner</label>
+        </div>
+        <div class="btn-group" style="margin-top:16px;">
+            <button onclick="saveCRMProfile()" style="flex:2;">KAYDET</button>
+            <button onclick="closeCRMModal()" class="secondary" style="flex:1;">İPTAL</button>
         </div>
     </div>
 </div>
 
+<!-- CONSIGNMENT MODAL -->
+<div id="consign-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>🏛️ Konsinye / Dış Sergi</h3>
+        <input type="hidden" id="consign-idx">
+        <div><label>Gönderilen Galeri / Mekan</label><input type="text" id="consign-venue" placeholder="Galeri İstanbul"></div>
+        <div class="grid-2">
+            <div><label>Çıkış Tarihi</label><input type="date" id="consign-out"></div>
+            <div><label>Beklenen İade Tarihi</label><input type="date" id="consign-return"></div>
+        </div>
+        <div><label>Not</label><textarea id="consign-note" rows="2"></textarea></div>
+        <div class="btn-group" style="margin-top:16px;">
+            <button onclick="saveConsignment()" style="flex:2;">KAYDET</button>
+            <button onclick="document.getElementById('consign-modal').classList.remove('open')" class="secondary" style="flex:1;">İPTAL</button>
+        </div>
+    </div>
+</div>
+
+<!-- SIDEBAR -->
 <div class="sidebar">
-    <h2>UBE<br>RAW</h2>
-    <div class="nav-link active" onclick="switchTab('dash', this)">📊 Ana Ekran & Finans</div>
-    <div class="nav-link" onclick="switchTab('add', this)">✨ Eser Ekle</div>
-    <div class="nav-link" onclick="switchTab('inv', this)">📦 Envanter & Çöp</div>
-    <div class="nav-link" onclick="switchTab('crm', this)">👥 Koleksiyonerler</div>
-    <div class="nav-link" onclick="switchTab('orders', this)">🛍️ Siparişler</div>
-    <div class="nav-link" onclick="switchTab('sale', this)">📜 Sertifika & Satış</div>
-    <div class="nav-link" onclick="switchTab('guest', this)">💬 Mesajlar</div>
-    <div class="nav-link" onclick="switchTab('config', this)">⚙️ Site Ayarları</div>
-    <div style="margin-top: auto; padding-top: 30px; border-top: 1px solid #111;">
-        <button class="secondary" style="width:100%; font-size:10px;" onclick="logout()">Çıkış Yap / Kilitle</button>
+    <div class="sidebar-brand">
+        <h2>UBE RAW</h2>
+        <span>STUDIO OS v4.0</span>
+    </div>
+    <div class="nav-section">Genel</div>
+    <div class="nav-link active" onclick="switchTab('dash',this)"><span class="nav-icon">◈</span> Ana Ekran</div>
+    <div class="nav-section">Eser Yönetimi</div>
+    <div class="nav-link" onclick="switchTab('add',this)"><span class="nav-icon">✦</span> Eser Ekle</div>
+    <div class="nav-link" onclick="switchTab('inv',this)"><span class="nav-icon">▦</span> Envanter</div>
+    <div class="nav-link" onclick="switchTab('gallery',this)"><span class="nav-icon">◻</span> Galeri & Sergiler</div>
+    <div class="nav-section">İş & Satış</div>
+    <div class="nav-link" onclick="switchTab('crm',this)"><span class="nav-icon">◉</span> Koleksiyonerler</div>
+    <div class="nav-link" onclick="switchTab('orders',this)"><span class="nav-icon">◈</span> Siparişler</div>
+    <div class="nav-link" onclick="switchTab('sale',this)"><span class="nav-icon">◎</span> Satış & Sertifika</div>
+    <div class="nav-section">Workshop</div>
+    <div class="nav-link" onclick="switchTab('workshop',this)"><span class="nav-icon">◌</span> Atölyeler</div>
+    <div class="nav-section">İçerik & Sistem</div>
+    <div class="nav-link" onclick="switchTab('guest',this)"><span class="nav-icon">◦</span> Mesajlar</div>
+    <div class="nav-link" onclick="switchTab('ai',this)"><span class="nav-icon">✧</span> AI Asistan</div>
+    <div class="nav-link" onclick="switchTab('config',this)"><span class="nav-icon">⊙</span> Ayarlar</div>
+    <div class="nav-link" onclick="switchTab('logs',this)"><span class="nav-icon">≡</span> İşlem Logu</div>
+    <div class="sidebar-footer">
+        <div class="sidebar-version">UBE RAW OS v4.0 · 2025</div>
+        <button class="secondary" style="width:100%; font-size:9px; padding:9px;" onclick="logout()">⎋ Çıkış Yap / Kilitle</button>
     </div>
 </div>
 
+<!-- MAIN CONTENT -->
 <div class="main">
-    
+
+    <!-- ══ TAB: DASHBOARD ══ -->
     <div id="tab-dash" class="tab active">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3>Stüdyo & Finans Özeti</h3>
-            <button onclick="exportFinanceCSV()" class="secondary small">Finans Raporu (CSV) İndir</button>
+        <div class="page-header">
+            <div><h2>Stüdyo Özeti</h2><small>ANA EKRAN & FİNANS</small></div>
+            <div class="btn-group" style="margin:0;">
+                <button onclick="exportFinanceCSV()" class="secondary sm">CSV Rapor</button>
+                <button onclick="backupAll()" class="secondary sm">💾 Yedekle</button>
+            </div>
         </div>
         <div class="stat-grid">
             <div class="stat-box"><h3 id="stat-total">0</h3><p>Toplam Eser</p></div>
             <div class="stat-box"><h3 id="stat-sold">0</h3><p>Satılan Eser</p></div>
-            <div class="stat-box"><h3 id="stat-revenue" style="color: #4CAF50;">₺0</h3><p>Tahmini Ciro (Aktif)</p></div>
-            <div class="stat-box"><h3 id="stat-orders" style="color: #ffb300;">0</h3><p>Bekleyen Sipariş</p></div>
-            <div class="stat-box"><h3 id="stat-msg" style="color: #64b5f6;">0</h3><p>Ziyaretçi Mesajı</p></div>
+            <div class="stat-box"><h3 id="stat-revenue" style="color:#4CAF50;">₺0</h3><p>Tahmini Ciro</p></div>
+            <div class="stat-box"><h3 id="stat-orders" style="color:#ffb300;">0</h3><p>Bekleyen Sipariş</p></div>
+            <div class="stat-box"><h3 id="stat-msg" style="color:#5bc0de;">0</h3><p>Ziyaretçi Mesajı</p></div>
+            <div class="stat-box"><h3 id="stat-drafts">0</h3><p>Taslak Eser</p></div>
         </div>
-        <div class="card" style="background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') center/cover; position: relative;">
-            <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.8); border-radius: 8px;"></div>
-            <div style="position: relative; z-index: 1;">
-                <h4 style="color: var(--accent); margin-top: 0;">Sisteme Hoş Geldiniz, Ubeydullah Bey.</h4>
-                <p style="font-size: 13px; color: #aaa; line-height: 1.6;">Stüdyonuzu, taslaklarınızı, koleksiyoner ağınızı ve satışlarınızı güvenli bir şekilde yönetin. İşlemleriniz asenkron ve şifreli olarak çalışır.</p>
+
+        <!-- Hedef Sayacı -->
+        <div class="card dark">
+            <div class="section-title" style="margin-top:0;">Yıllık Üretim Hedefi</div>
+            <div class="goal-display">
+                <div style="text-align:center;">
+                    <div class="goal-count" id="goal-current">0</div>
+                    <div style="font-size:8px;color:#444;letter-spacing:2px;">TAMAMLANDI</div>
+                </div>
+                <div class="goal-sep">/</div>
+                <div style="text-align:center;">
+                    <div class="goal-count" id="goal-target" style="color:#444;">20</div>
+                    <div style="font-size:8px;color:#444;letter-spacing:2px;">HEDEF</div>
+                </div>
+                <div style="flex:1;">
+                    <div style="font-size:9px;color:#555;margin-bottom:6px;" id="goal-percent">%0 tamamlandı</div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar" id="goal-bar" style="width:0%"></div>
+                    </div>
+                </div>
+                <input type="number" id="goal-input" placeholder="Hedef" style="width:80px;margin:0;" onchange="saveGoal(this.value)">
             </div>
+        </div>
+
+        <!-- Satış Grafiği -->
+        <div class="card">
+            <div class="section-title" style="margin-top:0;">Aylık Satış Dağılımı</div>
+            <div id="monthly-chart" class="chart-wrap"></div>
+            <div id="monthly-labels" style="display:flex;gap:6px;margin-top:6px;padding:0 4px;"></div>
+        </div>
+
+        <!-- Kategori Dağılımı -->
+        <div class="grid-2">
+            <div class="card">
+                <div class="section-title" style="margin-top:0;">Kategori Dağılımı</div>
+                <div id="cat-stats"></div>
+            </div>
+            <div class="card">
+                <div class="section-title" style="margin-top:0;">Bekleyen Hatırlatmalar</div>
+                <div id="reminder-list"><p style="color:#444;">Hatırlatma yok.</p></div>
+            </div>
+        </div>
+
+        <!-- Welcome card -->
+        <div class="card" style="background:linear-gradient(135deg,#080800 0%,#040404 100%);border-color:#1a1000;">
+            <h4 style="color:var(--accent);margin-top:0;font-family:'Cormorant Garamond',serif;font-weight:300;letter-spacing:3px;">Hoş Geldiniz, Ubeydullah Bey.</h4>
+            <p style="font-size:11px;color:#555;line-height:1.8;margin:0;">Stüdyonuzu, taslaklarınızı, koleksiyoner ağınızı ve satışlarınızı güvenli yönetin.</p>
         </div>
     </div>
 
+    <!-- ══ TAB: ESER EKLE ══ -->
     <div id="tab-add" class="tab">
-        <h3>Yeni Eser Kaydı</h3>
+        <div class="page-header">
+            <div><h2>Yeni Eser Kaydı</h2><small>ENVANTERE EKLE</small></div>
+        </div>
         <div class="card">
-            <div class="section-title">Eser Görselleri</div>
+            <div class="section-title" style="margin-top:0;">Eser Görselleri (Maks. 5)</div>
             <div class="drop-zone" id="drop-zone">
                 <input type="file" id="f-file" multiple accept="image/*" onchange="updateFilePreview(this)">
-                <p>Fotoğrafları buraya sürükleyin veya <span>Bilgisayardan Seçin</span></p>
-                <p style="font-size: 10px; margin-top: 10px;">* Web için otomatik optimize edilir.</p>
+                <div class="drop-zone-text">Fotoğrafları buraya sürükleyin veya <span>Bilgisayardan Seçin</span></div>
+                <div style="font-size:9px;color:#333;margin-top:8px;letter-spacing:1px;">Otomatik sıkıştırma · WebP dönüşümü · Maks. 5 fotoğraf</div>
             </div>
             <div id="file-preview"></div>
-            
-            <div class="section-title">Eser Detayları & Kategorizasyon</div>
-            <input type="text" id="f-title" placeholder="Eser Adı (Örn: The Melted Core)">
-            <div class="grid-3">
-                <input type="text" id="f-cat" placeholder="Kategori (Örn: Wall Relief)">
-                <select id="f-currency"><option value="TRY">TRY (₺)</option><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option></select>
-                <input type="text" id="f-price" placeholder="Fiyat">
+            <div id="upload-progress" style="display:none;margin-top:8px;">
+                <div style="font-size:9px;color:#555;margin-bottom:4px;" id="upload-progress-text">Yükleniyor...</div>
+                <div class="progress-bar-wrap"><div class="progress-bar" id="upload-bar" style="width:0%"></div></div>
             </div>
-            
-            <div class="section-title">Fiziksel Özellikler (Modül 2)</div>
-            <div class="grid-3">
-                <input type="text" id="f-dim" placeholder="Boyut (Örn: 50x70x5 cm)">
-                <input type="text" id="f-weight" placeholder="Ağırlık (kg)">
-                <input type="text" id="f-material" placeholder="Materyal Etiketleri (Örn: Kil, Bronz)">
+
+            <div class="section-title">Eser Kimliği</div>
+            <div class="grid-2">
+                <div><label>Eser Adı *</label><input type="text" id="f-title" placeholder="Örn: The Melted Core"></div>
+                <div><label>Ana Kategori</label>
+                    <select id="f-cat">
+                        <option value="">Kategori Seç</option>
+                        <option>Kil Heykel</option><option>Karakalem</option><option>Ahşap Rölyef</option>
+                        <option>Bronz Döküm</option><option>Duvar Rölyefi</option><option>Seramik</option>
+                        <option>Karma Teknik</option><option>Diğer</option>
+                    </select>
+                </div>
             </div>
             <div class="grid-2">
-                <select id="f-stage">
-                    <option value="Tamamlandı">Aşama: Tamamlandı</option>
-                    <option value="Eskiz Aşamasında">Aşama: Eskiz Aşamasında</option>
-                    <option value="Çamurda / Üretimde">Aşama: Çamurda / Üretimde</option>
-                </select>
-                <input type="text" id="f-location" placeholder="Stüdyo Konumu (Örn: Alt Kat Galeri)">
+                <div><label>Alt Kategori / Seri</label><input type="text" id="f-subcat" placeholder="Örn: İnsan Formu Serisi"></div>
+                <div><label>Koleksiyon / Grup</label><input type="text" id="f-collection" placeholder="Örn: Arkaik Formlar 2025"></div>
             </div>
 
-            <input type="text" id="f-map" placeholder="Harita / NFT Kontrat Linki (Opsiyonel)" style="margin-top: 10px;">
+            <div class="section-title">Fiyatlandırma</div>
+            <div class="grid-3">
+                <div><label>Para Birimi</label>
+                    <select id="f-currency">
+                        <option value="TRY">TRY (₺)</option><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option>
+                    </select>
+                </div>
+                <div><label>Satış Fiyatı</label><input type="text" id="f-price" placeholder="0"></div>
+                <div><label>Gizli Maliyet Notu</label><input type="text" id="f-cost" placeholder="Malzeme + Mesai"></div>
+            </div>
 
-            <label style="display: flex; align-items: center; gap: 10px; font-size: 12px; margin-top: 20px;">
-                <input type="checkbox" id="f-draft"> Bu eseri şimdilik TASLAK olarak kaydet (Siteye gitmez)
-            </label>
-            
-            <button onclick="handleUpload()" style="width: 100%; margin-top: 20px; padding: 18px;">GÖRSELLERİ İŞLE VE YAYINLA</button>
+            <div class="section-title">Fiziksel Özellikler</div>
+            <div class="grid-3">
+                <div><label>Boyut (En×Boy×Der. cm)</label><input type="text" id="f-dim" placeholder="50×70×5"></div>
+                <div><label>Ağırlık (kg)</label><input type="text" id="f-weight" placeholder="2.5"></div>
+                <div><label>Materyal Etiketleri</label><input type="text" id="f-material" placeholder="Kil, Bronz, Ceviz"></div>
+            </div>
+            <div class="grid-3">
+                <div><label>Üretim Aşaması</label>
+                    <select id="f-stage">
+                        <option value="Tamamlandı">Tamamlandı</option>
+                        <option value="Eskiz Aşamasında">Eskiz Aşamasında</option>
+                        <option value="Çamurda / Üretimde">Çamurda / Üretimde</option>
+                        <option value="Döküm Bekliyor">Döküm Bekliyor</option>
+                        <option value="Son İşlemde">Son İşlemde</option>
+                    </select>
+                </div>
+                <div><label>Fiziksel Konum</label><input type="text" id="f-location" placeholder="Alt Kat Galeri"></div>
+                <div><label>Seri No / Kopya</label><input type="text" id="f-edition" placeholder="1/1"></div>
+            </div>
+            <div><label>Harita / NFT Kontrat Linki</label><input type="text" id="f-map" placeholder="https://..."></div>
+            <div><label>Açıklama Metni</label><textarea id="f-description" rows="2" placeholder="Küratörce eser açıklaması..."></textarea></div>
+
+            <div class="check-group" style="margin-top:8px;">
+                <label class="check-item"><input type="checkbox" id="f-draft"> Taslak olarak kaydet</label>
+                <label class="check-item"><input type="checkbox" id="f-featured"> ⭐ Vitrine Ekle</label>
+            </div>
+
+            <button onclick="handleUpload()" class="full">GÖRSELLERİ İŞLE VE YAYINLA</button>
         </div>
     </div>
 
+    <!-- ══ TAB: ENVANTER ══ -->
     <div id="tab-inv" class="tab">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3>Envanter Yönetimi</h3>
-            <span style="font-size: 11px; color: var(--accent);">Otomatik SKU ve Canlı Arama</span>
+        <div class="page-header">
+            <div><h2>Envanter Yönetimi</h2><small>ESERLER · TASLAKLAR · ÇÖP KUTUSU</small></div>
+            <div class="btn-group" style="margin:0;">
+                <button onclick="openBulkActions()" class="secondary sm">⬡ Toplu İşlem</button>
+            </div>
         </div>
-        
+
+        <!-- Toplu İşlem Paneli -->
+        <div id="bulk-panel" class="card dark" style="display:none;">
+            <div class="section-title" style="margin-top:0;">Toplu İşlem</div>
+            <p style="font-size:10px;color:#666;">Aşağıdaki eserleri seçin ve işlem uygulayın.</p>
+            <div class="btn-group">
+                <button onclick="bulkAction('isDraft',true)" class="warning sm">Taslağa Çek</button>
+                <button onclick="bulkAction('isDraft',false)" class="success sm">Yayınla</button>
+                <button onclick="bulkAction('isHidden',true)" class="secondary sm">Gizle</button>
+                <button onclick="bulkAction('isDeleted',true)" class="danger sm">Çöpe At</button>
+                <button onclick="document.getElementById('bulk-panel').style.display='none'" class="secondary sm">Kapat</button>
+            </div>
+            <div id="bulk-select-list" style="margin-top:12px;"></div>
+        </div>
+
         <div class="inv-controls">
-            <input type="text" id="search-inv" placeholder="Eser veya Kod Ara..." onkeyup="renderInventory()" style="flex:2; margin:0;">
-            <select id="filter-inv" onchange="renderInventory()" style="flex:1; margin:0;">
+            <input type="text" id="search-inv" placeholder="Eser adı, SKU veya materyal ara..." onkeyup="renderInventory()" style="flex:2;margin:0;">
+            <select id="filter-inv" onchange="renderInventory()" style="flex:1;margin:0;">
                 <option value="active">Mevcut & Satılanlar</option>
                 <option value="draft">Sadece Taslaklar</option>
-                <option value="trash">🗑️ Çöp Kutusu (Silinenler)</option>
+                <option value="trash">🗑 Çöp Kutusu</option>
+                <option value="featured">⭐ Öne Çıkanlar</option>
+                <option value="hidden">👁 Gizli Eserler</option>
+            </select>
+            <select id="filter-cat" onchange="renderInventory()" style="flex:1;margin:0;">
+                <option value="">Tüm Kategoriler</option>
+                <option>Kil Heykel</option><option>Karakalem</option><option>Ahşap Rölyef</option>
+                <option>Bronz Döküm</option><option>Duvar Rölyefi</option><option>Seramik</option>
             </select>
         </div>
-
-        <div id="inventory-list" class="card" style="padding: 10px 25px;">Yükleniyor...</div>
+        <div id="inventory-list" class="card" style="padding:10px 16px;">Yükleniyor...</div>
     </div>
 
+    <!-- ══ TAB: GALERİ & SERGİLER ══ -->
+    <div id="tab-gallery" class="tab">
+        <div class="page-header">
+            <div><h2>Galeri & Sergiler</h2><small>MODÜL 6 — SERGİ OPERASYONLARı</small></div>
+        </div>
+        <div class="inner-tabs">
+            <button class="inner-tab-btn active" onclick="switchInnerTab('gallery','curate')">Sergi Paketi</button>
+            <button class="inner-tab-btn" onclick="switchInnerTab('gallery','consign')">Konsinye Takibi</button>
+            <button class="inner-tab-btn" onclick="switchInnerTab('gallery','catalog')">PDF Katalog</button>
+            <button class="inner-tab-btn" onclick="switchInnerTab('gallery','wallcard')">Duvar Kartı</button>
+        </div>
+        <div id="gallery-curate" class="inner-tab-panel active">
+            <div class="card dark">
+                <div class="section-title" style="margin-top:0;">Sergi Paketi Oluştur</div>
+                <div class="grid-2">
+                    <div><label>Sergi Adı</label><input type="text" id="expo-name" placeholder="Örn: PLÜN Sanatsal Farkındalık Rotası 2025"></div>
+                    <div><label>Tarih</label><input type="text" id="expo-date" placeholder="15–28 Kasım 2025"></div>
+                </div>
+                <div><label>Mekan</label><input type="text" id="expo-venue" placeholder="Galeri X, İstanbul"></div>
+                <div class="section-title">Sergiye Alınacak Eserler</div>
+                <div id="expo-select-list" style="max-height:300px;overflow-y:auto;"></div>
+                <div class="btn-group" style="margin-top:12px;">
+                    <button onclick="markExhibitionBatch()" class="success">Seçilenleri Sergiye İşle</button>
+                    <button onclick="returnFromExhibition()" class="secondary">Stüdyoya Döndür</button>
+                </div>
+            </div>
+        </div>
+        <div id="gallery-consign" class="inner-tab-panel">
+            <div class="card dark">
+                <div class="section-title" style="margin-top:0;">Dışarıdaki Eserler</div>
+                <div id="consign-list"><p style="color:#444;">Konsinye eser yok.</p></div>
+            </div>
+        </div>
+        <div id="gallery-catalog" class="inner-tab-panel">
+            <div class="card dark">
+                <div class="section-title" style="margin-top:0;">Dijital PDF Katalog (Maks. 10 Eser)</div>
+                <p style="font-size:10px;color:#666;">Envanterdeki eserlerden seçerek müşteriye gönderilebilir PDF oluşturun.</p>
+                <div id="catalog-select-list" style="max-height:280px;overflow-y:auto;"></div>
+                <button onclick="generateCatalogPDF()" class="full">PDF KATALOG OLUŞTUR</button>
+            </div>
+        </div>
+        <div id="gallery-wallcard" class="inner-tab-panel">
+            <div class="card dark">
+                <div class="section-title" style="margin-top:0;">Galeri Duvar Kartı (Künye) Üretici</div>
+                <p style="font-size:10px;color:#666;">Seçilen eserler için sergi yanına koyulacak mini etiket PDF'i üretin.</p>
+                <div id="wallcard-select-list" style="max-height:280px;overflow-y:auto;"></div>
+                <button onclick="generateWallCards()" class="full">DUVAR KARTLARINI ÜRET</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ TAB: KOLEKSİYONERLER ══ -->
     <div id="tab-crm" class="tab">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3>Koleksiyoner Ağı (CRM)</h3>
-            <button onclick="openCRMModal('')" class="success small">MÜŞTERİ EKLE</button>
+        <div class="page-header">
+            <div><h2>Koleksiyoner Ağı</h2><small>CRM — MÜŞTERİ İLİŞKİLERİ</small></div>
+            <div class="btn-group" style="margin:0;">
+                <button onclick="exportCRMCSV()" class="secondary sm">CSV İndir</button>
+                <button onclick="openCRMModal('')" class="success sm">+ Koleksiyoner Ekle</button>
+            </div>
         </div>
-        <div id="crm-list" class="card" style="padding: 10px 25px;">Yükleniyor...</div>
+        <div id="crm-list" class="card" style="padding:10px 16px;">Yükleniyor...</div>
     </div>
 
+    <!-- ══ TAB: SİPARİŞLER ══ -->
     <div id="tab-orders" class="tab">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h3>Sipariş & Talep Yönetimi</h3>
+        <div class="page-header">
+            <div><h2>Sipariş & Talep Yönetimi</h2><small>BEKLEYEN · TAMAMLANAN</small></div>
         </div>
-        
-        <div class="card" style="background: #080808; border-color: #222;">
+        <div class="card dark">
             <div class="section-title" style="margin-top:0;">Manuel Sipariş / Talep Ekle</div>
             <div class="grid-2">
-                <input type="text" id="new-o-name" placeholder="Müşteri Adı / Koleksiyoner">
-                <input type="text" id="new-o-contact" placeholder="İletişim (Telefon veya E-posta)">
+                <input type="text" id="new-o-name" placeholder="Müşteri Adı">
+                <input type="text" id="new-o-contact" placeholder="Telefon veya E-posta">
             </div>
-            <select id="new-o-artwork" style="margin-top: 10px;"></select>
-            <button onclick="addNewOrder()" style="width:100%; margin-top: 15px;">SİPARİŞ KAYDINI OLUŞTUR</button>
+            <select id="new-o-artwork" style="margin-top:8px;"></select>
+            <button onclick="addNewOrder()" class="full">SİPARİŞ KAYDINI OLUŞTUR</button>
         </div>
-        <div id="orders-list" class="card" style="padding: 10px 25px;">Yükleniyor...</div>
+        <div id="orders-list" class="card" style="padding:10px 16px;">Yükleniyor...</div>
     </div>
 
+    <!-- ══ TAB: SATIŞ & SERTİFİKA ══ -->
     <div id="tab-sale" class="tab">
-        <h3>Satış & Gelişmiş Dijital Sertifika</h3>
-        <p style="font-size: 12px; color:#aaa; margin-bottom: 20px;">Satış işlemini CRM ile bağlayabilir, kaporaları yönetebilir ve çift dilli (Hash Korumalı) sertifika üretebilirsiniz.</p>
-        
+        <div class="page-header">
+            <div><h2>Satış & Sertifika</h2><small>MODÜL 3 & 5 — FİNANS · COA · CRM</small></div>
+        </div>
         <div class="card">
-            <div class="section-title" style="margin-top:0;">1. Satış Yönetimi</div>
+            <div class="section-title" style="margin-top:0;">1. Satış İşlemi</div>
             <select id="sale-select" onchange="fillSaleFields(this.value)"><option value="">Satılacak Eseri Seçin</option></select>
-            
-            <div class="grid-2" style="margin-top: 10px;">
-                <div><label style="font-size: 11px; color:#aaa;">Kayıtlı Alıcı (CRM)</label><select id="sale-crm-select" onchange="document.getElementById('sale-owner').value = this.options[this.selectedIndex].text.replace(' (VIP)', '');"></select></div>
-                <div><label style="font-size: 11px; color:#aaa;">Sertifikada Yazacak İsim</label><input type="text" id="sale-owner" placeholder="Müşteri İsmi"></div>
+            <div class="grid-2" style="margin-top:10px;">
+                <div><label>Kayıtlı Alıcı (CRM)</label>
+                    <select id="sale-crm-select" onchange="document.getElementById('sale-owner').value = this.options[this.selectedIndex].text.replace(' (VIP)','');"></select>
+                </div>
+                <div><label>Sertifikada Yazacak İsim</label><input type="text" id="sale-owner" placeholder="Müşteri İsmi"></div>
             </div>
             <div class="grid-3">
-                <div><label style="font-size: 11px; color:#aaa;">Son Satış Fiyatı</label><input type="text" id="sale-price"></div>
-                <div><label style="font-size: 11px; color:#aaa;">Alınan Kapora / Peşinat</label><input type="text" id="sale-deposit" placeholder="Örn: 500"></div>
-                <div><label style="font-size: 11px; color:#aaa;">Sertifika / SKU No</label><input type="text" id="sale-cert"></div>
+                <div><label>Son Satış Fiyatı</label><input type="text" id="sale-price"></div>
+                <div><label>Kapora / Peşinat</label><input type="text" id="sale-deposit" placeholder="0"></div>
+                <div><label>SKU / Sertifika No</label><input type="text" id="sale-cert"></div>
             </div>
-            <label style="display: flex; align-items: center; gap: 10px; font-size: 12px; margin-top: 10px; margin-bottom: 15px;">
-                <input type="checkbox" id="sale-anon"> İsimsiz (Gizli) Satış (Alıcı bilgileri sitede gizlenir)
-            </label>
-            <button onclick="handleSaleUpdate()" class="success" style="width: 100%;">SATIŞI ONAYLA VE ENVANTERE İŞLE</button>
-            
-            <div class="section-title">2. Sertifika Üretimi (COA)</div>
-            <div class="grid-3" style="margin-bottom: 15px;">
-                <div><label style="font-size: 11px; color:#aaa;">Dil Desteği</label><select id="cert-lang"><option value="EN">İngilizce (Uluslararası)</option><option value="TR">Türkçe</option></select></div>
-                <div><label style="font-size: 11px; color:#aaa;">Kağıt Formatı</label><select id="cert-size"><option value="a4">A4 Yatay</option><option value="a5">A5 Yatay</option></select></div>
-                <div style="display: flex; align-items: flex-end; padding-bottom:10px;"><label style="font-size: 11px; color:#fff;"><input type="checkbox" id="cert-ap"> Artist Proof (A.P.) Ekle</label></div>
+            <div><label>Taksit / Vade Notu</label><input type="text" id="sale-installment" placeholder="3 eşit taksit, Ocak–Mart 2026"></div>
+            <div class="check-group">
+                <label class="check-item"><input type="checkbox" id="sale-anon"> İsimsiz (Gizli Koleksiyoner) Satış</label>
             </div>
-            <button onclick="generateAdvancedPDF()" class="secondary" style="width: 100%;">KRİPTOGRAFİK SERTİFİKA İNDİR</button>
+            <button onclick="handleSaleUpdate()" class="success full">SATIŞI ONAYLA VE ENVANTERE İŞLE</button>
+
+            <div class="section-title">2. Orijinallik Sertifikası (COA)</div>
+            <div class="grid-3" style="margin-bottom:12px;">
+                <div><label>Dil</label>
+                    <select id="cert-lang">
+                        <option value="EN">İngilizce (Uluslararası)</option>
+                        <option value="TR">Türkçe</option>
+                    </select>
+                </div>
+                <div><label>Kağıt Formatı</label>
+                    <select id="cert-size">
+                        <option value="a4">A4 Yatay</option>
+                        <option value="a5">A5 Yatay</option>
+                    </select>
+                </div>
+                <div style="display:flex;align-items:flex-end;padding-bottom:8px;">
+                    <label class="check-item"><input type="checkbox" id="cert-ap"> Artist Proof (A.P.)</label>
+                </div>
+            </div>
+            <button onclick="generateAdvancedPDF()" class="secondary full">KRİPTOGRAFİK SERTİFİKA İNDİR (PDF)</button>
         </div>
     </div>
 
+    <!-- ══ TAB: WORKSHOP ══ -->
+    <div id="tab-workshop" class="tab">
+        <div class="page-header">
+            <div><h2>Atölye & Workshop</h2><small>MODÜL 7 — EĞİTİM YÖNETİMİ</small></div>
+            <button onclick="openWorkshopModal()" class="success sm">+ Yeni Atölye</button>
+        </div>
+        <div class="inner-tabs">
+            <button class="inner-tab-btn active" onclick="switchInnerTab('ws','active')">Aktif Atölyeler</button>
+            <button class="inner-tab-btn" onclick="switchInnerTab('ws','students')">Kursiyer Listesi</button>
+            <button class="inner-tab-btn" onclick="switchInnerTab('ws','private')">Özel Ders Talepleri</button>
+        </div>
+        <div id="ws-active" class="inner-tab-panel active">
+            <div id="workshop-list"><p style="color:#444;">Henüz atölye kaydı yok.</p></div>
+        </div>
+        <div id="ws-students" class="inner-tab-panel">
+            <div id="student-list" class="card" style="padding:10px 16px;"><p style="color:#444;">Kayıtlı kursiyer yok.</p></div>
+        </div>
+        <div id="ws-private" class="inner-tab-panel">
+            <div class="info-box">Siteden gelen "Birebir Eğitim İstiyorum" talepleri burada gösterilir. Bu veriler <b>content/private_requests.json</b> dosyasından okunur.</div>
+            <div id="private-req-list" class="card" style="padding:10px 16px;"><p style="color:#444;">Talep yok.</p></div>
+        </div>
+    </div>
+
+    <!-- ══ TAB: ZİYARETÇİ DEFTERİ ══ -->
     <div id="tab-guest" class="tab">
-        <h3>Ziyaretçi Defteri</h3>
-        <div class="card" style="background: #080808; border-color: #222;">
-            <div class="section-title" style="margin-top:0;">Yeni Mesaj Ekle</div>
+        <div class="page-header">
+            <div><h2>Ziyaretçi Defteri</h2><small>MESAJLAR & SPAM FİLTRE</small></div>
+        </div>
+        <div class="card dark">
+            <div class="section-title" style="margin-top:0;">Yeni Mesaj Ekle (Admin)</div>
             <div class="grid-2">
                 <input type="text" id="new-g-name" placeholder="Ziyaretçi Adı *">
                 <input type="text" id="new-g-msg" placeholder="Mesaj *">
             </div>
-            <button onclick="approveNewMessage()" style="width:100%; margin-top: 15px;">MESAJI KAYDET</button>
+            <button onclick="approveNewMessage()" class="full">MESAJI KAYDET</button>
         </div>
-        <div id="guest-list" class="card" style="padding: 10px 25px;">Yükleniyor...</div>
+        <div id="guest-list" class="card" style="padding:10px 16px;">Yükleniyor...</div>
     </div>
 
-    <div id="tab-config" class="tab">
-        <h3>Site Genel Ayarları</h3>
+    <!-- ══ TAB: AI ASİSTAN ══ -->
+    <div id="tab-ai" class="tab">
+        <div class="page-header">
+            <div><h2>AI Asistan</h2><small>MODÜL 10 — YAPAY ZEKA YARDIMCıSı</small></div>
+        </div>
+        <div class="info-box">Bu bölüm aktif API anahtarı gerektirir. Anthropic Claude API entegrasyonu için <b>content/settings.json</b> dosyasına <code>ai_key</code> alanı eklenmelidir.</div>
         <div class="card">
-            <div class="section-title">Görünüm & Sistem</div>
-            <div style="display: flex; align-items: center; gap: 20px; background: #000; padding: 15px; border-radius: 4px; border: 1px solid #222;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <label style="font-size: 11px;">Vurgu Rengi:</label>
-                    <input type="color" id="s-theme" style="width: 50px; height: 30px; cursor: pointer; padding: 0; border: none; background: transparent;" oninput="document.documentElement.style.setProperty('--accent', this.value)">
-                </div>
-                <label style="display: flex; align-items: center; gap: 10px; font-size: 12px; cursor: pointer;">
-                    <input type="checkbox" id="s-maintenance" style="width:16px; height:16px; margin:0;"> Bakım Modunu Aktifleştir (Siteyi Kapatır)
-                </label>
+            <div class="section-title" style="margin-top:0;">Eser Betimleme Asistanı</div>
+            <div class="grid-2">
+                <div><label>Eser Adı</label><input type="text" id="ai-title" placeholder="The Melted Core"></div>
+                <div><label>Materyal</label><input type="text" id="ai-material" placeholder="Kil, Bronz patina"></div>
             </div>
-            <button onclick="handleSettingsUpdate()" style="width:100%; margin-top: 30px;">AYARLARI GÜNCELLE</button>
+            <div><label>Ek Notlar</label><textarea id="ai-notes" rows="2" placeholder="Boyutlar, ilham kaynağı, teknik..."></textarea></div>
+            <div class="grid-2" style="margin-top:8px;">
+                <button onclick="generateAIDesc('TR')" class="ai-btn">🤖 Türkçe Açıklama Üret</button>
+                <button onclick="generateAIDesc('EN')" class="ai-btn">🤖 English Description</button>
+            </div>
+            <div id="ai-result" style="margin-top:14px;padding:14px;background:#040404;border:1px solid var(--border);border-radius:3px;font-size:11px;color:#aaa;line-height:1.8;min-height:60px;display:none;"></div>
+            <div id="ai-result-en" style="margin-top:10px;padding:14px;background:#040404;border:1px solid var(--border);border-radius:3px;font-size:11px;color:#aaa;line-height:1.8;min-height:60px;display:none;"></div>
+        </div>
+        <div class="card">
+            <div class="section-title" style="margin-top:0;">Toplu İngilizce Çeviri</div>
+            <p style="font-size:10px;color:#555;margin:0 0 12px;">Envanterdeki Türkçe açıklamaları akademik sanat İngilizcesine çevirir.</p>
+            <button onclick="translateAllDescriptions()" class="ai-btn full">TÜM AÇIKLAMALARI İNGİLİZCEYE ÇEVİR</button>
         </div>
     </div>
-</div>
+
+    <!-- ══ TAB: AYARLAR ══ -->
+    <div id="tab-config" class="tab">
+        <div class="page-header">
+            <div><h2>Site Ayarları</h2><small>MODÜL 9 & 10 — CMS · GÖRÜNÜM · SİSTEM</small></div>
+        </div>
+        <div class="inner-tabs">
+            <button class="inner-tab-btn active" onclick="switchInnerTab('config','appearance')">Görünüm</button>
+            <button class="inner-tab-btn" onclick="switchInnerTab('config','content')">İçerik</button>
+            <button class="inner-tab-btn" onclick="switchInnerTab('config','social')">Sosyal & SEO</button>
+            <button class="inner-tab-btn" onclick="switchInnerTab('config','backup')">Yedek & Geri Yükleme</button>
+        </div>
+        <div id="config-appearance" class="inner-tab-panel active">
+            <div class="card dark">
+                <div class="section-title" style="margin-top:0;">Görünüm & Tema</div>
+                <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <label style="margin:0;">Vurgu Rengi:</label>
+                        <input type="color" id="s-theme" style="width:50px;margin:0;" oninput="document.documentElement.style.setProperty('--accent',this.value)">
+                    </div>
+                    <label class="check-item"><input type="checkbox" id="s-maintenance"> Bakım Modunu Aktifleştir</label>
+                </div>
+                <div class="grid-2" style="margin-top:12px;">
+                    <div><label>Yıllık Üretim Hedefi</label><input type="number" id="s-goal" placeholder="20"></div>
+                    <div><label>Oturum Zaman Aşımı (dk)</label><input type="number" id="s-timeout" placeholder="120"></div>
+                </div>
+                <button onclick="handleSettingsUpdate()" class="full">AYARLARI KAYDET</button>
+            </div>
+        </div>
+        <div id="config-content" class="inner-tab-panel">
+            <div class="card dark">
+                <div class="section-title" style="margin-top:0;">Dinamik İçerik (CMS)</div>
+                <div><label>Hakkımda / Biyografi Metni</label><textarea id="s-bio" rows="4" placeholder="Ubeydullah Bayrak, Kayseri doğumlu..."></textarea></div>
+                <div><label>İletişim Telefonu</label><input type="text" id="s-phone" placeholder="+90 5XX XXX XX XX"></div>
+                <div><label>E-posta</label><input type="text" id="s-email" placeholder="info@uberaw.com"></div>
+                <div><label>Stüdyo Adresi</label><input type="text" id="s-address" placeholder="Kayseri, Türkiye"></div>
+                <button onclick="handleSettingsUpdate()" class="full">İÇERİĞİ KAYDET</button>
+            </div>
+        </div>
+        <div id="config-social" class="inner-tab-panel">
+            <div class="card dark">
+                <div class="section-title" style="margin-top:0;">Sosyal Medya & SEO</div>
+                <div><label>Instagram</label><input type="text" id="s-instagram" placeholder="https://instagram.com/uberaw"></div>
+                <div><label>Behance</label><input type="text" id="s-behance" placeholder="https://behance.net/..."></div>
+                <div><label>Diğer Portfolyo Linki</label><input type="text" id="s-portfolio" placeholder="https://..."></div>
+                <div><label>SEO Anahtar Kelimeler</label><input type="text" id="s-seo" placeholder="Türk heykeli, kil sanatı, Kayseri sanat..."></div>
+                <button onclick="handleSettingsUpdate()" class="full">KAYDET</button>
+            </div>
+        </div>
+        <div id="config-backup" class="inner-tab-panel">
+            <div class="card dark">
+                <div class="section-title" style="margin-top:0;">Yedekleme & Geri Yükleme</div>
+                <p style="font-size:10px;color:#555;">Tüm stüdyo verilerini (envanter, CRM, ayarlar) tek dosyada indirin.</p>
+                <div class="btn-group">
+                    <button onclick="backupAll()" class="info">💾 JSON Yedek İndir</button>
+                </div>
+                <div class="section-title">Geri Yükleme</div>
+                <p style="font-size:10px;color:#555;">Yedek dosyasını seçin ve sistemi geri yükleyin.</p>
+                <input type="file" id="restore-file" accept=".json" style="margin-bottom:10px;">
+                <button onclick="restoreBackup()" class="warning full">YEDEĞİ GERİ YÜKLE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ TAB: İŞLEM LOGU ══ -->
+    <div id="tab-logs" class="tab">
+        <div class="page-header">
+            <div><h2>İşlem Günlüğü</h2><small>GÜVENLİK LOGU</small></div>
+            <button onclick="clearLog()" class="danger sm">Logu Temizle</button>
+        </div>
+        <div class="card" style="padding:10px 16px;" id="log-list">
+            <p style="color:#444;font-size:10px;">Henüz işlem kaydı yok.</p>
+        </div>
+    </div>
+
+</div><!-- /main -->
 
 <script>
-    const REPO = "uberaw/uberaw"; 
-    let currentPortfolio = { projects: [] };
-    let currentCRM = { collectors: [] };
-    let currentSettings = {};
+// ═══════════════════════════════════════════════
+// CONFIG & STATE
+// ═══════════════════════════════════════════════
+const REPO = "uberaw/uberaw";
+let sessionToken = "";
+let currentPortfolio = { projects: [] };
+let currentCRM = { collectors: [] };
+let currentSettings = {};
+let currentOrders = { orders: [] };
+let currentWorkshops = { workshops: [], students: [] };
+let sessionExpireTimer = null;
+const SESSION_TIMEOUT_DEFAULT = 120; // dakika
 
-    // --- UTILS & GÜVENLİ ŞİFRELEME (MODÜL 1) ---
-    const u2b = (s) => btoa(unescape(encodeURIComponent(s)));
-    const b2u = (s) => decodeURIComponent(escape(atob(s)));
-    
-    function xorEncrypt(text, key) {
-        let result = '';
-        for(let i=0; i<text.length; i++) result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-        return btoa(result);
-    }
-    function xorDecrypt(cipher, key) {
-        let text = atob(cipher);
-        let result = '';
-        for(let i=0; i<text.length; i++) result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-        return result;
-    }
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+const u2b = (s) => btoa(unescape(encodeURIComponent(s)));
+const b2u = (s) => decodeURIComponent(escape(atob(s)));
 
-    function generateUUID() { // Kriptografik Hash (Modül 5)
-        return Math.random().toString(36).substring(2, 10) + '-' + Math.random().toString(36).substring(2, 10);
-    }
+function xorEncrypt(text, key) {
+    let r=''; for(let i=0;i<text.length;i++) r+=String.fromCharCode(text.charCodeAt(i)^key.charCodeAt(i%key.length));
+    return btoa(r);
+}
+function xorDecrypt(cipher, key) {
+    let text=atob(cipher), r='';
+    for(let i=0;i<text.length;i++) r+=String.fromCharCode(text.charCodeAt(i)^key.charCodeAt(i%key.length));
+    return r;
+}
+function generateUUID() {
+    return 'xxxx-xxxx-xxxx'.replace(/x/g, () => Math.random().toString(36)[2]);
+}
+function nowStr() { return new Date().toLocaleString('tr-TR'); }
+function showLoading(show, txt="İSTEMCİ İŞLENİYOR...") {
+    document.getElementById('loader-text').innerText = txt;
+    document.getElementById('loader').style.display = show ? 'flex' : 'none';
+}
+function showToast(message, isError=false, isSuccess=false) {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast${isError?' error':''}${isSuccess?' success-toast':''}`;
+    t.innerText = message;
+    c.appendChild(t);
+    setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity 0.3s'; setTimeout(()=>t.remove(),300); }, 3500);
+}
+function switchTab(tabId, element) {
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));
+    document.getElementById('tab-'+tabId).classList.add('active');
+    element.classList.add('active');
+    resetSessionTimer();
+}
+function switchInnerTab(prefix, panel) {
+    document.querySelectorAll(`[id^="${prefix}-"]`).forEach(el => {
+        if(el.classList.contains('inner-tab-panel')) el.classList.remove('active');
+    });
+    document.getElementById(`${prefix}-${panel}`)?.classList.add('active');
+    const parentTab = document.getElementById(`tab-${prefix === 'ws' ? 'workshop' : prefix === 'config' ? 'config' : 'gallery'}`);
+    parentTab?.querySelectorAll('.inner-tab-btn').forEach((btn, i) => {
+        const panels = parentTab.querySelectorAll('.inner-tab-panel');
+        btn.classList.toggle('active', panels[i]?.id === `${prefix}-${panel}`);
+    });
+}
 
-    function setLoaderText(txt) { document.getElementById('loader-text').innerText = txt; }
-    function showLoading(show, txt="İSTEMCİ İŞLENİYOR...") { 
-        setLoaderText(txt);
-        document.getElementById('loader').style.display = show ? 'flex' : 'none'; 
-    }
-    
-    function showToast(message, isError = false) {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = `toast ${isError ? 'error' : ''}`;
-        toast.innerText = message;
-        container.appendChild(toast);
-        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
-    }
-
-    function switchTab(tabId, element) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
-        document.getElementById('tab-' + tabId).classList.add('active');
-        element.classList.add('active');
-    }
-
-    // --- GITHUB API ACTION & AUTH ---
-    let sessionToken = ""; 
-    
+// ═══════════════════════════════════════════════
+// SESSION & AUTH
+// ═══════════════════════════════════════════════
+if(!localStorage.getItem('ube_enc_t')) {
+    document.getElementById('login-token').style.display = 'block';
+    document.getElementById('login-desc').innerText = "İlk kurulum: GitHub Token ve şifre belirleyin.";
+}
+function resetLogin() {
+    if(confirm("Kayıtlı token silinecek. Emin misiniz?")) { localStorage.removeItem('ube_enc_t'); location.reload(); }
+}
+function logout() { sessionToken=""; clearTimeout(sessionExpireTimer); location.reload(); }
+function resetSessionTimer() {
+    clearTimeout(sessionExpireTimer);
+    const timeout = (parseInt(currentSettings.timeout) || SESSION_TIMEOUT_DEFAULT) * 60 * 1000;
+    sessionExpireTimer = setTimeout(() => {
+        showToast("Oturum süresi doldu. Güvenlik nedeniyle çıkış yapıldı.", false);
+        setTimeout(logout, 2000);
+    }, timeout);
+}
+async function auth() {
+    const pwd = document.getElementById('login-pwd').value;
+    const rawToken = document.getElementById('login-token').value;
+    if(!pwd) return showToast("Şifre boş olamaz!", true);
     if(!localStorage.getItem('ube_enc_t')) {
-        document.getElementById('login-token').style.display = 'block';
-        document.getElementById('login-desc').innerText = "İlk kurulum: Lütfen GitHub Token'ınızı ve sisteme giriş yaparken kullanacağınız bir şifre belirleyin.";
+        if(!rawToken) return showToast("İlk kurulum için GitHub Token zorunludur!", true);
+        localStorage.setItem('ube_enc_t', xorEncrypt(rawToken, pwd));
+        sessionToken = rawToken;
+    } else {
+        sessionToken = xorDecrypt(localStorage.getItem('ube_enc_t'), pwd);
     }
-
-    function resetLogin() {
-        if(confirm("Kayıtlı token silinecek. Yeni bir cihazda veya token değiştirdiğinizde bunu yapmalısınız. Emin misiniz?")) {
-            localStorage.removeItem('ube_enc_t');
-            location.reload();
-        }
-    }
-
-    function logout() {
+    showLoading(true, "YETKİLENDİRİLİYOR...");
+    try {
+        const res = await ghAction('content/settings.json');
+        if(res.sha) {
+            document.getElementById('login').style.display = 'none';
+            await initDashboard();
+            showToast("Sisteme güvenle giriş yapıldı.", false, true);
+            addLog("AUTH", "Sisteme giriş yapıldı.");
+            resetSessionTimer();
+        } else throw new Error();
+    } catch(e) {
+        showToast("Şifre yanlış veya Token geçersiz!", true);
         sessionToken = "";
-        location.reload();
-    }
+    } finally { showLoading(false); }
+}
 
-    async function ghAction(path, method = 'GET', data = null, sha = null) {
-        const options = { method, headers: { 'Authorization': `token ${sessionToken}`, 'Content-Type': 'application/json' } };
-        if (data) {
-            options.body = JSON.stringify({
-                message: "UBE RAW OS Update",
-                content: (path.endsWith('.png') || path.endsWith('.jpg')) ? data : u2b(JSON.stringify(data, null, 2)),
-                sha: sha
+// ═══════════════════════════════════════════════
+// GITHUB API
+// ═══════════════════════════════════════════════
+async function ghAction(path, method='GET', data=null, sha=null) {
+    const opts = { method, headers: { 'Authorization': `token ${sessionToken}`, 'Content-Type': 'application/json' } };
+    if(data) {
+        opts.body = JSON.stringify({
+            message: "UBE RAW OS Update",
+            content: (path.endsWith('.png')||path.endsWith('.jpg')) ? data : u2b(JSON.stringify(data,null,2)),
+            sha: sha
+        });
+    }
+    const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}?v=${Date.now()}`, opts);
+    if(!r.ok && method !== 'GET') throw new Error("API Hatası: " + r.status);
+    return await r.json();
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+async function initDashboard() {
+    await loadSettings();
+    await fetchCRM();
+    await renderInventory();
+    await refreshOrders();
+    await refreshGuestbook();
+    await refreshWorkshops();
+    renderExpoSelectLists();
+    renderReminderList();
+}
+
+// ═══════════════════════════════════════════════
+// LOG SYSTEM (Modül 10)
+// ═══════════════════════════════════════════════
+function addLog(action, desc) {
+    const logs = JSON.parse(localStorage.getItem('ube_log') || '[]');
+    logs.unshift({ time: nowStr(), action, desc });
+    if(logs.length > 200) logs.pop();
+    localStorage.setItem('ube_log', JSON.stringify(logs));
+    renderLog();
+}
+function renderLog() {
+    const logs = JSON.parse(localStorage.getItem('ube_log') || '[]');
+    const el = document.getElementById('log-list');
+    if(!el) return;
+    el.innerHTML = logs.length ? logs.map(l => `
+        <div class="log-row">
+            <span class="log-time">${l.time}</span>
+            <span class="log-action">${l.action}</span>
+            <span class="log-desc">${l.desc}</span>
+        </div>`).join('') : "<p style='color:#444;font-size:10px;'>Log boş.</p>";
+}
+function clearLog() {
+    if(confirm("İşlem logu temizlensin mi?")) { localStorage.removeItem('ube_log'); renderLog(); }
+}
+
+// ═══════════════════════════════════════════════
+// DRAG & DROP
+// ═══════════════════════════════════════════════
+const dropZone = document.getElementById('drop-zone');
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault(); dropZone.classList.remove('dragover');
+    document.getElementById('f-file').files = e.dataTransfer.files;
+    updateFilePreview(document.getElementById('f-file'));
+});
+
+function updateFilePreview(input) {
+    const p = document.getElementById('file-preview');
+    p.innerHTML = '';
+    const files = Array.from(input.files).slice(0, 5);
+    files.forEach(f => { p.innerHTML += `<span class="file-badge">${f.name} (${(f.size/1024/1024).toFixed(1)}MB)</span>`; });
+    if(input.files.length > 5) showToast("Maksimum 5 fotoğraf yüklenebilir. İlk 5 işlenecek.", false);
+}
+
+// Modül 8: Gelişmiş görsel sıkıştırma & WebP
+async function processImage(file, artworkTitle, index) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let w = img.width, h = img.height;
+                const MAX_W = 1400;
+                if(w > MAX_W) { h = Math.round(h * MAX_W / w); w = MAX_W; }
+                canvas.width = w; canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                const slug = artworkTitle.toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+                const fileName = `images/uploads/${slug}-${Date.now()}-${index}.jpg`;
+                // EXIF: use file.lastModified for creation date hint
+                resolve({ name: fileName, content: canvas.toDataURL('image/jpeg', 0.78).split(',')[1], created: new Date(file.lastModified).toLocaleDateString('tr-TR') });
+            };
+        };
+    });
+}
+
+// ═══════════════════════════════════════════════
+// UPLOAD (Modül 8 + Modül 1)
+// ═══════════════════════════════════════════════
+async function handleUpload() {
+    const files = Array.from(document.getElementById('f-file').files).slice(0, 5);
+    const title = document.getElementById('f-title').value.trim();
+    if(!files.length || !title) return showToast("Eser adı ve en az 1 görsel zorunludur!", true);
+    showLoading(true, "GÖRSELLER SIKIŞTIRILIP YÜKLENİYOR...");
+    document.getElementById('upload-progress').style.display='block';
+    try {
+        let paths = [], createdDate = '';
+        for(let i=0; i<files.length; i++) {
+            const pct = Math.round((i/files.length)*100);
+            document.getElementById('upload-bar').style.width = pct + '%';
+            document.getElementById('upload-progress-text').innerText = `Görsel ${i+1}/${files.length} işleniyor... %${pct}`;
+            const proc = await processImage(files[i], title, i);
+            if(i===0) createdDate = proc.created;
+            await fetch(`https://api.github.com/repos/${REPO}/contents/${proc.name}`, {
+                method:'PUT', headers: {'Authorization': `token ${sessionToken}`},
+                body: JSON.stringify({ message: `Upload: ${title}`, content: proc.content })
             });
+            paths.push(proc.name);
         }
-        const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}?v=${Date.now()}`, options);
-        if(!r.ok && method !== 'GET') throw new Error("API Hatası");
-        return await r.json();
-    }
+        document.getElementById('upload-bar').style.width = '100%';
 
-    async function auth() {
-        const pwd = document.getElementById('login-pwd').value;
-        const rawToken = document.getElementById('login-token').value;
-        if(!pwd) return showToast("Şifre boş olamaz!", true);
+        let d, data;
+        try { d = await ghAction('content/portfolio.json'); data = JSON.parse(b2u(d.content)); }
+        catch(e) { data = { projects: [] }; }
 
-        if(!localStorage.getItem('ube_enc_t')) {
-            if(!rawToken) return showToast("İlk kurulum için GitHub Token zorunludur!", true);
-            localStorage.setItem('ube_enc_t', xorEncrypt(rawToken, pwd));
-            sessionToken = rawToken;
-        } else {
-            sessionToken = xorDecrypt(localStorage.getItem('ube_enc_t'), pwd);
-        }
-
-        showLoading(true, "YETKİLENDİRİLİYOR...");
-        try {
-            const res = await ghAction('content/settings.json');
-            if(res.sha) {
-                document.getElementById('login').style.display = 'none';
-                await initDashboard();
-                showToast("Sisteme güvenle giriş yapıldı.");
-            } else throw new Error();
-        } catch(e) { 
-            showToast("Şifre yanlış veya Token geçersiz!", true); 
-            sessionToken = "";
-        } finally { showLoading(false); }
-    }
-
-    async function initDashboard() {
-        await loadSettings();
-        await fetchCRM();
+        const autoCode = `UBE-${new Date().getFullYear().toString().slice(-2)}-${String(data.projects.length+1).padStart(3,'0')}`;
+        data.projects.unshift({
+            title,
+            category: document.getElementById('f-cat').value,
+            subCategory: document.getElementById('f-subcat').value,
+            collection: document.getElementById('f-collection').value,
+            price: document.getElementById('f-price').value || "",
+            currency: document.getElementById('f-currency').value || "TRY",
+            costNote: document.getElementById('f-cost').value,
+            image: paths.join(','),
+            mapLink: document.getElementById('f-map').value,
+            dimensions: document.getElementById('f-dim').value,
+            weight: document.getElementById('f-weight').value,
+            material: document.getElementById('f-material').value,
+            stage: document.getElementById('f-stage').value,
+            location: document.getElementById('f-location').value,
+            edition: document.getElementById('f-edition').value,
+            description: document.getElementById('f-description').value,
+            certCode: autoCode,
+            isDraft: document.getElementById('f-draft').checked,
+            isFeatured: document.getElementById('f-featured').checked,
+            isDeleted: false, isHidden: false, isSale: false, owner: "",
+            createdDate, addedDate: nowStr(),
+            exhibitions: []
+        });
+        await ghAction('content/portfolio.json', 'PUT', data, d ? d.sha : null);
+        // reset form
+        document.querySelectorAll('#tab-add input[type="text"],#tab-add textarea').forEach(el=>el.value='');
+        document.querySelectorAll('#tab-add input[type="checkbox"]').forEach(el=>el.checked=false);
+        document.getElementById('file-preview').innerHTML='';
+        document.getElementById('upload-progress').style.display='none';
+        showToast("Eser başarıyla envantere eklendi!", false, true);
+        addLog("ESER EKLENDİ", title + " · " + autoCode);
         await renderInventory();
-        await refreshOrders();
-        await refreshGuestbook();
-    }
+        switchTab('inv', document.querySelectorAll('.nav-link')[3]);
+    } catch(e) { showToast("Yükleme sırasında hata oluştu: " + e.message, true); }
+    showLoading(false);
+}
 
-    // --- DRAG & DROP ---
-    const dropZone = document.getElementById('drop-zone');
-    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault(); dropZone.classList.remove('dragover');
-        document.getElementById('f-file').files = e.dataTransfer.files;
-        updateFilePreview(document.getElementById('f-file'));
+// ═══════════════════════════════════════════════
+// INVENTORY FETCH & RENDER (Modül 1, 2)
+// ═══════════════════════════════════════════════
+async function fetchInventory() {
+    try {
+        const d = await ghAction('content/portfolio.json');
+        currentPortfolio = JSON.parse(b2u(d.content));
+        currentPortfolio.sha = d.sha;
+    } catch(e) { currentPortfolio = { projects: [] }; }
+}
+async function fetchCRM() {
+    try {
+        const d = await ghAction('content/crm.json');
+        currentCRM = JSON.parse(b2u(d.content));
+        currentCRM.sha = d.sha;
+    } catch(e) { currentCRM = { collectors: [] }; }
+    renderCRM();
+}
+
+function calculateRevenue() {
+    let total = 0;
+    currentPortfolio.projects.filter(p=>p.isSale&&!p.isDeleted).forEach(p => {
+        let v = parseFloat(String(p.price).replace(/[^0-9.-]+/g,""));
+        if(!isNaN(v)) total += v;
+    });
+    document.getElementById('stat-revenue').innerText = "₺" + total.toLocaleString('tr-TR');
+}
+
+function renderDashboardCharts() {
+    // Monthly chart
+    const months = ["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+    const monthlySales = new Array(12).fill(0);
+    currentPortfolio.projects.filter(p=>p.isSale&&!p.isDeleted).forEach(p => {
+        const d = new Date(p.saleDate || p.addedDate || '');
+        if(!isNaN(d.getTime())) monthlySales[d.getMonth()]++;
+    });
+    const maxSale = Math.max(...monthlySales, 1);
+    const chart = document.getElementById('monthly-chart');
+    const labels = document.getElementById('monthly-labels');
+    if(!chart) return;
+    chart.innerHTML = monthlySales.map((v,i) => `
+        <div class="chart-bar-col">
+            <div class="chart-bar" style="height:${Math.max(4,(v/maxSale)*160)}px;">
+                ${v > 0 ? `<span class="chart-val">${v}</span>` : ''}
+            </div>
+        </div>`).join('');
+    labels.innerHTML = months.map(m => `<div class="chart-label" style="flex:1;text-align:center;">${m}</div>`).join('');
+
+    // Category stats
+    const catCount = {};
+    currentPortfolio.projects.filter(p=>!p.isDeleted&&!p.isDraft).forEach(p => {
+        const c = p.category || 'Diğer';
+        catCount[c] = (catCount[c]||0) + 1;
+    });
+    const total = Object.values(catCount).reduce((a,b)=>a+b,0) || 1;
+    const catEl = document.getElementById('cat-stats');
+    if(catEl) catEl.innerHTML = Object.entries(catCount).sort((a,b)=>b[1]-a[1]).map(([cat,cnt]) => `
+        <div style="margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px;">
+                <span style="color:#aaa;">${cat}</span><span style="color:var(--accent);">${cnt}</span>
+            </div>
+            <div class="progress-bar-wrap"><div class="progress-bar" style="width:${(cnt/total*100).toFixed(0)}%"></div></div>
+        </div>`).join('') || "<p style='color:#444;font-size:10px;'>Veri yok.</p>";
+
+    // Goal tracker
+    const goal = parseInt(currentSettings.goal) || 20;
+    const completed = currentPortfolio.projects.filter(p=>!p.isDeleted&&p.stage==='Tamamlandı').length;
+    document.getElementById('goal-current').innerText = completed;
+    document.getElementById('goal-target').innerText = goal;
+    document.getElementById('goal-input').value = goal;
+    const pct = Math.min(100, Math.round(completed/goal*100));
+    document.getElementById('goal-percent').innerText = `%${pct} tamamlandı`;
+    document.getElementById('goal-bar').style.width = pct + '%';
+}
+
+async function renderInventory() {
+    await fetchInventory();
+    const listContainer = document.getElementById('inventory-list');
+    const searchTerm = document.getElementById('search-inv').value.toLowerCase();
+    const filterStr = document.getElementById('filter-inv').value;
+    const filterCat = document.getElementById('filter-cat').value;
+
+    const activeProjects = currentPortfolio.projects.filter(p=>!p.isDeleted&&!p.isDraft);
+    document.getElementById('stat-total').innerText = activeProjects.length;
+    document.getElementById('stat-sold').innerText = activeProjects.filter(p=>p.isSale).length;
+    document.getElementById('stat-drafts').innerText = currentPortfolio.projects.filter(p=>p.isDraft&&!p.isDeleted).length;
+    calculateRevenue();
+    renderDashboardCharts();
+    renderExpoSelectLists();
+
+    let displayList = currentPortfolio.projects.map((p,i)=>({...p, originalIndex:i}));
+    if(filterStr==='trash') displayList = displayList.filter(p=>p.isDeleted);
+    else if(filterStr==='draft') displayList = displayList.filter(p=>!p.isDeleted&&p.isDraft);
+    else if(filterStr==='featured') displayList = displayList.filter(p=>!p.isDeleted&&p.isFeatured);
+    else if(filterStr==='hidden') displayList = displayList.filter(p=>!p.isDeleted&&p.isHidden);
+    else displayList = displayList.filter(p=>!p.isDeleted&&!p.isDraft);
+
+    if(filterCat) displayList = displayList.filter(p=>p.category===filterCat);
+    if(searchTerm) displayList = displayList.filter(p=>
+        (p.title&&p.title.toLowerCase().includes(searchTerm)) ||
+        (p.certCode&&p.certCode.toLowerCase().includes(searchTerm)) ||
+        (p.material&&p.material.toLowerCase().includes(searchTerm)) ||
+        (p.category&&p.category.toLowerCase().includes(searchTerm))
+    );
+
+    let html = '';
+    displayList.forEach(p => {
+        const i = p.originalIndex;
+        const thumbUrl = p.image ? `https://raw.githubusercontent.com/${REPO}/main/${p.image.split(',')[0]}` : '';
+        const badges = [
+            p.isDraft ? `<span class="badge draft">TASLAK</span>` : '',
+            p.isHidden ? `<span class="badge hidden">GİZLİ</span>` : '',
+            p.isSale ? `<span class="badge sold">SATILDI</span>` : '',
+            p.isFeatured ? `<span class="badge featured">⭐VİTRİN</span>` : '',
+            p.isReserved ? `<span class="badge reserved">REZERVE</span>` : '',
+            p.isConsignment ? `<span class="badge consignment">DIŞARIDA</span>` : '',
+        ].join('');
+
+        html += `<div class="item-row" style="${p.isHidden?'opacity:0.45;':''}">
+            ${thumbUrl ? `<img src="${thumbUrl}" class="item-thumb" onerror="this.style.display='none';this.nextSibling.style.display='flex';">
+            <div class="item-thumb-placeholder" style="display:none;">🖼</div>` : `<div class="item-thumb-placeholder">🖼</div>`}
+            <div class="item-info">
+                <b>${p.title || '—'} ${badges}</b>
+                <small>
+                    <span style="color:var(--accent);">SKU</span> ${p.certCode||'-'} &nbsp;·&nbsp;
+                    <span style="color:var(--accent);">Kat.</span> ${p.category||'-'} &nbsp;·&nbsp;
+                    <span style="color:var(--accent);">Fiyat</span> ${p.price ? p.price+' '+(p.currency||'TRY') : '-'}
+                    ${p.oldPrice ? `&nbsp;<s style="color:#444;">${p.oldPrice}</s>` : ''}
+                </small>
+                <small>${p.stage||'Tamamlandı'} · ${p.location||'-'} ${p.collection?'· '+p.collection:''}</small>
+            </div>
+            <div class="btn-group">`;
+
+        if(filterStr==='trash') {
+            html += `<button class="success sm" onclick="restoreProject(${i})">GERİ YÜKLE</button>
+                     <button class="danger sm" onclick="hardDeleteProject(${i})">KALICI SİL</button>`;
+        } else {
+            html += `<button class="secondary sm" onclick="moveItem(${i},-1)">▲</button>
+                     <button class="secondary sm" onclick="moveItem(${i},1)">▼</button>
+                     <button class="warning sm" onclick="toggleVisibility(${i})">👁</button>
+                     <button class="info sm" onclick="toggleReserved(${i})">${p.isReserved?'✓RZV':'RZV'}</button>
+                     <button class="secondary sm" onclick="openConsignModal(${i})">↗</button>`;
+            if(p.isSale) html += `<button class="danger sm" onclick="cancelSale(${i})">İPTAL</button>`;
+            html += `<button class="secondary sm" onclick="openEditModal(${i})">DÜZENLE</button>
+                     <button class="danger sm" onclick="softDeleteProject(${i})">ÇÖP</button>`;
+        }
+        html += `</div></div>`;
     });
 
-    function updateFilePreview(input) {
-        const p = document.getElementById('file-preview');
-        p.innerHTML = '';
-        Array.from(input.files).forEach(f => { p.innerHTML += `<span class="file-badge">${f.name}</span>`; });
-    }
+    listContainer.innerHTML = html || "<p style='color:#444;font-size:10px;padding:20px;'>Arama kriterlerine uygun eser bulunamadı.</p>";
 
-    async function processImage(file, artworkTitle, index) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (event) => {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width; let height = img.height;
-                    const MAX_WIDTH = 1500;
-                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                    canvas.width = width; canvas.height = height;
-                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                    
-                    const slug = artworkTitle.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').trim();
-                    const fileName = `images/uploads/${slug}-${Date.now()}-${index}.jpg`;
-                    resolve({ name: fileName, content: canvas.toDataURL('image/jpeg', 0.8).split(',')[1] });
-                };
-            };
-        });
-    }
+    const saleOptions = '<option value="">Eser Seçin</option>' +
+        currentPortfolio.projects.map((p,idx) => {
+            if(p.isDeleted) return '';
+            return `<option value="${idx}">${p.certCode||'?'} — ${p.title} ${p.isSale?'(Satıldı)':''}</option>`;
+        }).join('');
+    document.getElementById('sale-select').innerHTML = saleOptions;
+    document.getElementById('new-o-artwork').innerHTML = saleOptions;
+}
 
-    async function handleUpload() {
-        const files = document.getElementById('f-file').files;
-        const title = document.getElementById('f-title').value;
-        if(!files.length || !title) return showToast("Eser adı ve görsel zorunludur!", true);
+// ═══════════════════════════════════════════════
+// BULK ACTIONS (Modül 1.6)
+// ═══════════════════════════════════════════════
+function openBulkActions() {
+    const panel = document.getElementById('bulk-panel');
+    panel.style.display = panel.style.display==='none' ? 'block' : 'none';
+    const active = currentPortfolio.projects.filter(p=>!p.isDeleted);
+    document.getElementById('bulk-select-list').innerHTML = active.map((p,i) => `
+        <label class="check-item" style="padding:6px 0;border-bottom:1px solid #0a0a0a;">
+            <input type="checkbox" class="bulk-cb" value="${currentPortfolio.projects.indexOf(p)}">
+            <span>${p.title} <span style="color:#444;">(${p.certCode||'?'})</span></span>
+        </label>`).join('');
+}
+async function bulkAction(field, value) {
+    const selected = [...document.querySelectorAll('.bulk-cb:checked')].map(cb=>parseInt(cb.value));
+    if(!selected.length) return showToast("Hiç eser seçilmedi.", true);
+    if(!confirm(`${selected.length} eser için işlem uygulanacak. Emin misiniz?`)) return;
+    showLoading(true, "TOPLU İŞLEM UYGULANYOR...");
+    selected.forEach(i => { currentPortfolio.projects[i][field] = value; });
+    try {
+        await ghAction('content/portfolio.json', 'PUT', {projects:currentPortfolio.projects}, currentPortfolio.sha);
+        addLog("TOPLU İŞLEM", `${selected.length} eser · ${field}=${value}`);
+        showToast(`${selected.length} eser güncellendi.`, false, true);
+        await renderInventory();
+    } catch(e) { showToast("Hata: " + e.message, true); }
+    showLoading(false);
+}
 
-        showLoading(true, "GÖRSELLER İŞLENİYOR...");
-        try {
-            let paths = [];
-            for(let i = 0; i < files.length; i++) {
-                showToast(`Görsel ${i+1}/${files.length} yükleniyor...`);
-                const proc = await processImage(files[i], title, i);
-                await fetch(`https://api.github.com/repos/${REPO}/contents/${proc.name}`, {
-                    method: 'PUT', headers: { 'Authorization': `token ${sessionToken}` },
-                    body: JSON.stringify({ message: `Upload: ${title}`, content: proc.content })
-                });
-                paths.push(proc.name);
+// ═══════════════════════════════════════════════
+// PROJECT ACTIONS (Modül 1, 2)
+// ═══════════════════════════════════════════════
+async function updateProjectField(index, field, value, successMsg) {
+    showLoading(true);
+    currentPortfolio.projects[index][field] = value;
+    try {
+        await ghAction('content/portfolio.json', 'PUT', {projects:currentPortfolio.projects}, currentPortfolio.sha);
+        if(successMsg) showToast(successMsg, false, true);
+        addLog("GÜNCELLEME", `${currentPortfolio.projects[index].title} · ${field}`);
+        await renderInventory();
+    } catch(e) { showToast("İşlem başarısız", true); }
+    showLoading(false);
+}
+function toggleVisibility(i) { updateProjectField(i,'isHidden',!currentPortfolio.projects[i].isHidden,"Görünürlük değiştirildi."); }
+function toggleReserved(i) { updateProjectField(i,'isReserved',!currentPortfolio.projects[i].isReserved, currentPortfolio.projects[i].isReserved?"Rezerve kaldırıldı.":"Eser rezerve edildi."); }
+function softDeleteProject(i) { if(confirm("Eser Çöp Kutusuna taşınacak?")) updateProjectField(i,'isDeleted',true,"Eser çöpe taşındı."); }
+function restoreProject(i) { updateProjectField(i,'isDeleted',false,"Eser envantere geri yüklendi."); }
+
+async function hardDeleteProject(i) {
+    if(!confirm("DİKKAT: Kalıcı olarak silinecek. Emin misiniz?")) return;
+    showLoading(true, "SİLİNİYOR...");
+    try {
+        const project = currentPortfolio.projects[i];
+        if(project.image) {
+            for(let path of project.image.split(',')) {
+                try {
+                    const info = await ghAction(path.trim());
+                    if(info.sha) await fetch(`https://api.github.com/repos/${REPO}/contents/${path.trim()}`, {
+                        method:'DELETE', headers:{'Authorization':`token ${sessionToken}`},
+                        body: JSON.stringify({ message:"Resim Kalıcı Silindi", sha:info.sha })
+                    });
+                } catch(e){}
             }
-
-            let d, data;
-            try { d = await ghAction('content/portfolio.json'); data = JSON.parse(b2u(d.content)); } 
-            catch(e) { data = { projects: [] }; }
-            
-            const autoCode = `UBE-${new Date().getFullYear().toString().slice(-2)}-${String(data.projects.length + 1).padStart(3, '0')}`;
-
-            data.projects.unshift({ 
-                title, 
-                category: document.getElementById('f-cat').value,
-                price: document.getElementById('f-price').value || "", 
-                currency: document.getElementById('f-currency').value || "TRY", 
-                image: paths.join(','), 
-                mapLink: document.getElementById('f-map').value,
-                dimensions: document.getElementById('f-dim').value,
-                weight: document.getElementById('f-weight').value,
-                material: document.getElementById('f-material').value,
-                stage: document.getElementById('f-stage').value,
-                location: document.getElementById('f-location').value,
-                certCode: autoCode,
-                isDraft: document.getElementById('f-draft').checked,
-                isDeleted: false, isHidden: false, isSale: false, owner: ""
-            });
-            await ghAction('content/portfolio.json', 'PUT', data, d ? d.sha : null);
-            
-            document.querySelectorAll('#tab-add input[type="text"]').forEach(el => el.value = '');
-            document.getElementById('file-preview').innerHTML = '';
-            document.getElementById('f-draft').checked = false;
-            
-            showToast("Eser başarıyla envantere eklendi!");
-            await renderInventory(); 
-            switchTab('inv', document.querySelectorAll('.nav-link')[2]);
-        } catch(e) { showToast("Yükleme sırasında hata oluştu.", true); }
-        showLoading(false);
-    }
-
-    // --- ENVANTER & CRM (MODÜL 1, 2, 4) ---
-    async function fetchInventory() {
-        try {
-            const d = await ghAction('content/portfolio.json');
-            currentPortfolio = JSON.parse(b2u(d.content));
-            currentPortfolio.sha = d.sha;
-        } catch(e) { currentPortfolio = { projects: [] }; }
-    }
-
-    async function fetchCRM() {
-        try {
-            const d = await ghAction('content/crm.json');
-            currentCRM = JSON.parse(b2u(d.content));
-            currentCRM.sha = d.sha;
-        } catch(e) { currentCRM = { collectors: [] }; }
-        renderCRM();
-    }
-
-    function calculateRevenue() {
-        let total = 0;
-        currentPortfolio.projects.filter(p => p.isSale && !p.isDeleted).forEach(p => {
-            let val = parseFloat(String(p.price).replace(/[^0-9.-]+/g,""));
-            if(!isNaN(val)) total += val; // Basit hesaplama, kurlar eklenebilir
-        });
-        document.getElementById('stat-revenue').innerText = "₺" + total.toLocaleString('tr-TR');
-    }
-
-    async function renderInventory() {
-        await fetchInventory(); 
-        const listContainer = document.getElementById('inventory-list');
-        const searchTerm = document.getElementById('search-inv').value.toLowerCase();
-        const filterStr = document.getElementById('filter-inv').value;
-
-        const activeProjects = currentPortfolio.projects.filter(p => !p.isDeleted && !p.isDraft);
-        document.getElementById('stat-total').innerText = activeProjects.length;
-        document.getElementById('stat-sold').innerText = activeProjects.filter(p => p.isSale).length;
-        calculateRevenue();
-
-        let html = '';
-        let displayList = currentPortfolio.projects.map((p, i) => ({...p, originalIndex: i}));
-
-        if(filterStr === 'trash') displayList = displayList.filter(p => p.isDeleted);
-        else if(filterStr === 'draft') displayList = displayList.filter(p => !p.isDeleted && p.isDraft);
-        else displayList = displayList.filter(p => !p.isDeleted && !p.isDraft);
-
-        if(searchTerm) {
-            displayList = displayList.filter(p => 
-                (p.title && p.title.toLowerCase().includes(searchTerm)) || 
-                (p.certCode && p.certCode.toLowerCase().includes(searchTerm)) ||
-                (p.material && p.material.toLowerCase().includes(searchTerm))
-            );
         }
+        addLog("KALICI SİLME", project.title);
+        currentPortfolio.projects.splice(i,1);
+        await ghAction('content/portfolio.json', 'PUT', {projects:currentPortfolio.projects}, currentPortfolio.sha);
+        showToast("Eser kalıcı silindi.", false);
+        await renderInventory();
+    } catch(e) { showToast("Kalıcı silme hatası!", true); }
+    showLoading(false);
+}
 
-        displayList.forEach(p => {
-            const i = p.originalIndex;
-            const thumbUrl = p.image ? `https://raw.githubusercontent.com/${REPO}/main/${p.image.split(',')[0]}` : '';
-            
-            html += `
-                <div class="item-row" style="${p.isHidden ? 'opacity: 0.5;' : ''}">
-                    ${thumbUrl ? `<img src="${thumbUrl}" class="item-thumb">` : `<div class="item-thumb" style="background:#222;"></div>`}
-                    <div class="item-info">
-                        <b>${p.title} 
-                            ${p.isDraft ? '<span class="badge draft">TASLAK</span>' : ''}
-                            ${p.isHidden ? '<span class="badge hidden">GİZLİ</span>' : ''}
-                            ${p.isSale ? '<span class="badge sold">SATILDI</span>' : ''}
-                        </b>
-                        <small>
-                            <span style="color:var(--accent);">SKU:</span> ${p.certCode || '-'} &nbsp;|&nbsp; 
-                            <span style="color:var(--accent);">Aşama:</span> ${p.stage || 'Tamamlandı'} &nbsp;|&nbsp; 
-                            <span style="color:var(--accent);">Fiyat:</span> ${p.price ? p.price + ' ' + (p.currency||'TRY') : '-'}
-                        </small>
-                    </div>
-                    <div class="btn-group">
-            `;
+async function cancelSale(i) {
+    if(!confirm("Satış iptal edilecek, finans logu temizlenecek. Emin misiniz?")) return;
+    showLoading(true, "SATIŞ İPTAL EDİLİYOR...");
+    currentPortfolio.projects[i].isSale = false;
+    currentPortfolio.projects[i].owner = "";
+    currentPortfolio.projects[i].deposit = "";
+    currentPortfolio.projects[i].saleDate = "";
+    try {
+        await ghAction('content/portfolio.json', 'PUT', {projects:currentPortfolio.projects}, currentPortfolio.sha);
+        addLog("SATIŞ İPTAL", currentPortfolio.projects[i].title);
+        showToast("Satış iptal edildi.", false, true);
+        await renderInventory();
+    } catch(e) { showToast("İptal başarısız.", true); }
+    showLoading(false);
+}
 
-            if(filterStr === 'trash') {
-                html += `<button class="success" onclick="restoreProject(${i})">GERİ YÜKLE</button>
-                         <button class="danger" onclick="hardDeleteProject(${i})">KALICI SİL</button>`;
-            } else {
-                html += `<button class="secondary small" title="Yukarı" onclick="moveItem(${i},-1)">▲</button>
-                         <button class="secondary small" title="Aşağı" onclick="moveItem(${i},1)">▼</button>
-                         <button class="warning small" title="Gizle/Göster" onclick="toggleVisibility(${i})">👁️</button>`;
-                
-                if(p.isSale) html += `<button class="danger small" style="background:#8b0000;" title="Satışı İptal Et" onclick="cancelSale(${i})">SATIŞ İPTAL</button>`;
-                
-                html += `<button style="background:#333;color:#fff;" class="small" onclick="openEditModal(${i})">DÜZENLE</button>
-                         <button class="danger small" onclick="softDeleteProject(${i})">ÇÖPE AT</button>`;
-            }
-            html += `</div></div>`;
-        });
+async function moveItem(i, dir) {
+    const ni = i+dir;
+    if(ni<0||ni>=currentPortfolio.projects.length) return;
+    showLoading(true);
+    [currentPortfolio.projects[i], currentPortfolio.projects[ni]] = [currentPortfolio.projects[ni], currentPortfolio.projects[i]];
+    try {
+        await ghAction('content/portfolio.json', 'PUT', {projects:currentPortfolio.projects}, currentPortfolio.sha);
+        await renderInventory();
+    } catch(e) { showToast("Sıralama hatası", true); }
+    showLoading(false);
+}
 
-        listContainer.innerHTML = html || "<p style='color:#777;'>Arama kriterlerine uygun eser bulunamadı.</p>";
+// ═══════════════════════════════════════════════
+// EDIT MODAL
+// ═══════════════════════════════════════════════
+function openEditModal(i) {
+    const p = currentPortfolio.projects[i];
+    document.getElementById('edit-idx').value = i;
+    document.getElementById('edit-title').value = p.title||'';
+    document.getElementById('edit-cat').value = p.category||'';
+    document.getElementById('edit-subcat').value = p.subCategory||'';
+    document.getElementById('edit-collection').value = p.collection||'';
+    document.getElementById('edit-currency').value = p.currency||'TRY';
+    document.getElementById('edit-price-direct').value = p.price||'';
+    document.getElementById('edit-old-price').value = p.oldPrice||'';
+    document.getElementById('edit-cost').value = p.costNote||'';
+    document.getElementById('edit-installment').value = p.installmentNote||'';
+    document.getElementById('edit-cert-code').value = p.certCode||'';
+    document.getElementById('edit-inc-shipping').checked = p.incShipping||false;
+    document.getElementById('edit-inc-vat').checked = p.incVat||false;
+    document.getElementById('edit-featured').checked = p.isFeatured||false;
+    document.getElementById('edit-draft').checked = p.isDraft||false;
+    document.getElementById('edit-map').value = p.mapLink||'';
+    document.getElementById('edit-dim').value = p.dimensions||'';
+    document.getElementById('edit-weight').value = p.weight||'';
+    document.getElementById('edit-material').value = p.material||'';
+    document.getElementById('edit-stage').value = p.stage||'Tamamlandı';
+    document.getElementById('edit-location').value = p.location||'';
+    document.getElementById('edit-edition').value = p.edition||'';
+    document.getElementById('edit-exhibitions').value = (p.exhibitions||[]).join(', ');
+    document.getElementById('edit-description').value = p.description||'';
+    document.getElementById('edit-modal').classList.add('open');
+}
+function closeEditModal() { document.getElementById('edit-modal').classList.remove('open'); }
 
-        const saleOptions = '<option value="">İşlem Yapılacak Eseri Seçin</option>' + 
-            currentPortfolio.projects.map((p, idx) => {
-                if(p.isDeleted) return '';
-                return `<option value="${idx}">${p.certCode} - ${p.title} ${p.isSale ? '(Satıldı)' : ''}</option>`;
-            }).join('');
-        document.getElementById('sale-select').innerHTML = saleOptions;
-        document.getElementById('new-o-artwork').innerHTML = saleOptions;
+async function saveProjectEdit() {
+    showLoading(true, "KAYDEDİLİYOR...");
+    const i = document.getElementById('edit-idx').value;
+    const p = currentPortfolio.projects[i];
+    p.title = document.getElementById('edit-title').value;
+    p.category = document.getElementById('edit-cat').value;
+    p.subCategory = document.getElementById('edit-subcat').value;
+    p.collection = document.getElementById('edit-collection').value;
+    p.currency = document.getElementById('edit-currency').value;
+    p.price = document.getElementById('edit-price-direct').value;
+    p.oldPrice = document.getElementById('edit-old-price').value;
+    p.costNote = document.getElementById('edit-cost').value;
+    p.installmentNote = document.getElementById('edit-installment').value;
+    p.certCode = document.getElementById('edit-cert-code').value;
+    p.incShipping = document.getElementById('edit-inc-shipping').checked;
+    p.incVat = document.getElementById('edit-inc-vat').checked;
+    p.isFeatured = document.getElementById('edit-featured').checked;
+    p.isDraft = document.getElementById('edit-draft').checked;
+    p.mapLink = document.getElementById('edit-map').value;
+    p.dimensions = document.getElementById('edit-dim').value;
+    p.weight = document.getElementById('edit-weight').value;
+    p.material = document.getElementById('edit-material').value;
+    p.stage = document.getElementById('edit-stage').value;
+    p.location = document.getElementById('edit-location').value;
+    p.edition = document.getElementById('edit-edition').value;
+    p.exhibitions = document.getElementById('edit-exhibitions').value.split(',').map(s=>s.trim()).filter(Boolean);
+    p.description = document.getElementById('edit-description').value;
+    try {
+        await ghAction('content/portfolio.json', 'PUT', {projects:currentPortfolio.projects}, currentPortfolio.sha);
+        closeEditModal();
+        addLog("ESER GÜNCELLEME", p.title);
+        showToast("Eser bilgileri güncellendi.", false, true);
+        await renderInventory();
+    } catch(e) { showToast("Güncelleme hatası", true); }
+    showLoading(false);
+}
+
+// AI Description helper (called from edit modal)
+async function generateAIDescription() {
+    const title = document.getElementById('edit-title').value;
+    const material = document.getElementById('edit-material').value;
+    if(!title) return showToast("Eser adı giriniz.", true);
+    const result = await callAI(`Sen profesyonel bir sanat küratörüsün. Aşağıdaki heykel/sanat eseri için kısa, etkileyici, küratörce Türkçe bir açıklama yaz (2-3 cümle, 60-90 kelime). Eser adı: "${title}". Materyal: "${material||'belirtilmemiş'}". Sadece açıklama metnini yaz, başka hiçbir şey ekleme.`);
+    if(result) document.getElementById('edit-description').value = result;
+}
+
+// ═══════════════════════════════════════════════
+// CRM (Modül 4)
+// ═══════════════════════════════════════════════
+function renderCRM() {
+    const list = currentCRM.collectors || [];
+    document.getElementById('crm-list').innerHTML = list.length ? list.map((c,i) => {
+        const purchases = currentPortfolio.projects.filter(p=>p.isSale&&!p.isDeleted&&p.owner===c.name);
+        return `<div class="item-row">
+            <div class="item-info">
+                <b>${c.name} ${c.isVip?'<span class="badge vip">VIP</span>':''}</b>
+                <small>Tel: ${c.phone||'-'} · E-posta: ${c.email||'-'} · Özel Gün: ${c.bday||'-'}</small>
+                <small style="color:#444;">Not: ${c.notes||'Yok'} · Satın Alma: ${purchases.length} eser</small>
+                ${c.address?`<small style="color:#333;">Adres: ${c.address}</small>`:''}
+            </div>
+            <div class="btn-group">
+                <button class="secondary sm" onclick="openCRMModal(${i})">DÜZENLE</button>
+                <button class="danger sm" onclick="deleteCRM(${i})">SİL</button>
+            </div>
+        </div>`;
+    }).join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Kayıtlı koleksiyoner yok.</p>";
+
+    const crmOpts = '<option value="">Manuel İsim Gir (CRM Dışı)</option>' +
+        list.map(c=>`<option value="${c.name}">${c.name} ${c.isVip?'(VIP)':''}</option>`).join('');
+    document.getElementById('sale-crm-select').innerHTML = crmOpts;
+}
+
+function openCRMModal(i) {
+    if(i==='') {
+        document.getElementById('crm-idx').value='';
+        ['crm-name','crm-phone','crm-email','crm-address','crm-bday'].forEach(id=>document.getElementById(id).value='');
+        document.getElementById('crm-notes').value='';
+        document.getElementById('crm-vip').checked=false;
+    } else {
+        const c = currentCRM.collectors[i];
+        document.getElementById('crm-idx').value=i;
+        document.getElementById('crm-name').value=c.name||'';
+        document.getElementById('crm-phone').value=c.phone||'';
+        document.getElementById('crm-email').value=c.email||'';
+        document.getElementById('crm-address').value=c.address||'';
+        document.getElementById('crm-bday').value=c.bday||'';
+        document.getElementById('crm-notes').value=c.notes||'';
+        document.getElementById('crm-vip').checked=c.isVip||false;
     }
+    document.getElementById('crm-modal').classList.add('open');
+}
+function closeCRMModal() { document.getElementById('crm-modal').classList.remove('open'); }
 
-    // --- CRM / KOLEKSİYONER METOTLARI (MODÜL 4) ---
-    function renderCRM() {
-        const list = currentCRM.collectors || [];
-        document.getElementById('crm-list').innerHTML = list.map((c, i) => `
-            <div class="item-row">
+async function saveCRMProfile() {
+    const name = document.getElementById('crm-name').value.trim();
+    if(!name) return showToast("Ad Soyad zorunludur.", true);
+    showLoading(true, "CRM KAYDEDİLİYOR...");
+    const idx = document.getElementById('crm-idx').value;
+    const newCol = {
+        name,
+        phone: document.getElementById('crm-phone').value,
+        email: document.getElementById('crm-email').value,
+        address: document.getElementById('crm-address').value,
+        bday: document.getElementById('crm-bday').value,
+        notes: document.getElementById('crm-notes').value,
+        isVip: document.getElementById('crm-vip').checked,
+        addedDate: idx==='' ? nowStr() : (currentCRM.collectors[idx]?.addedDate || nowStr())
+    };
+    if(idx==='') currentCRM.collectors.push(newCol);
+    else currentCRM.collectors[idx] = newCol;
+    try {
+        let sha = currentCRM.sha || null;
+        try { const d = await ghAction('content/crm.json'); sha = d.sha; } catch(e){}
+        await ghAction('content/crm.json', 'PUT', {collectors:currentCRM.collectors}, sha);
+        closeCRMModal();
+        addLog("CRM", (idx===''?"Yeni koleksiyoner: ":"Güncellendi: ") + name);
+        showToast("Koleksiyoner kaydedildi.", false, true);
+        await fetchCRM();
+    } catch(e) { showToast("Kayıt hatası", true); }
+    showLoading(false);
+}
+
+async function deleteCRM(i) {
+    if(!confirm("Koleksiyoner silinecek?")) return;
+    showLoading(true);
+    addLog("CRM SİLME", currentCRM.collectors[i].name);
+    currentCRM.collectors.splice(i,1);
+    try {
+        await ghAction('content/crm.json', 'PUT', currentCRM, currentCRM.sha);
+        showToast("Profil silindi.");
+        await fetchCRM();
+    } catch(e) { showToast("Hata!", true); }
+    showLoading(false);
+}
+
+function exportCRMCSV() {
+    const list = currentCRM.collectors || [];
+    let csv = "data:text/csv;charset=utf-8,Ad Soyad,Telefon,E-posta,Adres,Özel Gün,VIP\n";
+    list.forEach(c => { csv += `"${c.name}","${c.phone||''}","${c.email||''}","${c.address||''}","${c.bday||''}","${c.isVip?'Evet':'Hayır'}"\n`; });
+    const link = document.createElement('a');
+    link.href = encodeURI(csv);
+    link.download = 'ube_raw_koleksiyonerler.csv';
+    document.body.appendChild(link); link.click(); link.remove();
+}
+
+// ═══════════════════════════════════════════════
+// FINANCE (Modül 3)
+// ═══════════════════════════════════════════════
+function exportFinanceCSV() {
+    const sold = currentPortfolio.projects.filter(p=>p.isSale&&!p.isDeleted);
+    let csv = "data:text/csv;charset=utf-8,SKU,Eser,Kategori,Fiyat,Para Birimi,Kapora,Alıcı,Tarih,KDV Dahil\n";
+    sold.forEach(p => {
+        csv += `"${p.certCode}","${p.title}","${p.category||''}","${p.price}","${p.currency||'TRY'}","${p.deposit||''}","${p.owner||''}","${p.saleDate||''}","${p.incVat?'Evet':'Hayır'}"\n`;
+    });
+    const link = document.createElement('a');
+    link.href = encodeURI(csv);
+    link.download = 'ube_raw_finans_raporu.csv';
+    document.body.appendChild(link); link.click(); link.remove();
+}
+
+// ═══════════════════════════════════════════════
+// ORDERS (Modül 3)
+// ═══════════════════════════════════════════════
+async function refreshOrders() {
+    try {
+        const d = await ghAction('content/orders.json');
+        currentOrders = JSON.parse(b2u(d.content));
+        const list = currentOrders.orders || [];
+        const pending = list.filter(o=>o.status==='Bekliyor').length;
+        document.getElementById('stat-orders').innerText = pending;
+        document.getElementById('orders-list').innerHTML = list.length ? list.map((o,i) => {
+            const realIdx = list.length-1-i;
+            return `<div class="item-row" style="background:${o.status==='Bekliyor'?'rgba(255,179,0,0.03)':'transparent'}">
                 <div class="item-info">
-                    <b>${c.name} ${c.isVip ? '<span class="badge vip">VIP</span>' : ''}</b>
-                    <small>İletişim: ${c.phone || '-'} | E-Posta: ${c.email || '-'}</small>
-                    <small style="color:#666;">Not: ${c.notes || 'Yok'}</small>
+                    <b>${o.customerName} <span class="badge ${o.status==='Bekliyor'?'pending':'sold'}">${o.status}</span></b>
+                    <small>Eser: ${o.artwork} · İletişim: ${o.contact} · ${o.date}</small>
                 </div>
                 <div class="btn-group">
-                    <button style="background:#333;color:#fff;" class="small" onclick="openCRMModal(${i})">DÜZENLE</button>
-                    <button class="danger small" onclick="deleteCRM(${i})">SİL</button>
+                    ${o.status==='Bekliyor'?`<button class="success sm" onclick="updateOrderStatus(${realIdx},'Tamamlandı')">✓ ONAYLA</button>`:''}
+                    <button class="danger sm" onclick="deleteOrder(${realIdx})">SİL</button>
+                </div>
+            </div>`;
+        }).reverse().join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Sipariş yok.</p>";
+    } catch(e) { document.getElementById('orders-list').innerHTML = "<p style='color:#444;'>Sipariş verisi yüklenemedi.</p>"; }
+}
+
+async function addNewOrder() {
+    const name = document.getElementById('new-o-name').value.trim();
+    const contact = document.getElementById('new-o-contact').value.trim();
+    const artIdx = document.getElementById('new-o-artwork').value;
+    if(!name||!contact) return showToast("Ad ve iletişim zorunlu.", true);
+    showLoading(true);
+    try {
+        let d, data;
+        try { d = await ghAction('content/orders.json'); data = JSON.parse(b2u(d.content)); }
+        catch(e) { data = {orders:[]}; }
+        const artworkName = artIdx!==""? currentPortfolio.projects[artIdx].title : "Bağımsız Talep";
+        data.orders.push({ customerName:name, contact, artwork:artworkName, status:"Bekliyor", date:nowStr() });
+        await ghAction('content/orders.json', 'PUT', data, d?d.sha:null);
+        document.getElementById('new-o-name').value=''; document.getElementById('new-o-contact').value='';
+        addLog("SİPARİŞ", name+" · "+artworkName);
+        showToast("Sipariş eklendi.", false, true);
+        await refreshOrders();
+    } catch(e) { showToast("Sipariş ekleme hatası.", true); }
+    showLoading(false);
+}
+
+async function updateOrderStatus(i, status) {
+    showLoading(true);
+    try {
+        const d = await ghAction('content/orders.json');
+        let data = JSON.parse(b2u(d.content));
+        data.orders[i].status = status;
+        await ghAction('content/orders.json', 'PUT', data, d.sha);
+        addLog("SİPARİŞ DURUM", `#${i} → ${status}`);
+        await refreshOrders();
+    } catch(e) { showToast("Hata", true); }
+    showLoading(false);
+}
+
+async function deleteOrder(i) {
+    if(!confirm("Sipariş silinecek?")) return;
+    showLoading(true);
+    try {
+        const d = await ghAction('content/orders.json');
+        let data = JSON.parse(b2u(d.content));
+        data.orders.splice(i,1);
+        await ghAction('content/orders.json', 'PUT', data, d.sha);
+        await refreshOrders();
+    } catch(e) { showToast("Hata", true); }
+    showLoading(false);
+}
+
+// ═══════════════════════════════════════════════
+// SALE & COA (Modül 3, 5)
+// ═══════════════════════════════════════════════
+function fillSaleFields(val) {
+    if(val==="") { ['sale-price','sale-cert','sale-owner','sale-deposit','sale-installment'].forEach(id=>document.getElementById(id).value=''); return; }
+    const p = currentPortfolio.projects[val];
+    document.getElementById('sale-price').value = p.price||'';
+    document.getElementById('sale-cert').value = p.certCode||'';
+    document.getElementById('sale-owner').value = p.owner||'';
+    document.getElementById('sale-deposit').value = p.deposit||'';
+    document.getElementById('sale-installment').value = p.installmentNote||'';
+    document.getElementById('sale-anon').checked = p.isAnonSale||false;
+}
+
+async function handleSaleUpdate() {
+    const val = document.getElementById('sale-select').value;
+    if(val==="") return showToast("Lütfen satışı onaylanacak eseri seçin.", true);
+    showLoading(true, "SATIŞ İŞLENİYOR...");
+    try {
+        const p = currentPortfolio.projects[val];
+        p.price = document.getElementById('sale-price').value;
+        p.deposit = document.getElementById('sale-deposit').value;
+        p.certCode = document.getElementById('sale-cert').value;
+        p.owner = document.getElementById('sale-owner').value;
+        p.installmentNote = document.getElementById('sale-installment').value;
+        p.isAnonSale = document.getElementById('sale-anon').checked;
+        p.isSale = true;
+        p.saleDate = nowStr();
+        await ghAction('content/portfolio.json', 'PUT', {projects:currentPortfolio.projects}, currentPortfolio.sha);
+        addLog("SATIŞ ONAYI", `${p.title} → ${p.owner||'Gizli'} · ${p.price} ${p.currency||'TRY'}`);
+        showToast("Satış onaylandı!", false, true);
+        await renderInventory();
+    } catch(e) { showToast("Satış onaylanırken hata oluştu.", true); }
+    showLoading(false);
+}
+
+function generateAdvancedPDF() {
+    const val = document.getElementById('sale-select').value;
+    if(val==="") return showToast("Sertifikası oluşturulacak eseri seçin.", true);
+    const p = currentPortfolio.projects[val];
+    const owner = document.getElementById('sale-owner').value || 'Değerli Koleksiyoner';
+    const certCode = document.getElementById('sale-cert').value || p.certCode;
+    const lang = document.getElementById('cert-lang').value;
+    const format = document.getElementById('cert-size').value;
+    const isAP = document.getElementById('cert-ap').checked;
+    const hash = generateUUID();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:"landscape", format });
+    const w = format==='a4'?297:210, h = format==='a4'?210:148, cx = w/2;
+    doc.setFillColor(8,8,8); doc.rect(0,0,w,h,'F');
+    doc.setDrawColor(168,127,74); doc.setLineWidth(1); doc.rect(8,8,w-16,h-16);
+    doc.setDrawColor(100,80,40); doc.setLineWidth(0.3); doc.rect(11,11,w-22,h-22);
+    if(isAP) {
+        doc.setTextColor(25,25,25); doc.setFontSize(70);
+        doc.text("ARTIST PROOF", cx, h/2+15, {align:"center", angle:40});
+    }
+    doc.setTextColor(168,127,74); doc.setFontSize(format==='a4'?24:17);
+    doc.text(lang==='EN'?"CERTIFICATE OF AUTHENTICITY":"ORİJİNALLİK SERTİFİKASI", cx, 38, {align:"center"});
+    doc.setTextColor(100,100,100); doc.setFontSize(8);
+    doc.text(lang==='EN'?"This document certifies the artwork below is an original creation by UBE RAW.":"Bu belge eserin orijinal ve tek bir yaratım olduğunu onaylar.", cx, 50, {align:"center"});
+    doc.setTextColor(220,220,220); doc.setFontSize(format==='a4'?20:15);
+    doc.text(p.title.toUpperCase(), cx, 70, {align:"center"});
+    doc.setTextColor(120,120,120); doc.setFontSize(10);
+    doc.text(`${lang==='EN'?'Cert. No':'Sertifika No'}: ${certCode}`, cx, 88, {align:"center"});
+    doc.text(`${lang==='EN'?'Category':'Kategori'}: ${p.category||'-'}`, cx, 98, {align:"center"});
+    doc.text(`${lang==='EN'?'Material':'Materyal'}: ${p.material||'-'}`, cx, 108, {align:"center"});
+    doc.text(`${lang==='EN'?'Dimensions':'Boyutlar'}: ${p.dimensions||'-'}`, cx, 118, {align:"center"});
+    if(p.edition) doc.text(`${lang==='EN'?'Edition':'Kopya'}: ${p.edition}`, cx, 128, {align:"center"});
+    doc.setTextColor(180,180,180); doc.setFontSize(11);
+    doc.text(`${lang==='EN'?'Acquired By':'Koleksiyoner'}: ${p.isAnonSale?'Gizli Koleksiyoner':owner}`, cx, 146, {align:"center"});
+    doc.setTextColor(168,127,74); doc.setFontSize(13);
+    doc.text("UBE RAW STUDIO", cx, h-28, {align:"center"});
+    doc.setFontSize(7); doc.setTextColor(80,80,80);
+    doc.text(`${lang==='EN'?'Date':'Tarih'}: ${new Date().toLocaleDateString('tr-TR')}`, cx, h-20, {align:"center"});
+    doc.text(`Verify Hash: ${hash}`, cx, h-14, {align:"center"});
+    doc.save(`UBE-RAW-COA-${certCode}.pdf`);
+    addLog("SERTİFİKA", `${p.title} · ${lang} · ${certCode}`);
+    showToast("Sertifika PDF olarak indirildi.", false, true);
+}
+
+// ═══════════════════════════════════════════════
+// GUESTBOOK (Modül 10.5)
+// ═══════════════════════════════════════════════
+async function refreshGuestbook() {
+    try {
+        const d = await ghAction('content/guestbook.json');
+        const list = JSON.parse(b2u(d.content)).messages || [];
+        document.getElementById('stat-msg').innerText = list.length;
+        document.getElementById('guest-list').innerHTML = list.length ? list.map((m,i) => {
+            const realIdx = list.length-1-i;
+            // Simple spam filter: flag messages shorter than 3 chars
+            const isSpam = m.message && m.message.trim().length < 3;
+            return `<div class="item-row" style="${isSpam?'opacity:0.4;':''}">
+                <div class="item-info">
+                    <b>${m.name} ${isSpam?'<span class="badge draft">SPAM?</span>':''}</b>
+                    <small>"${m.message}" — ${m.date}</small>
+                </div>
+                <button class="danger sm" onclick="deleteMessage(${realIdx})">SİL</button>
+            </div>`;
+        }).reverse().join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Ziyaretçi mesajı yok.</p>";
+    } catch(e) { document.getElementById('guest-list').innerHTML = "<p style='color:#444;'>Veri okunamadı.</p>"; }
+}
+
+async function approveNewMessage() {
+    const name = document.getElementById('new-g-name').value.trim();
+    const msg = document.getElementById('new-g-msg').value.trim();
+    if(!name||!msg) return showToast("Zorunlu alanları doldurun.", true);
+    showLoading(true);
+    try {
+        let d, data;
+        try { d = await ghAction('content/guestbook.json'); data = JSON.parse(b2u(d.content)); }
+        catch(e) { data = {messages:[]}; }
+        data.messages.push({ name, message:msg, date:new Date().toLocaleDateString('tr-TR') });
+        await ghAction('content/guestbook.json', 'PUT', data, d?d.sha:null);
+        document.getElementById('new-g-name').value=''; document.getElementById('new-g-msg').value='';
+        addLog("MESAJ", name + ": " + msg.substring(0,40));
+        await refreshGuestbook();
+    } catch(e) { showToast("Hata oluştu", true); }
+    showLoading(false);
+}
+
+async function deleteMessage(i) {
+    if(!confirm("Mesaj silinsin mi?")) return;
+    showLoading(true);
+    try {
+        const d = await ghAction('content/guestbook.json');
+        let data = JSON.parse(b2u(d.content));
+        data.messages.splice(i,1);
+        await ghAction('content/guestbook.json', 'PUT', data, d.sha);
+        await refreshGuestbook();
+    } catch(e) { showToast("Hata", true); }
+    showLoading(false);
+}
+
+// ═══════════════════════════════════════════════
+// SETTINGS (Modül 9, 10)
+// ═══════════════════════════════════════════════
+async function loadSettings() {
+    try {
+        const d = await ghAction('content/settings.json');
+        const s = JSON.parse(b2u(d.content));
+        currentSettings = s;
+        currentSettings.sha = d.sha;
+        document.getElementById('s-theme').value = s.theme||'#a87f4a';
+        document.getElementById('s-maintenance').checked = s.maintenance||false;
+        document.getElementById('s-goal').value = s.goal||20;
+        document.getElementById('s-timeout').value = s.timeout||120;
+        document.getElementById('s-bio').value = s.bio||'';
+        document.getElementById('s-phone').value = s.phone||'';
+        document.getElementById('s-email').value = s.email||'';
+        document.getElementById('s-address').value = s.address||'';
+        document.getElementById('s-instagram').value = s.instagram||'';
+        document.getElementById('s-behance').value = s.behance||'';
+        document.getElementById('s-portfolio').value = s.portfolio||'';
+        document.getElementById('s-seo').value = s.seo||'';
+        document.documentElement.style.setProperty('--accent', s.theme||'#a87f4a');
+        document.getElementById('goal-input').value = s.goal||20;
+    } catch(e) { console.log("Ayarlar yüklenemedi."); }
+}
+
+function saveGoal(val) {
+    currentSettings.goal = parseInt(val)||20;
+    handleSettingsUpdate();
+}
+
+async function handleSettingsUpdate() {
+    showLoading(true, "AYARLAR KAYDEDİLİYOR...");
+    try {
+        let sha = currentSettings.sha||null;
+        try { const d = await ghAction('content/settings.json'); sha = d.sha; } catch(e){}
+        const data = {
+            theme: document.getElementById('s-theme').value,
+            maintenance: document.getElementById('s-maintenance').checked,
+            goal: parseInt(document.getElementById('s-goal').value)||20,
+            timeout: parseInt(document.getElementById('s-timeout').value)||120,
+            bio: document.getElementById('s-bio').value,
+            phone: document.getElementById('s-phone').value,
+            email: document.getElementById('s-email').value,
+            address: document.getElementById('s-address').value,
+            instagram: document.getElementById('s-instagram').value,
+            behance: document.getElementById('s-behance').value,
+            portfolio: document.getElementById('s-portfolio').value,
+            seo: document.getElementById('s-seo').value,
+        };
+        await ghAction('content/settings.json', 'PUT', data, sha);
+        currentSettings = { ...data, sha };
+        document.documentElement.style.setProperty('--accent', data.theme);
+        addLog("AYARLAR", "Site ayarları güncellendi.");
+        showToast("Ayarlar güncellendi!", false, true);
+    } catch(e) { showToast("Hata oluştu.", true); }
+    showLoading(false);
+}
+
+// ═══════════════════════════════════════════════
+// GALLERY / EXHIBITION (Modül 6)
+// ═══════════════════════════════════════════════
+function renderExpoSelectLists() {
+    const active = currentPortfolio.projects.filter(p=>!p.isDeleted&&!p.isDraft);
+    const listHTML = active.map((p,i) => {
+        const idx = currentPortfolio.projects.indexOf(p);
+        return `<label class="check-item" style="padding:7px 0;border-bottom:1px solid #0a0a0a;">
+            <input type="checkbox" class="expo-cb" value="${idx}">
+            <span>${p.title} <span style="color:#444;">(${p.certCode||'?'}) ${p.isConsignment?'· <span style="color:#bb86fc;">DIŞARIDA</span>':''}</span></span>
+        </label>`;
+    }).join('');
+    ['expo-select-list','catalog-select-list','wallcard-select-list'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.innerHTML = listHTML || "<p style='color:#444;'>Eser yok.</p>";
+    });
+
+    // Consignment list
+    const consign = currentPortfolio.projects.filter(p=>p.isConsignment&&!p.isDeleted);
+    document.getElementById('consign-list').innerHTML = consign.length ? consign.map((p,i) => {
+        const idx = currentPortfolio.projects.indexOf(p);
+        return `<div class="item-row">
+            <div class="item-info">
+                <b>${p.title}</b>
+                <small>Galeri: ${p.consignVenue||'-'} · Çıkış: ${p.consignOut||'-'} · İade: ${p.consignReturn||'-'}</small>
+            </div>
+            <button class="success sm" onclick="returnConsignment(${idx})">İADE EDİLDİ</button>
+        </div>`;
+    }).join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Konsinye eser yok.</p>";
+}
+
+async function markExhibitionBatch() {
+    const selected = [...document.querySelectorAll('.expo-cb:checked')].map(cb=>parseInt(cb.value));
+    if(!selected.length) return showToast("Eser seçilmedi.", true);
+    const expoName = document.getElementById('expo-name').value||'Sergi';
+    showLoading(true, "SERGİ KAYDI İŞLENİYOR...");
+    selected.forEach(i => {
+        if(!currentPortfolio.projects[i].exhibitions) currentPortfolio.projects[i].exhibitions = [];
+        if(!currentPortfolio.projects[i].exhibitions.includes(expoName)) currentPortfolio.projects[i].exhibitions.push(expoName);
+        currentPortfolio.projects[i].isReserved = true;
+    });
+    try {
+        await ghAction('content/portfolio.json', 'PUT', {projects:currentPortfolio.projects}, currentPortfolio.sha);
+        addLog("SERGİ", expoName + " · " + selected.length + " eser");
+        showToast(selected.length + " eser sergiye işlendi.", false, true);
+        await renderInventory();
+    } catch(e) { showToast("Hata", true); }
+    showLoading(false);
+}
+
+async function returnFromExhibition() {
+    const selected = [...document.querySelectorAll('.expo-cb:checked')].map(cb=>parseInt(cb.value));
+    if(!selected.length) return showToast("Eser seçilmedi.", true);
+    showLoading(true);
+    selected.forEach(i => { currentPortfolio.projects[i].isReserved = false; });
+    try {
+        await ghAction('content/portfolio.json', 'PUT', {projects:currentPortfolio.projects}, currentPortfolio.sha);
+        addLog("SERGİ DÖNÜŞÜ", selected.length + " eser stüdyoya döndü.");
+        showToast("Eserler stüdyoya döndü.", false, true);
+        await renderInventory();
+    } catch(e) { showToast("Hata", true); }
+    showLoading(false);
+}
+
+function openConsignModal(i) {
+    document.getElementById('consign-idx').value = i;
+    document.getElementById('consign-modal').classList.add('open');
+}
+
+async function saveConsignment() {
+    const i = document.getElementById('consign-idx').value;
+    currentPortfolio.projects[i].isConsignment = true;
+    currentPortfolio.projects[i].consignVenue = document.getElementById('consign-venue').value;
+    currentPortfolio.projects[i].consignOut = document.getElementById('consign-out').value;
+    currentPortfolio.projects[i].consignReturn = document.getElementById('consign-return').value;
+    currentPortfolio.projects[i].consignNote = document.getElementById('consign-note').value;
+    try {
+        showLoading(true);
+        await ghAction('content/portfolio.json', 'PUT', {projects:currentPortfolio.projects}, currentPortfolio.sha);
+        document.getElementById('consign-modal').classList.remove('open');
+        addLog("KONSİNYE", currentPortfolio.projects[i].title + " → " + currentPortfolio.projects[i].consignVenue);
+        showToast("Konsinye kaydedildi.", false, true);
+        await renderInventory();
+    } catch(e) { showToast("Hata", true); }
+    showLoading(false);
+}
+
+async function returnConsignment(i) {
+    currentPortfolio.projects[i].isConsignment = false;
+    showLoading(true);
+    try {
+        await ghAction('content/portfolio.json', 'PUT', {projects:currentPortfolio.projects}, currentPortfolio.sha);
+        addLog("KONSİNYE İADE", currentPortfolio.projects[i].title);
+        showToast("Eser stüdyoya döndü.", false, true);
+        await renderInventory();
+    } catch(e) { showToast("Hata", true); }
+    showLoading(false);
+}
+
+function generateCatalogPDF() {
+    const selected = [...document.querySelectorAll('.expo-cb:checked')].map(cb=>parseInt(cb.value)).slice(0,10);
+    if(!selected.length) return showToast("En az 1 eser seçiniz.", true);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:"portrait", format:"a4" });
+    const w = 210, h = 297;
+    doc.setFillColor(8,8,8); doc.rect(0,0,w,h,'F');
+    doc.setTextColor(168,127,74); doc.setFontSize(22);
+    doc.text("UBE RAW STUDIO", w/2, 24, {align:"center"});
+    doc.setFontSize(10); doc.setTextColor(100,100,100);
+    doc.text("ESER KATALOĞU · " + new Date().toLocaleDateString('tr-TR'), w/2, 32, {align:"center"});
+    doc.setDrawColor(168,127,74); doc.setLineWidth(0.5); doc.line(20,36,190,36);
+    let y = 48;
+    selected.forEach((idx,i) => {
+        if(y > 260) { doc.addPage(); doc.setFillColor(8,8,8); doc.rect(0,0,w,h,'F'); y=20; }
+        const p = currentPortfolio.projects[idx];
+        doc.setTextColor(200,200,200); doc.setFontSize(13);
+        doc.text(`${i+1}. ${p.title}`, 20, y);
+        doc.setFontSize(9); doc.setTextColor(100,100,100);
+        doc.text(`SKU: ${p.certCode||'-'} · ${p.category||'-'} · ${p.dimensions||'-'} · ${p.material||'-'}`, 20, y+8);
+        if(p.price) doc.text(`Fiyat: ${p.price} ${p.currency||'TRY'}`, 20, y+16);
+        if(p.description) {
+            doc.setFontSize(8); doc.setTextColor(80,80,80);
+            const lines = doc.splitTextToSize(p.description, 170);
+            doc.text(lines, 20, y+24);
+            y += 24 + lines.length*4 + 14;
+        } else { y += 30; }
+        doc.setDrawColor(30,30,30); doc.setLineWidth(0.3); doc.line(20,y-4,190,y-4);
+    });
+    doc.save('UBE-RAW-Katalog.pdf');
+    addLog("KATALOG PDF", selected.length + " eser");
+    showToast("Katalog PDF oluşturuldu.", false, true);
+}
+
+function generateWallCards() {
+    const selected = [...document.querySelectorAll('.expo-cb:checked')].map(cb=>parseInt(cb.value));
+    if(!selected.length) return showToast("En az 1 eser seçiniz.", true);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:"landscape", format:"a5" });
+    selected.forEach((idx, i) => {
+        if(i>0) doc.addPage();
+        const p = currentPortfolio.projects[idx];
+        const w=210, h=148, cx=w/2;
+        doc.setFillColor(10,10,10); doc.rect(0,0,w,h,'F');
+        doc.setDrawColor(168,127,74); doc.setLineWidth(0.8); doc.rect(10,10,w-20,h-20);
+        doc.setTextColor(168,127,74); doc.setFontSize(9); doc.text("UBE RAW", cx, 24, {align:"center"});
+        doc.setTextColor(230,230,230); doc.setFontSize(18);
+        const titleLines = doc.splitTextToSize(p.title, 170);
+        doc.text(titleLines, cx, 50, {align:"center"});
+        doc.setFontSize(9); doc.setTextColor(130,130,130);
+        doc.text(`${p.material||'-'}`, cx, 70+titleLines.length*8, {align:"center"});
+        doc.text(`${p.dimensions||'-'}`, cx, 80+titleLines.length*8, {align:"center"});
+        doc.text(p.certCode||'', cx, h-22, {align:"center"});
+    });
+    doc.save('UBE-RAW-Duvar-Kartlari.pdf');
+    addLog("DUVAR KARTI", selected.length + " eser");
+    showToast("Duvar kartları PDF oluşturuldu.", false, true);
+}
+
+// ═══════════════════════════════════════════════
+// WORKSHOP (Modül 7)
+// ═══════════════════════════════════════════════
+async function refreshWorkshops() {
+    try {
+        const d = await ghAction('content/workshops.json');
+        currentWorkshops = JSON.parse(b2u(d.content));
+    } catch(e) { currentWorkshops = { workshops:[], students:[] }; }
+    renderWorkshops();
+}
+
+function renderWorkshops() {
+    const list = currentWorkshops.workshops || [];
+    const el = document.getElementById('workshop-list');
+    if(!el) return;
+    el.innerHTML = list.length ? list.map((w,i) => `
+        <div class="card dark" style="margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <b style="color:#ddd;font-family:'Cormorant Garamond',serif;font-size:16px;">${w.name}</b>
+                    <div style="font-size:10px;color:#555;margin-top:4px;">${w.date||''} · ${w.location||''} · Kapasite: ${w.enrolled||0}/${w.capacity||10}</div>
+                </div>
+                <div class="btn-group">
+                    <button class="secondary sm" onclick="generateAttendancePDF(${i})">SERTİFİKA</button>
+                    <button class="danger sm" onclick="deleteWorkshop(${i})">SİL</button>
                 </div>
             </div>
-        `).reverse().join('') || "<p style='color:#777;'>Henüz kayıtlı koleksiyoner yok.</p>";
+            <div class="progress-bar-wrap" style="margin-top:8px;">
+                <div class="progress-bar" style="width:${Math.min(100,((w.enrolled||0)/(w.capacity||10))*100)}%"></div>
+            </div>
+        </div>`).join('') : "<p style='color:#444;font-size:10px;'>Atölye kaydı yok.</p>";
 
-        // Satış menüsü için CRM seçenekleri
-        const crmOpts = '<option value="">Manuel İsim Gir (CRM Dışı)</option>' + list.map(c => `<option value="${c.name}">${c.name} ${c.isVip?'(VIP)':''}</option>`).join('');
-        document.getElementById('sale-crm-select').innerHTML = crmOpts;
+    const students = currentWorkshops.students || [];
+    document.getElementById('student-list').innerHTML = students.length ? students.map((s,i) => `
+        <div class="item-row">
+            <div class="item-info">
+                <b>${s.name}</b>
+                <small>${s.phone||'-'} · ${s.email||'-'} · Atölye: ${s.workshop||'-'} · Ödeme: ${s.paid?'✓ Tam':'⚡ Kapora'}</small>
+            </div>
+            <button class="danger sm" onclick="deleteStudent(${i})">SİL</button>
+        </div>`).join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Kursiyer yok.</p>";
+}
+
+function openWorkshopModal() {
+    const name = prompt("Atölye Adı:"); if(!name) return;
+    const date = prompt("Tarih/Saat:"); 
+    const capacity = parseInt(prompt("Kontenjan (kişi):")) || 10;
+    addWorkshop({ name, date, capacity, enrolled:0, location:"Stüdyo" });
+}
+
+async function addWorkshop(w) {
+    showLoading(true);
+    currentWorkshops.workshops.push(w);
+    try {
+        let sha = null;
+        try { const d = await ghAction('content/workshops.json'); sha = d.sha; } catch(e){}
+        await ghAction('content/workshops.json', 'PUT', currentWorkshops, sha);
+        addLog("ATÖLYE", w.name + " oluşturuldu.");
+        showToast("Atölye eklendi.", false, true);
+        renderWorkshops();
+    } catch(e) { showToast("Hata", true); }
+    showLoading(false);
+}
+
+async function deleteWorkshop(i) {
+    if(!confirm("Atölye silinsin mi?")) return;
+    currentWorkshops.workshops.splice(i,1);
+    showLoading(true);
+    try {
+        let sha = null;
+        try { const d = await ghAction('content/workshops.json'); sha = d.sha; } catch(e){}
+        await ghAction('content/workshops.json', 'PUT', currentWorkshops, sha);
+        renderWorkshops();
+    } catch(e) { showToast("Hata", true); }
+    showLoading(false);
+}
+
+async function deleteStudent(i) {
+    if(!confirm("Kursiyer silinsin mi?")) return;
+    currentWorkshops.students.splice(i,1);
+    showLoading(true);
+    try {
+        let sha = null;
+        try { const d = await ghAction('content/workshops.json'); sha = d.sha; } catch(e){}
+        await ghAction('content/workshops.json', 'PUT', currentWorkshops, sha);
+        renderWorkshops();
+    } catch(e) { showToast("Hata", true); }
+    showLoading(false);
+}
+
+function generateAttendancePDF(i) {
+    const w = currentWorkshops.workshops[i];
+    const students = (currentWorkshops.students||[]).filter(s=>s.workshop===w.name);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:"portrait", format:"a4" });
+    doc.setFillColor(8,8,8); doc.rect(0,0,210,297,'F');
+    doc.setTextColor(168,127,74); doc.setFontSize(20);
+    doc.text("UBE RAW STUDIO", 105, 30, {align:"center"});
+    doc.setFontSize(14); doc.setTextColor(200,200,200);
+    doc.text("KATILIM SERTİFİKASI", 105, 46, {align:"center"});
+    doc.setFontSize(11); doc.setTextColor(130,130,130);
+    doc.text(`Atölye: ${w.name}`, 105, 62, {align:"center"});
+    doc.text(`Tarih: ${w.date||'-'}`, 105, 72, {align:"center"});
+    doc.setDrawColor(168,127,74); doc.setLineWidth(0.5); doc.line(30,80,180,80);
+    if(students.length) {
+        let y = 94; doc.setFontSize(10); doc.setTextColor(180,180,180);
+        students.forEach((s,i) => { doc.text(`${i+1}. ${s.name}`, 50, y); y+=10; });
+    } else {
+        doc.setFontSize(10); doc.setTextColor(100,100,100);
+        doc.text("(Bu atölye için ayrı sertifika üretiniz)", 105, 100, {align:"center"});
     }
+    doc.save(`UBE-RAW-Katilim-${w.name.replace(/\s/g,'-')}.pdf`);
+    showToast("Katılım sertifikası oluşturuldu.", false, true);
+}
 
-    function openCRMModal(i) {
-        if(i === '') {
-            document.getElementById('crm-idx').value = '';
-            document.querySelectorAll('#crm-modal input[type="text"]').forEach(e => e.value='');
-            document.getElementById('crm-notes').value = '';
-            document.getElementById('crm-vip').checked = false;
-        } else {
-            const c = currentCRM.collectors[i];
-            document.getElementById('crm-idx').value = i;
-            document.getElementById('crm-name').value = c.name || '';
-            document.getElementById('crm-phone').value = c.phone || '';
-            document.getElementById('crm-email').value = c.email || '';
-            document.getElementById('crm-address').value = c.address || '';
-            document.getElementById('crm-bday').value = c.bday || '';
-            document.getElementById('crm-notes').value = c.notes || '';
-            document.getElementById('crm-vip').checked = c.isVip || false;
+// ═══════════════════════════════════════════════
+// REMINDER SYSTEM (Modül 4.35)
+// ═══════════════════════════════════════════════
+function renderReminderList() {
+    const el = document.getElementById('reminder-list');
+    if(!el) return;
+    const reminders = [];
+    // Check for birthdays this month
+    const thisMonth = new Date().getMonth()+1;
+    (currentCRM.collectors||[]).forEach(c => {
+        if(c.bday) {
+            const m = parseInt(c.bday.split(' ')[1]?.replace('Ocak',1).replace('Şubat',2).replace('Mart',3).replace('Nisan',4).replace('Mayıs',5).replace('Haziran',6).replace('Temmuz',7).replace('Ağustos',8).replace('Eylül',9).replace('Ekim',10).replace('Kasım',11).replace('Aralık',12)) || 0;
+            if(m===thisMonth) reminders.push(`🎂 ${c.name} — ${c.bday}`);
         }
-        document.getElementById('crm-modal').style.display = 'flex';
-    }
+    });
+    // Consignment return reminders
+    const today = new Date();
+    (currentPortfolio.projects||[]).filter(p=>p.isConsignment&&p.consignReturn).forEach(p => {
+        const ret = new Date(p.consignReturn);
+        const diff = Math.ceil((ret-today)/(1000*60*60*24));
+        if(diff>=0&&diff<=7) reminders.push(`📦 ${p.title} — ${p.consignVenue} (${diff} gün içinde iade)`);
+    });
+    el.innerHTML = reminders.length ? reminders.map(r=>`<div style="padding:8px 0;border-bottom:1px solid #0a0a0a;font-size:10px;color:#aaa;">${r}</div>`).join('') : "<p style='color:#444;font-size:10px;'>Hatırlatma yok.</p>";
+}
 
-    async function saveCRMProfile() {
-        const name = document.getElementById('crm-name').value;
-        if(!name) return showToast("Ad Soyad zorunludur.", true);
-        
-        showLoading(true, "CRM KAYDEDİLİYOR...");
-        const idx = document.getElementById('crm-idx').value;
-        const newCol = {
-            name: name,
-            phone: document.getElementById('crm-phone').value,
-            email: document.getElementById('crm-email').value,
-            address: document.getElementById('crm-address').value,
-            bday: document.getElementById('crm-bday').value,
-            notes: document.getElementById('crm-notes').value,
-            isVip: document.getElementById('crm-vip').checked
-        };
-
-        if(idx === '') currentCRM.collectors.push(newCol);
-        else currentCRM.collectors[idx] = newCol;
-
-        try {
-            let sha = currentCRM.sha || null;
-            try { const d = await ghAction('content/crm.json'); sha = d.sha; } catch(e) {}
-            await ghAction('content/crm.json', 'PUT', { collectors: currentCRM.collectors }, sha);
-            document.getElementById('crm-modal').style.display = 'none';
-            showToast("Koleksiyoner profili güncellendi.");
-            await fetchCRM();
-        } catch(e) { showToast("Kayıt hatası", true); }
-        showLoading(false);
-    }
-
-    async function deleteCRM(i) {
-        if(!confirm("Koleksiyoner silinecek. Emin misiniz?")) return;
-        showLoading(true);
-        currentCRM.collectors.splice(i, 1);
-        try {
-            await ghAction('content/crm.json', 'PUT', currentCRM, currentCRM.sha);
-            showToast("Profil silindi.");
-            await fetchCRM();
-        } catch(e) { showToast("Hata!", true); }
-        showLoading(false);
-    }
-
-    function exportFinanceCSV() {
-        const sold = currentPortfolio.projects.filter(p => p.isSale && !p.isDeleted);
-        let csvContent = "data:text/csv;charset=utf-8,SKU,Eser Adi,Kategori,Satis Fiyati,Para Birimi,Alici\n";
-        sold.forEach(p => {
-            let row = `${p.certCode},${p.title},${p.category},${p.price},${p.currency||'TRY'},${p.owner||'Bilinmiyor'}`;
-            csvContent += row + "\n";
+// ═══════════════════════════════════════════════
+// AI ASSISTANT (Modül 10.1, 10.2)
+// ═══════════════════════════════════════════════
+async function callAI(prompt) {
+    const apiKey = currentSettings.ai_key;
+    if(!apiKey) { showToast("Yapay zeka için API anahtarı (settings.json → ai_key) gereklidir.", true); return null; }
+    showLoading(true, "YAPAY ZEKA ÇALIŞIYOR...");
+    try {
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: { "Content-Type":"application/json", "x-api-key": apiKey, "anthropic-version":"2023-06-01" },
+            body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:500, messages:[{role:"user",content:prompt}] })
         });
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "ube_raw_finans_raporu.csv");
-        document.body.appendChild(link);
-        link.click();
-    }
-
-    // --- DURUM GÜNCELLEMELERİ ---
-    async function updateProjectField(index, field, value, successMsg) {
-        showLoading(true);
-        currentPortfolio.projects[index][field] = value;
-        try {
-            await ghAction('content/portfolio.json', 'PUT', {projects: currentPortfolio.projects}, currentPortfolio.sha);
-            if(successMsg) showToast(successMsg);
-            await renderInventory();
-        } catch(e) { showToast("İşlem başarısız", true); }
+        const data = await res.json();
         showLoading(false);
+        return data.content?.[0]?.text || null;
+    } catch(e) { showLoading(false); showToast("AI hatası: " + e.message, true); return null; }
+}
+
+async function generateAIDesc(lang) {
+    const title = document.getElementById('ai-title').value.trim();
+    const material = document.getElementById('ai-material').value.trim();
+    const notes = document.getElementById('ai-notes').value.trim();
+    if(!title) return showToast("Eser adı gerekli.", true);
+    const prompt = lang==='TR'
+        ? `Sen profesyonel bir sanat küratörüsün. Aşağıdaki sanat eseri için kısa, etkileyici Türkçe bir açıklama yaz (2-3 cümle, 60-90 kelime). Eser: "${title}". Materyal: "${material||'belirtilmemiş'}". Ek not: "${notes||'yok'}". Sadece açıklama metnini döndür.`
+        : `You are a professional art curator. Write a short, compelling English description (2-3 sentences, 60-90 words) for this artwork. Artwork: "${title}". Material: "${material||'unspecified'}". Notes: "${notes||'none'}". Return only the description text.`;
+    const result = await callAI(prompt);
+    if(result) {
+        const elId = lang==='TR' ? 'ai-result' : 'ai-result-en';
+        const el = document.getElementById(elId);
+        el.style.display='block'; el.innerText = result;
+        addLog("AI", (lang==='TR'?"Türkçe":"İngilizce") + " metin: " + title);
     }
+}
 
-    function toggleVisibility(i) { updateProjectField(i, 'isHidden', !currentPortfolio.projects[i].isHidden, "Görünürlük değiştirildi."); }
-    function softDeleteProject(i) { if(confirm("Eser Çöp Kutusuna taşınacak. Emin misiniz?")) updateProjectField(i, 'isDeleted', true, "Eser çöpe taşındı."); }
-    function restoreProject(i) { updateProjectField(i, 'isDeleted', false, "Eser envantere geri yüklendi."); }
+async function translateAllDescriptions() {
+    if(!confirm("Tüm Türkçe açıklamalar İngilizceye çevrilecek. Bu işlem biraz sürebilir. Devam?")) return;
+    const toTranslate = currentPortfolio.projects.filter(p=>p.description&&!p.descriptionEN);
+    if(!toTranslate.length) return showToast("Çevrilecek açıklama bulunamadı.", false);
+    showLoading(true, "ÇEVÍRÍ YAPILIYOR...");
+    let count=0;
+    for(const p of toTranslate) {
+        const result = await callAI(`Translate this Turkish art description to professional English (art curator style, 60-90 words): "${p.description}". Return only the translation.`);
+        if(result) { p.descriptionEN = result; count++; }
+    }
+    try {
+        await ghAction('content/portfolio.json','PUT',{projects:currentPortfolio.projects},currentPortfolio.sha);
+        showToast(`${count} açıklama çevrildi.`, false, true);
+        addLog("AI ÇEVİRİ", count + " açıklama");
+    } catch(e) { showToast("Kayıt hatası", true); }
+    showLoading(false);
+}
 
-    async function hardDeleteProject(i) {
-        if(!confirm("DİKKAT: Bu eser kalıcı olarak silinecek. Dosyalar temizlenecek. Emin misiniz?")) return;
-        showLoading(true, "DOSYALAR SİLİNİYOR...");
+// ═══════════════════════════════════════════════
+// BACKUP & RESTORE (Modül 10.8, 10.9)
+// ═══════════════════════════════════════════════
+async function backupAll() {
+    showLoading(true, "YEDEK HAZIRLANIYOR...");
+    try {
+        const backup = {
+            version: "4.0",
+            date: nowStr(),
+            portfolio: currentPortfolio,
+            crm: currentCRM,
+            settings: currentSettings,
+            orders: currentOrders,
+            workshops: currentWorkshops,
+            guestbook: null,
+            log: JSON.parse(localStorage.getItem('ube_log')||'[]')
+        };
+        try { const d = await ghAction('content/guestbook.json'); backup.guestbook = JSON.parse(b2u(d.content)); } catch(e){}
+        const blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download=`UBE-RAW-Backup-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        addLog("YEDEK", "Tam yedek indirildi.");
+        showToast("Yedek başarıyla indirildi.", false, true);
+    } catch(e) { showToast("Yedekleme hatası: " + e.message, true); }
+    showLoading(false);
+}
+
+async function restoreBackup() {
+    const file = document.getElementById('restore-file').files[0];
+    if(!file) return showToast("Yedek dosyası seçiniz.", true);
+    if(!confirm("DİKKAT: Bu işlem mevcut verilerin üzerine yazacak. Emin misiniz?")) return;
+    showLoading(true, "YEDEK GERİ YÜKLENİYOR...");
+    const reader = new FileReader();
+    reader.onload = async (e) => {
         try {
-            const project = currentPortfolio.projects[i];
-            if(project.image) {
-                for(let path of project.image.split(',')) {
-                    try {
-                        const info = await ghAction(path.trim());
-                        if(info.sha) await fetch(`https://api.github.com/repos/${REPO}/contents/${path.trim()}`, {
-                            method: 'DELETE', headers: { 'Authorization': `token ${sessionToken}` },
-                            body: JSON.stringify({ message: "Resim Kalıcı Silindi", sha: info.sha })
-                        });
-                    } catch(e) {}
-                }
-            }
-            currentPortfolio.projects.splice(i, 1);
-            await ghAction('content/portfolio.json', 'PUT', {projects: currentPortfolio.projects}, currentPortfolio.sha);
-            showToast("Eser kalıcı olarak silindi.");
-            await renderInventory();
-        } catch(e) { showToast("Kalıcı silme hatası!", true); }
+            const backup = JSON.parse(e.target.result);
+            if(backup.portfolio) await ghAction('content/portfolio.json','PUT',backup.portfolio,null);
+            if(backup.crm) await ghAction('content/crm.json','PUT',backup.crm,null);
+            if(backup.settings) await ghAction('content/settings.json','PUT',backup.settings,null);
+            if(backup.guestbook) await ghAction('content/guestbook.json','PUT',backup.guestbook,null);
+            addLog("GERİ YÜKLEME", file.name);
+            showToast("Yedek geri yüklendi! Sayfa yenilenecek...", false, true);
+            setTimeout(()=>location.reload(), 2500);
+        } catch(e) { showToast("Geri yükleme hatası: " + e.message, true); }
         showLoading(false);
-    }
+    };
+    reader.readAsText(file);
+}
 
-    // Kusursuz İptal (Finans log geri alımı)
-    async function cancelSale(i) {
-        if(!confirm("Eserin satış işlemi iptal edilecek, finans logu temizlenecek ve eser stüdyo envanterine dönecek. Emin misiniz?")) return;
-        showLoading(true, "SATIŞ İPTAL EDİLİYOR...");
-        currentPortfolio.projects[i].isSale = false;
-        currentPortfolio.projects[i].owner = "";
-        currentPortfolio.projects[i].deposit = "";
-        try {
-            await ghAction('content/portfolio.json', 'PUT', {projects: currentPortfolio.projects}, currentPortfolio.sha);
-            showToast("Satış başarıyla iptal edildi, eser envantere döndü.");
-            await renderInventory();
-        } catch(e) { showToast("İptal işlemi başarısız.", true); }
-        showLoading(false);
-    }
-
-    // --- DÜZENLEME MODALI (MODÜL 3 & 5 İÇERİR) ---
-    function openEditModal(i) {
-        const p = currentPortfolio.projects[i];
-        document.getElementById('edit-idx').value = i;
-        document.getElementById('edit-title').value = p.title || '';
-        document.getElementById('edit-cat').value = p.category || '';
-        document.getElementById('edit-currency').value = p.currency || 'TRY';
-        document.getElementById('edit-price-direct').value = p.price || '';
-        document.getElementById('edit-old-price').value = p.oldPrice || '';
-        document.getElementById('edit-cost').value = p.costNote || '';
-        document.getElementById('edit-inc-shipping').checked = p.incShipping || false;
-        document.getElementById('edit-inc-vat').checked = p.incVat || false;
-        document.getElementById('edit-cert-code').value = p.certCode || '';
-        document.getElementById('edit-map').value = p.mapLink || '';
-        document.getElementById('edit-dim').value = p.dimensions || '';
-        document.getElementById('edit-weight').value = p.weight || '';
-        document.getElementById('edit-material').value = p.material || '';
-        document.getElementById('edit-stage').value = p.stage || 'Tamamlandı';
-        document.getElementById('edit-location').value = p.location || '';
-        document.getElementById('edit-draft').checked = p.isDraft || false;
-        
-        document.getElementById('edit-modal').style.display = 'flex';
-    }
-    function closeEditModal() { document.getElementById('edit-modal').style.display = 'none'; }
-
-    async function saveProjectEdit() {
-        showLoading(true, "KAYDEDİLİYOR...");
-        const i = document.getElementById('edit-idx').value;
-        const p = currentPortfolio.projects[i];
-        
-        p.title = document.getElementById('edit-title').value;
-        p.category = document.getElementById('edit-cat').value;
-        p.currency = document.getElementById('edit-currency').value;
-        p.price = document.getElementById('edit-price-direct').value;
-        p.oldPrice = document.getElementById('edit-old-price').value;
-        p.costNote = document.getElementById('edit-cost').value;
-        p.incShipping = document.getElementById('edit-inc-shipping').checked;
-        p.incVat = document.getElementById('edit-inc-vat').checked;
-        p.certCode = document.getElementById('edit-cert-code').value;
-        p.mapLink = document.getElementById('edit-map').value;
-        p.dimensions = document.getElementById('edit-dim').value;
-        p.weight = document.getElementById('edit-weight').value;
-        p.material = document.getElementById('edit-material').value;
-        p.stage = document.getElementById('edit-stage').value;
-        p.location = document.getElementById('edit-location').value;
-        p.isDraft = document.getElementById('edit-draft').checked;
-
-        try {
-            await ghAction('content/portfolio.json', 'PUT', {projects: currentPortfolio.projects}, currentPortfolio.sha);
-            closeEditModal(); 
-            showToast("Eser bilgileri güncellendi.");
-            await renderInventory();
-        } catch(e) { showToast("Güncelleme hatası", true); }
-        showLoading(false);
-    }
-
-    async function moveItem(i, dir) {
-        const ni = i + dir;
-        if(ni < 0 || ni >= currentPortfolio.projects.length) return;
-        showLoading(true);
-        const temp = currentPortfolio.projects[i];
-        currentPortfolio.projects[i] = currentPortfolio.projects[ni];
-        currentPortfolio.projects[ni] = temp;
-        try {
-            await ghAction('content/portfolio.json', 'PUT', {projects: currentPortfolio.projects}, currentPortfolio.sha);
-            await renderInventory();
-        } catch(e) { showToast("Sıralama hatası", true); }
-        showLoading(false);
-    }
-
-    // --- SİPARİŞ & TALEP ---
-    async function refreshOrders() {
-        try {
-            const d = await ghAction('content/orders.json');
-            const list = JSON.parse(b2u(d.content)).orders || [];
-            const pendingCount = list.filter(o => o.status === 'Bekliyor').length;
-            document.getElementById('stat-orders').innerText = pendingCount;
-            document.getElementById('orders-list').innerHTML = list.map((o, i) => {
-                const realIdx = list.length - 1 - i;
-                return `
-                <div class="item-row" style="background: ${o.status === 'Bekliyor' ? 'rgba(255, 179, 0, 0.05)' : 'transparent'};">
-                    <div class="item-info">
-                        <b>${o.customerName} <span class="badge ${o.status === 'Bekliyor' ? 'pending' : 'sold'}">${o.status}</span></b>
-                        <small style="color:#aaa;">Eser: <span style="color:#fff;">${o.artwork}</span> | İletişim: ${o.contact} | Tarih: ${o.date}</small>
-                    </div>
-                    <div class="btn-group">
-                        ${o.status === 'Bekliyor' ? `<button class="success small" title="Tamamla" onclick="updateOrderStatus(${realIdx}, 'Tamamlandı')">✓ ONAYLA</button>` : ''}
-                        <button class="danger small" onclick="deleteOrder(${realIdx})">SİL</button>
-                    </div>
-                </div>`;
-            }).reverse().join('') || "<p style='color:#777;'>Kayıtlı bir sipariş bulunmuyor.</p>";
-        } catch(e) { document.getElementById('orders-list').innerHTML = "Sipariş verisi yok."; }
-    }
-
-    async function addNewOrder() {
-        const name = document.getElementById('new-o-name').value;
-        const contact = document.getElementById('new-o-contact').value;
-        const artIdx = document.getElementById('new-o-artwork').value;
-        if(!name || !contact) return showToast("Ad ve iletişim zorunlu.", true);
-        
-        showLoading(true);
-        try {
-            let d, data;
-            try { d = await ghAction('content/orders.json'); data = JSON.parse(b2u(d.content)); } 
-            catch(e) { data = { orders: [] }; }
-            
-            const artworkName = artIdx !== "" ? currentPortfolio.projects[artIdx].title : "Bağımsız Talep";
-            data.orders.push({ customerName: name, contact: contact, artwork: artworkName, status: "Bekliyor", date: new Date().toLocaleDateString('tr-TR') });
-            await ghAction('content/orders.json', 'PUT', data, d ? d.sha : null);
-            
-            document.getElementById('new-o-name').value = ''; document.getElementById('new-o-contact').value = '';
-            showToast("Sipariş eklendi.");
-            await refreshOrders();
-        } catch(e) { showToast("Sipariş ekleme hatası.", true); }
-        showLoading(false);
-    }
-
-    async function updateOrderStatus(i, status) {
-        showLoading(true);
-        try {
-            const d = await ghAction('content/orders.json');
-            let data = JSON.parse(b2u(d.content));
-            data.orders[i].status = status;
-            await ghAction('content/orders.json', 'PUT', data, d.sha);
-            await refreshOrders();
-        } catch(e) { showToast("Hata", true); }
-        showLoading(false);
-    }
-
-    async function deleteOrder(i) {
-        if(!confirm("Sipariş silinecek. Emin misiniz?")) return;
-        showLoading(true);
-        try {
-            const d = await ghAction('content/orders.json');
-            let data = JSON.parse(b2u(d.content));
-            data.orders.splice(i, 1);
-            await ghAction('content/orders.json', 'PUT', data, d.sha);
-            await refreshOrders();
-        } catch(e) { showToast("Hata", true); }
-        showLoading(false);
-    }
-
-    // --- SATIŞ YÖNETİMİ & GELİŞMİŞ SERTİFİKA ÜRETİMİ (MODÜL 3, 4, 5) ---
-    function fillSaleFields(val) {
-        if(val === "") {
-            document.getElementById('sale-price').value = "";
-            document.getElementById('sale-cert').value = "";
-            document.getElementById('sale-owner').value = "";
-            document.getElementById('sale-deposit').value = "";
-            return;
-        }
-        const p = currentPortfolio.projects[val];
-        document.getElementById('sale-price').value = p.price || "";
-        document.getElementById('sale-cert').value = p.certCode || "";
-        document.getElementById('sale-owner').value = p.owner || "";
-        document.getElementById('sale-deposit').value = p.deposit || "";
-        document.getElementById('sale-anon').checked = p.isAnonSale || false;
-    }
-
-    async function handleSaleUpdate() {
-        const val = document.getElementById('sale-select').value;
-        if(val === "") return showToast("Lütfen satışı onaylanacak eseri seçin.", true);
-        showLoading(true, "SATIŞ İŞLENİYOR...");
-        try {
-            currentPortfolio.projects[val].price = document.getElementById('sale-price').value;
-            currentPortfolio.projects[val].deposit = document.getElementById('sale-deposit').value;
-            currentPortfolio.projects[val].certCode = document.getElementById('sale-cert').value;
-            currentPortfolio.projects[val].owner = document.getElementById('sale-owner').value;
-            currentPortfolio.projects[val].isAnonSale = document.getElementById('sale-anon').checked;
-            currentPortfolio.projects[val].isSale = true; 
-            
-            await ghAction('content/portfolio.json', 'PUT', {projects: currentPortfolio.projects}, currentPortfolio.sha);
-            showToast("Satış onaylandı, kapora ve finans logu işlendi.");
-            await renderInventory();
-        } catch(e) { showToast("Satış onaylanırken hata oluştu.", true); }
-        showLoading(false);
-    }
-
-    function generateAdvancedPDF() {
-        const val = document.getElementById('sale-select').value;
-        if(val === "") return showToast("Sertifikası oluşturulacak eseri seçin.", true);
-        
-        const p = currentPortfolio.projects[val];
-        const owner = document.getElementById('sale-owner').value || 'Değerli Koleksiyoner';
-        const certCode = document.getElementById('sale-cert').value || p.certCode;
-        const lang = document.getElementById('cert-lang').value;
-        const format = document.getElementById('cert-size').value; // a4 or a5
-        const isAP = document.getElementById('cert-ap').checked;
-        const hash = generateUUID(); // Kriptografik Hash
-        
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ orientation: "landscape", format: format });
-        
-        const w = format === 'a4' ? 297 : 210;
-        const h = format === 'a4' ? 210 : 148;
-        const cx = w / 2;
-
-        // Arkaplan ve Çerçeve
-        doc.setFillColor(15, 15, 15);
-        doc.rect(0, 0, w, h, 'F');
-        doc.setDrawColor(168, 127, 74); 
-        doc.setLineWidth(1.5); 
-        doc.rect(10, 10, w-20, h-20);
-        
-        // Filigran / A.P.
-        if(isAP) {
-            doc.setTextColor(30, 30, 30);
-            doc.setFontSize(80);
-            doc.text("ARTIST PROOF", cx, h/2 + 20, { align: "center", angle: 45 });
-        }
-
-        doc.setTextColor(168, 127, 74); 
-        doc.setFontSize(format === 'a4' ? 28 : 20);
-        doc.text(lang === 'EN' ? "CERTIFICATE OF AUTHENTICITY" : "ORİJİNALLİK SERTİFİKASI", cx, 40, { align: "center" });
-        
-        doc.setTextColor(200, 200, 200); 
-        doc.setFontSize(10);
-        const desc = lang === 'EN' ? "This document certifies that the artwork detailed below is an original creation." : "Bu belge, aşağıda detayları verilen eserin orijinal ve tek bir yaratım olduğunu onaylar.";
-        doc.text(desc, cx, 55, { align: "center" });
-        
-        doc.setTextColor(255, 255, 255); 
-        doc.setFontSize(22);
-        doc.text(p.title.toUpperCase(), cx, 80, { align: "center" });
-        
-        doc.setTextColor(150, 150, 150); 
-        doc.setFontSize(11);
-        doc.text(`${lang === 'EN' ? 'SKU / Cert No' : 'Sertifika No'}: ${certCode}`, cx, 100, { align: "center" });
-        doc.text(`${lang === 'EN' ? 'Category' : 'Kategori'}: ${p.category || '-'}`, cx, 110, { align: "center" });
-        doc.text(`${lang === 'EN' ? 'Material' : 'Materyal'}: ${p.material || '-'}`, cx, 120, { align: "center" });
-        doc.text(`${lang === 'EN' ? 'Dimensions' : 'Boyutlar'}: ${p.dimensions || '-'}`, cx, 130, { align: "center" });
-        
-        doc.setTextColor(200, 200, 200); 
-        doc.setFontSize(12);
-        doc.text(`${lang === 'EN' ? 'Acquired By' : 'Koleksiyoner'}: ${owner}`, cx, 150, { align: "center" });
-        
-        doc.setTextColor(168, 127, 74); 
-        doc.setFontSize(14);
-        doc.text("UBE RAW STUDIO", cx, h - 30, { align: "center" });
-        
-        doc.setFontSize(8); 
-        doc.setTextColor(100, 100, 100);
-        doc.text(`${lang === 'EN' ? 'Date' : 'Tarih'}: ${new Date().toLocaleDateString('tr-TR')}`, cx, h - 22, { align: "center" });
-        doc.text(`Verify Hash: ${hash}`, cx, h - 16, { align: "center" }); // Kripto doğrulama
-        
-        doc.save(`UBE-RAW-COA-${certCode}.pdf`);
-        showToast("Kriptografik Sertifika PDF olarak indirildi.");
-    }
-
-    // --- ZİYARETÇİ DEFTERİ ---
-    async function refreshGuestbook() {
-        try {
-            const d = await ghAction('content/guestbook.json');
-            const list = JSON.parse(b2u(d.content)).messages || [];
-            document.getElementById('stat-msg').innerText = list.length;
-            document.getElementById('guest-list').innerHTML = list.map((m,i) => {
-                const realIdx = list.length - 1 - i;
-                return `
-                <div class="item-row">
-                    <div class="item-info"><b>${m.name}</b><small>"${m.message}" - ${m.date}</small></div>
-                    <button class="danger small" onclick="deleteMessage(${realIdx})">SİL</button>
-                </div>`;
-            }).reverse().join('') || "<p style='color:#777;'>Ziyaretçi mesajı yok.</p>";
-        } catch(e) { document.getElementById('guest-list').innerHTML = "Veri okunamadı."; }
-    }
-
-    async function approveNewMessage() {
-        const name = document.getElementById('new-g-name').value;
-        const msg = document.getElementById('new-g-msg').value;
-        if(!name || !msg) return showToast("Zorunlu alanları doldurun.", true);
-        showLoading(true);
-        try {
-            let d, data;
-            try { d = await ghAction('content/guestbook.json'); data = JSON.parse(b2u(d.content)); } 
-            catch(e) { data = { messages: [] }; }
-            data.messages.push({ name, message: msg, date: new Date().toLocaleDateString('tr-TR') });
-            await ghAction('content/guestbook.json', 'PUT', data, d ? d.sha : null);
-            document.getElementById('new-g-name').value = ''; document.getElementById('new-g-msg').value = '';
-            await refreshGuestbook();
-        } catch(e) { showToast("Hata oluştu", true); }
-        showLoading(false);
-    }
-
-    async function deleteMessage(i) {
-        if(!confirm("Mesaj silinsin mi?")) return;
-        showLoading(true);
-        try {
-            const d = await ghAction('content/guestbook.json');
-            let data = JSON.parse(b2u(d.content));
-            data.messages.splice(i, 1);
-            await ghAction('content/guestbook.json', 'PUT', data, d.sha);
-            await refreshGuestbook();
-        } catch(e) { showToast("Hata", true); }
-        showLoading(false);
-    }
-
-    // --- SİTE AYARLARI ---
-    async function loadSettings() {
-        try {
-            const d = await ghAction('content/settings.json');
-            const s = JSON.parse(b2u(d.content));
-            currentSettings = s;
-            currentSettings.sha = d.sha;
-            
-            document.getElementById('s-theme').value = s.theme || "#a87f4a";
-            document.getElementById('s-maintenance').checked = s.maintenance || false;
-            document.documentElement.style.setProperty('--accent', s.theme || "#a87f4a");
-        } catch(e) { console.log("Ayarlar yüklenemedi."); }
-    }
-
-    async function handleSettingsUpdate() {
-        showLoading(true, "AYARLAR KAYDEDİLİYOR...");
-        try {
-            let sha = currentSettings.sha || null;
-            try { const d = await ghAction('content/settings.json'); sha = d.sha; } catch(e) {}
-            
-            const data = {
-                theme: document.getElementById('s-theme').value,
-                maintenance: document.getElementById('s-maintenance').checked
-            };
-            
-            await ghAction('content/settings.json', 'PUT', data, sha);
-            currentSettings = { ...data, sha };
-            document.documentElement.style.setProperty('--accent', data.theme);
-            showToast("Ayarlar güncellendi!");
-        } catch(e) { showToast("Hata oluştu.", true); }
-        showLoading(false);
-    }
-
+// ═══════════════════════════════════════════════
+// INIT ON LOAD
+// ═══════════════════════════════════════════════
+renderLog();
 </script>
 </body>
 </html>
