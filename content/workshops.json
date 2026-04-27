@@ -1,11 +1,11 @@
 {
   "workshops": [
     {
-      "name": "Resim ve Heykel",
-      "date": "28.04.2026/12:00",
-      "capacity": 20,
+      "name": "Heykel Atölyesi",
+      "date": "2026-05-15",
+      "capacity": 10,
       "enrolled": 0,
-      "location": "Stüdyo"
+      "location": "KAIDE Studio"
     }
   ],
   "students": []
