@@ -1,0 +1,12 @@
+{
+  "workshops": [
+    {
+      "name": "Resim ve Heykel",
+      "date": "28.04.2026/12:00",
+      "capacity": 20,
+      "enrolled": 0,
+      "location": "Stüdyo"
+    }
+  ],
+  "students": []
+}
