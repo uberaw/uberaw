@@ -108,7 +108,6 @@
         .badge.reserved { background: #001a30; color: #5bc0de; border: 1px solid #003a60; }
         .badge.consignment { background: #1a0a1a; color: #bb86fc; border: 1px solid #3a1a3a; }
         .badge.featured { background: #1a1000; color: var(--accent); border: 1px solid #3a2010; }
-        .badge.ap { background: #101a10; color: #81c784; border: 1px solid #1a3a1a; }
 
         /* ── MODALS ── */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
@@ -130,7 +129,7 @@
 
         /* ── TOAST ── */
         #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 10001; display: flex; flex-direction: column; gap: 8px; }
-        .toast { background: #0d0d0d; border-left: 3px solid var(--accent); border: 1px solid #1a1a1a; border-left: 3px solid var(--accent); color: #ccc; padding: 12px 20px; border-radius: 3px; font-size: 11px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); animation: slideIn 0.25s ease; max-width: 320px; }
+        .toast { background: #0d0d0d; border-left: 3px solid var(--accent); border: 1px solid #1a1a1a; color: #ccc; padding: 12px 20px; border-radius: 3px; font-size: 11px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); animation: slideIn 0.25s ease; max-width: 320px; }
         .toast.error { border-left-color: #f44336; }
         .toast.success-toast { border-left-color: #4caf50; }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
@@ -187,14 +186,12 @@
 </head>
 <body>
 
-<!-- LOADER -->
 <div id="loader">
     <div class="loader-ring"></div>
     <span id="loader-text">İSTEMCİ İŞLENİYOR...</span>
 </div>
 <div id="toast-container"></div>
 
-<!-- LOGIN -->
 <div id="login">
     <div class="login-box">
         <h1>UBE RAW</h1>
@@ -207,7 +204,6 @@
     </div>
 </div>
 
-<!-- EDIT MODAL -->
 <div id="edit-modal" class="modal-overlay">
     <div class="modal-box" style="max-width:680px;">
         <h3 id="edit-modal-title">✦ Eseri Düzenle</h3>
@@ -227,6 +223,7 @@
             <div><label>Alt Kategori / Seri</label><input type="text" id="edit-subcat" placeholder="Örn: İnsan Formu Serisi"></div>
             <div><label>Koleksiyon / Grup</label><input type="text" id="edit-collection" placeholder="Örn: Arkaik Formlar 2025"></div>
         </div>
+        
         <div class="section-title">Finans & Fiyatlandırma</div>
         <div class="grid-3">
             <div><label>Para Birimi</label>
@@ -248,6 +245,7 @@
             <label class="check-item"><input type="checkbox" id="edit-featured"> ⭐ Öne Çıkar (Vitrin)</label>
             <label class="check-item"><input type="checkbox" id="edit-draft"> Taslak (Sitede Gizle)</label>
         </div>
+ 
         <div class="section-title">Fiziksel Detaylar & Üretim</div>
         <div class="grid-3">
             <div><label>Boyut (En×Boy×Der. cm)</label><input type="text" id="edit-dim" placeholder="50×70×5"></div>
@@ -268,6 +266,7 @@
             <div><label>Seri No / Kopya</label><input type="text" id="edit-edition" placeholder="1/1 veya 3/10"></div>
         </div>
         <div><label>Sergi Geçmişi (Virgülle ayırın)</label><input type="text" id="edit-exhibitions" placeholder="İstanbul Art Fair 2024, Galeri X 2023"></div>
+       
         <div><label>Harita / NFT Kontrat Linki</label><input type="text" id="edit-map"></div>
         <div><label>AI Açıklama Metni</label><textarea id="edit-description" rows="2" placeholder="Eserin küratörce açıklaması..."></textarea></div>
         <div class="btn-group" style="margin-top:16px;">
@@ -278,7 +277,6 @@
     </div>
 </div>
 
-<!-- CRM MODAL -->
 <div id="crm-modal" class="modal-overlay">
     <div class="modal-box">
         <h3>👤 Koleksiyoner Profili</h3>
@@ -303,7 +301,6 @@
     </div>
 </div>
 
-<!-- CONSIGNMENT MODAL -->
 <div id="consign-modal" class="modal-overlay">
     <div class="modal-box">
         <h3>🏛️ Konsinye / Dış Sergi</h3>
@@ -321,7 +318,6 @@
     </div>
 </div>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
     <div class="sidebar-brand">
         <h2>UBE RAW</h2>
@@ -350,10 +346,8 @@
     </div>
 </div>
 
-<!-- MAIN CONTENT -->
 <div class="main">
 
-    <!-- ══ TAB: DASHBOARD ══ -->
     <div id="tab-dash" class="tab active">
         <div class="page-header">
             <div><h2>Stüdyo Özeti</h2><small>ANA EKRAN & FİNANS</small></div>
@@ -371,7 +365,6 @@
             <div class="stat-box"><h3 id="stat-drafts">0</h3><p>Taslak Eser</p></div>
         </div>
 
-        <!-- Hedef Sayacı -->
         <div class="card dark">
             <div class="section-title" style="margin-top:0;">Yıllık Üretim Hedefi</div>
             <div class="goal-display">
@@ -394,14 +387,12 @@
             </div>
         </div>
 
-        <!-- Satış Grafiği -->
         <div class="card">
             <div class="section-title" style="margin-top:0;">Aylık Satış Dağılımı</div>
             <div id="monthly-chart" class="chart-wrap"></div>
             <div id="monthly-labels" style="display:flex;gap:6px;margin-top:6px;padding:0 4px;"></div>
         </div>
 
-        <!-- Kategori Dağılımı -->
         <div class="grid-2">
             <div class="card">
                 <div class="section-title" style="margin-top:0;">Kategori Dağılımı</div>
@@ -413,14 +404,12 @@
             </div>
         </div>
 
-        <!-- Welcome card -->
         <div class="card" style="background:linear-gradient(135deg,#080800 0%,#040404 100%);border-color:#1a1000;">
             <h4 style="color:var(--accent);margin-top:0;font-family:'Cormorant Garamond',serif;font-weight:300;letter-spacing:3px;">Hoş Geldiniz, Ubeydullah Bey.</h4>
             <p style="font-size:11px;color:#555;line-height:1.8;margin:0;">Stüdyonuzu, taslaklarınızı, koleksiyoner ağınızı ve satışlarınızı güvenli yönetin.</p>
         </div>
     </div>
 
-    <!-- ══ TAB: ESER EKLE ══ -->
     <div id="tab-add" class="tab">
         <div class="page-header">
             <div><h2>Yeni Eser Kaydı</h2><small>ENVANTERE EKLE</small></div>
@@ -497,7 +486,6 @@
         </div>
     </div>
 
-    <!-- ══ TAB: ENVANTER ══ -->
     <div id="tab-inv" class="tab">
         <div class="page-header">
             <div><h2>Envanter Yönetimi</h2><small>ESERLER · TASLAKLAR · ÇÖP KUTUSU</small></div>
@@ -506,7 +494,6 @@
             </div>
         </div>
 
-        <!-- Toplu İşlem Paneli -->
         <div id="bulk-panel" class="card dark" style="display:none;">
             <div class="section-title" style="margin-top:0;">Toplu İşlem</div>
             <p style="font-size:10px;color:#666;">Aşağıdaki eserleri seçin ve işlem uygulayın.</p>
@@ -538,7 +525,6 @@
         <div id="inventory-list" class="card" style="padding:10px 16px;">Yükleniyor...</div>
     </div>
 
-    <!-- ══ TAB: GALERİ & SERGİLER ══ -->
     <div id="tab-gallery" class="tab">
         <div class="page-header">
             <div><h2>Galeri & Sergiler</h2><small>MODÜL 6 — SERGİ OPERASYONLARı</small></div>
@@ -553,7 +539,7 @@
             <div class="card dark">
                 <div class="section-title" style="margin-top:0;">Sergi Paketi Oluştur</div>
                 <div class="grid-2">
-                    <div><label>Sergi Adı</label><input type="text" id="expo-name" placeholder="Örn: PLÜN Sanatsal Farkındalık Rotası 2025"></div>
+                    <div><label>Sergi Adı</label><input type="text" id="expo-name" placeholder="Örn: PLYN Sanatsal Farkındalık Rotası 2025"></div>
                     <div><label>Tarih</label><input type="text" id="expo-date" placeholder="15–28 Kasım 2025"></div>
                 </div>
                 <div><label>Mekan</label><input type="text" id="expo-venue" placeholder="Galeri X, İstanbul"></div>
@@ -567,7 +553,7 @@
         </div>
         <div id="gallery-consign" class="inner-tab-panel">
             <div class="card dark">
-                <div class="section-title" style="margin-top:0;">Dışarıdaki Eserler</div>
+                <div class="section-title" style="margin-top:0;">Dışarıdaki Eserler (Konsinye)</div>
                 <div id="consign-list"><p style="color:#444;">Konsinye eser yok.</p></div>
             </div>
         </div>
@@ -589,7 +575,6 @@
         </div>
     </div>
 
-    <!-- ══ TAB: KOLEKSİYONERLER ══ -->
     <div id="tab-crm" class="tab">
         <div class="page-header">
             <div><h2>Koleksiyoner Ağı</h2><small>CRM — MÜŞTERİ İLİŞKİLERİ</small></div>
@@ -601,7 +586,6 @@
         <div id="crm-list" class="card" style="padding:10px 16px;">Yükleniyor...</div>
     </div>
 
-    <!-- ══ TAB: SİPARİŞLER ══ -->
     <div id="tab-orders" class="tab">
         <div class="page-header">
             <div><h2>Sipariş & Talep Yönetimi</h2><small>BEKLEYEN · TAMAMLANAN</small></div>
@@ -618,7 +602,6 @@
         <div id="orders-list" class="card" style="padding:10px 16px;">Yükleniyor...</div>
     </div>
 
-    <!-- ══ TAB: SATIŞ & SERTİFİKA ══ -->
     <div id="tab-sale" class="tab">
         <div class="page-header">
             <div><h2>Satış & Sertifika</h2><small>MODÜL 3 & 5 — FİNANS · COA · CRM</small></div>
@@ -665,7 +648,6 @@
         </div>
     </div>
 
-    <!-- ══ TAB: WORKSHOP ══ -->
     <div id="tab-workshop" class="tab">
         <div class="page-header">
             <div><h2>Atölye & Workshop</h2><small>MODÜL 7 — EĞİTİM YÖNETİMİ</small></div>
@@ -688,7 +670,6 @@
         </div>
     </div>
 
-    <!-- ══ TAB: ZİYARETÇİ DEFTERİ ══ -->
     <div id="tab-guest" class="tab">
         <div class="page-header">
             <div><h2>Ziyaretçi Defteri</h2><small>MESAJLAR & SPAM FİLTRE</small></div>
@@ -704,7 +685,6 @@
         <div id="guest-list" class="card" style="padding:10px 16px;">Yükleniyor...</div>
     </div>
 
-    <!-- ══ TAB: AI ASİSTAN ══ -->
     <div id="tab-ai" class="tab">
         <div class="page-header">
             <div><h2>AI Asistan</h2><small>MODÜL 10 — YAPAY ZEKA YARDIMCıSı</small></div>
@@ -731,7 +711,6 @@
         </div>
     </div>
 
-    <!-- ══ TAB: AYARLAR ══ -->
     <div id="tab-config" class="tab">
         <div class="page-header">
             <div><h2>Site Ayarları</h2><small>MODÜL 9 & 10 — CMS · GÖRÜNÜM · SİSTEM</small></div>
@@ -794,7 +773,6 @@
         </div>
     </div>
 
-    <!-- ══ TAB: İŞLEM LOGU ══ -->
     <div id="tab-logs" class="tab">
         <div class="page-header">
             <div><h2>İşlem Günlüğü</h2><small>GÜVENLİK LOGU</small></div>
@@ -805,9 +783,7 @@
         </div>
     </div>
 
-</div><!-- /main -->
-
-<script>
+</div><script>
 // ═══════════════════════════════════════════════
 // CONFIG & STATE
 // ═══════════════════════════════════════════════
@@ -840,6 +816,7 @@ function generateUUID() {
     return 'xxxx-xxxx-xxxx'.replace(/x/g, () => Math.random().toString(36)[2]);
 }
 function nowStr() { return new Date().toLocaleString('tr-TR'); }
+
 function showLoading(show, txt="İSTEMCİ İŞLENİYOR...") {
     document.getElementById('loader-text').innerText = txt;
     document.getElementById('loader').style.display = show ? 'flex' : 'none';
@@ -984,7 +961,6 @@ dropZone.addEventListener('drop', (e) => {
     document.getElementById('f-file').files = e.dataTransfer.files;
     updateFilePreview(document.getElementById('f-file'));
 });
-
 function updateFilePreview(input) {
     const p = document.getElementById('file-preview');
     p.innerHTML = '';
@@ -1073,6 +1049,7 @@ async function handleUpload() {
             exhibitions: []
         });
         await ghAction('content/portfolio.json', 'PUT', data, d ? d.sha : null);
+        
         // reset form
         document.querySelectorAll('#tab-add input[type="text"],#tab-add textarea').forEach(el=>el.value='');
         document.querySelectorAll('#tab-add input[type="checkbox"]').forEach(el=>el.checked=false);
@@ -1182,7 +1159,7 @@ async function renderInventory() {
     else if(filterStr==='featured') displayList = displayList.filter(p=>!p.isDeleted&&p.isFeatured);
     else if(filterStr==='hidden') displayList = displayList.filter(p=>!p.isDeleted&&p.isHidden);
     else displayList = displayList.filter(p=>!p.isDeleted&&!p.isDraft);
-
+    
     if(filterCat) displayList = displayList.filter(p=>p.category===filterCat);
     if(searchTerm) displayList = displayList.filter(p=>
         (p.title&&p.title.toLowerCase().includes(searchTerm)) ||
@@ -1190,7 +1167,7 @@ async function renderInventory() {
         (p.material&&p.material.toLowerCase().includes(searchTerm)) ||
         (p.category&&p.category.toLowerCase().includes(searchTerm))
     );
-
+    
     let html = '';
     displayList.forEach(p => {
         const i = p.originalIndex;
@@ -1218,7 +1195,7 @@ async function renderInventory() {
                 <small>${p.stage||'Tamamlandı'} · ${p.location||'-'} ${p.collection?'· '+p.collection:''}</small>
             </div>
             <div class="btn-group">`;
-
+            
         if(filterStr==='trash') {
             html += `<button class="success sm" onclick="restoreProject(${i})">GERİ YÜKLE</button>
                      <button class="danger sm" onclick="hardDeleteProject(${i})">KALICI SİL</button>`;
@@ -1229,7 +1206,7 @@ async function renderInventory() {
                      <button class="info sm" onclick="toggleReserved(${i})">${p.isReserved?'✓RZV':'RZV'}</button>
                      <button class="secondary sm" onclick="openConsignModal(${i})">↗</button>`;
             if(p.isSale) html += `<button class="danger sm" onclick="cancelSale(${i})">İPTAL</button>`;
-            html += `<button class="secondary sm" onclick="openEditModal(${i})">DÜZENLE</button>
+            html += `<button style="background:#333;color:#fff;" class="small" onclick="openEditModal(${i})">DÜZENLE</button>
                      <button class="danger sm" onclick="softDeleteProject(${i})">ÇÖP</button>`;
         }
         html += `</div></div>`;
@@ -1406,6 +1383,7 @@ async function saveProjectEdit() {
     p.edition = document.getElementById('edit-edition').value;
     p.exhibitions = document.getElementById('edit-exhibitions').value.split(',').map(s=>s.trim()).filter(Boolean);
     p.description = document.getElementById('edit-description').value;
+
     try {
         await ghAction('content/portfolio.json', 'PUT', {projects:currentPortfolio.projects}, currentPortfolio.sha);
         closeEditModal();
@@ -1445,7 +1423,7 @@ function renderCRM() {
             </div>
         </div>`;
     }).join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Kayıtlı koleksiyoner yok.</p>";
-
+    
     const crmOpts = '<option value="">Manuel İsim Gir (CRM Dışı)</option>' +
         list.map(c=>`<option value="${c.name}">${c.name} ${c.isVip?'(VIP)':''}</option>`).join('');
     document.getElementById('sale-crm-select').innerHTML = crmOpts;
@@ -1476,6 +1454,7 @@ async function saveCRMProfile() {
     const name = document.getElementById('crm-name').value.trim();
     if(!name) return showToast("Ad Soyad zorunludur.", true);
     showLoading(true, "CRM KAYDEDİLİYOR...");
+    
     const idx = document.getElementById('crm-idx').value;
     const newCol = {
         name,
@@ -1489,6 +1468,7 @@ async function saveCRMProfile() {
     };
     if(idx==='') currentCRM.collectors.push(newCol);
     else currentCRM.collectors[idx] = newCol;
+    
     try {
         let sha = currentCRM.sha || null;
         try { const d = await ghAction('content/crm.json'); sha = d.sha; } catch(e){}
@@ -1549,7 +1529,8 @@ async function refreshOrders() {
         const list = currentOrders.orders || [];
         const pending = list.filter(o=>o.status==='Bekliyor').length;
         document.getElementById('stat-orders').innerText = pending;
-        document.getElementById('orders-list').innerHTML = list.length ? list.map((o,i) => {
+        document.getElementById('orders-list').innerHTML = list.length ?
+            list.map((o,i) => {
             const realIdx = list.length-1-i;
             return `<div class="item-row" style="background:${o.status==='Bekliyor'?'rgba(255,179,0,0.03)':'transparent'}">
                 <div class="item-info">
@@ -1575,6 +1556,7 @@ async function addNewOrder() {
         let d, data;
         try { d = await ghAction('content/orders.json'); data = JSON.parse(b2u(d.content)); }
         catch(e) { data = {orders:[]}; }
+        
         const artworkName = artIdx!==""? currentPortfolio.projects[artIdx].title : "Bağımsız Talep";
         data.orders.push({ customerName:name, contact, artwork:artworkName, status:"Bekliyor", date:nowStr() });
         await ghAction('content/orders.json', 'PUT', data, d?d.sha:null);
@@ -1640,6 +1622,7 @@ async function handleSaleUpdate() {
         p.isAnonSale = document.getElementById('sale-anon').checked;
         p.isSale = true;
         p.saleDate = nowStr();
+        
         await ghAction('content/portfolio.json', 'PUT', {projects:currentPortfolio.projects}, currentPortfolio.sha);
         addLog("SATIŞ ONAYI", `${p.title} → ${p.owner||'Gizli'} · ${p.price} ${p.currency||'TRY'}`);
         showToast("Satış onaylandı!", false, true);
@@ -1658,12 +1641,15 @@ function generateAdvancedPDF() {
     const format = document.getElementById('cert-size').value;
     const isAP = document.getElementById('cert-ap').checked;
     const hash = generateUUID();
+    
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation:"landscape", format });
     const w = format==='a4'?297:210, h = format==='a4'?210:148, cx = w/2;
+    
     doc.setFillColor(8,8,8); doc.rect(0,0,w,h,'F');
     doc.setDrawColor(168,127,74); doc.setLineWidth(1); doc.rect(8,8,w-16,h-16);
     doc.setDrawColor(100,80,40); doc.setLineWidth(0.3); doc.rect(11,11,w-22,h-22);
+    
     if(isAP) {
         doc.setTextColor(25,25,25); doc.setFontSize(70);
         doc.text("ARTIST PROOF", cx, h/2+15, {align:"center", angle:40});
@@ -1684,125 +1670,22 @@ function generateAdvancedPDF() {
     doc.text(`${lang==='EN'?'Acquired By':'Koleksiyoner'}: ${p.isAnonSale?'Gizli Koleksiyoner':owner}`, cx, 146, {align:"center"});
     doc.setTextColor(168,127,74); doc.setFontSize(13);
     doc.text("UBE RAW STUDIO", cx, h-28, {align:"center"});
+    
+    // Add QR code placeholder representing cryptographic trace
+    doc.setDrawColor(168,127,74);
+    doc.rect(w - 30, h - 30, 18, 18);
+    doc.setFontSize(5);
+    doc.setTextColor(168,127,74);
+    doc.text("SCAN QR", w - 21, h - 20, {align: "center"});
+
     doc.setFontSize(7); doc.setTextColor(80,80,80);
     doc.text(`${lang==='EN'?'Date':'Tarih'}: ${new Date().toLocaleDateString('tr-TR')}`, cx, h-20, {align:"center"});
     doc.text(`Verify Hash: ${hash}`, cx, h-14, {align:"center"});
     doc.save(`UBE-RAW-COA-${certCode}.pdf`);
-    addLog("SERTİFİKA", `${p.title} · ${lang} · ${certCode}`);
+    
+    // Log PDF Gen
+    addLog("SERTİFİKA ÜRETİMİ", `${p.title} · ${lang} · ${certCode}`);
     showToast("Sertifika PDF olarak indirildi.", false, true);
-}
-
-// ═══════════════════════════════════════════════
-// GUESTBOOK (Modül 10.5)
-// ═══════════════════════════════════════════════
-async function refreshGuestbook() {
-    try {
-        const d = await ghAction('content/guestbook.json');
-        const list = JSON.parse(b2u(d.content)).messages || [];
-        document.getElementById('stat-msg').innerText = list.length;
-        document.getElementById('guest-list').innerHTML = list.length ? list.map((m,i) => {
-            const realIdx = list.length-1-i;
-            // Simple spam filter: flag messages shorter than 3 chars
-            const isSpam = m.message && m.message.trim().length < 3;
-            return `<div class="item-row" style="${isSpam?'opacity:0.4;':''}">
-                <div class="item-info">
-                    <b>${m.name} ${isSpam?'<span class="badge draft">SPAM?</span>':''}</b>
-                    <small>"${m.message}" — ${m.date}</small>
-                </div>
-                <button class="danger sm" onclick="deleteMessage(${realIdx})">SİL</button>
-            </div>`;
-        }).reverse().join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Ziyaretçi mesajı yok.</p>";
-    } catch(e) { document.getElementById('guest-list').innerHTML = "<p style='color:#444;'>Veri okunamadı.</p>"; }
-}
-
-async function approveNewMessage() {
-    const name = document.getElementById('new-g-name').value.trim();
-    const msg = document.getElementById('new-g-msg').value.trim();
-    if(!name||!msg) return showToast("Zorunlu alanları doldurun.", true);
-    showLoading(true);
-    try {
-        let d, data;
-        try { d = await ghAction('content/guestbook.json'); data = JSON.parse(b2u(d.content)); }
-        catch(e) { data = {messages:[]}; }
-        data.messages.push({ name, message:msg, date:new Date().toLocaleDateString('tr-TR') });
-        await ghAction('content/guestbook.json', 'PUT', data, d?d.sha:null);
-        document.getElementById('new-g-name').value=''; document.getElementById('new-g-msg').value='';
-        addLog("MESAJ", name + ": " + msg.substring(0,40));
-        await refreshGuestbook();
-    } catch(e) { showToast("Hata oluştu", true); }
-    showLoading(false);
-}
-
-async function deleteMessage(i) {
-    if(!confirm("Mesaj silinsin mi?")) return;
-    showLoading(true);
-    try {
-        const d = await ghAction('content/guestbook.json');
-        let data = JSON.parse(b2u(d.content));
-        data.messages.splice(i,1);
-        await ghAction('content/guestbook.json', 'PUT', data, d.sha);
-        await refreshGuestbook();
-    } catch(e) { showToast("Hata", true); }
-    showLoading(false);
-}
-
-// ═══════════════════════════════════════════════
-// SETTINGS (Modül 9, 10)
-// ═══════════════════════════════════════════════
-async function loadSettings() {
-    try {
-        const d = await ghAction('content/settings.json');
-        const s = JSON.parse(b2u(d.content));
-        currentSettings = s;
-        currentSettings.sha = d.sha;
-        document.getElementById('s-theme').value = s.theme||'#a87f4a';
-        document.getElementById('s-maintenance').checked = s.maintenance||false;
-        document.getElementById('s-goal').value = s.goal||20;
-        document.getElementById('s-timeout').value = s.timeout||120;
-        document.getElementById('s-bio').value = s.bio||'';
-        document.getElementById('s-phone').value = s.phone||'';
-        document.getElementById('s-email').value = s.email||'';
-        document.getElementById('s-address').value = s.address||'';
-        document.getElementById('s-instagram').value = s.instagram||'';
-        document.getElementById('s-behance').value = s.behance||'';
-        document.getElementById('s-portfolio').value = s.portfolio||'';
-        document.getElementById('s-seo').value = s.seo||'';
-        document.documentElement.style.setProperty('--accent', s.theme||'#a87f4a');
-        document.getElementById('goal-input').value = s.goal||20;
-    } catch(e) { console.log("Ayarlar yüklenemedi."); }
-}
-
-function saveGoal(val) {
-    currentSettings.goal = parseInt(val)||20;
-    handleSettingsUpdate();
-}
-
-async function handleSettingsUpdate() {
-    showLoading(true, "AYARLAR KAYDEDİLİYOR...");
-    try {
-        let sha = currentSettings.sha||null;
-        try { const d = await ghAction('content/settings.json'); sha = d.sha; } catch(e){}
-        const data = {
-            theme: document.getElementById('s-theme').value,
-            maintenance: document.getElementById('s-maintenance').checked,
-            goal: parseInt(document.getElementById('s-goal').value)||20,
-            timeout: parseInt(document.getElementById('s-timeout').value)||120,
-            bio: document.getElementById('s-bio').value,
-            phone: document.getElementById('s-phone').value,
-            email: document.getElementById('s-email').value,
-            address: document.getElementById('s-address').value,
-            instagram: document.getElementById('s-instagram').value,
-            behance: document.getElementById('s-behance').value,
-            portfolio: document.getElementById('s-portfolio').value,
-            seo: document.getElementById('s-seo').value,
-        };
-        await ghAction('content/settings.json', 'PUT', data, sha);
-        currentSettings = { ...data, sha };
-        document.documentElement.style.setProperty('--accent', data.theme);
-        addLog("AYARLAR", "Site ayarları güncellendi.");
-        showToast("Ayarlar güncellendi!", false, true);
-    } catch(e) { showToast("Hata oluştu.", true); }
-    showLoading(false);
 }
 
 // ═══════════════════════════════════════════════
@@ -1821,17 +1704,21 @@ function renderExpoSelectLists() {
         const el = document.getElementById(id);
         if(el) el.innerHTML = listHTML || "<p style='color:#444;'>Eser yok.</p>";
     });
-
+    
     // Consignment list
     const consign = currentPortfolio.projects.filter(p=>p.isConsignment&&!p.isDeleted);
-    document.getElementById('consign-list').innerHTML = consign.length ? consign.map((p,i) => {
+    document.getElementById('consign-list').innerHTML = consign.length ?
+        consign.map((p,i) => {
         const idx = currentPortfolio.projects.indexOf(p);
         return `<div class="item-row">
             <div class="item-info">
                 <b>${p.title}</b>
                 <small>Galeri: ${p.consignVenue||'-'} · Çıkış: ${p.consignOut||'-'} · İade: ${p.consignReturn||'-'}</small>
             </div>
-            <button class="success sm" onclick="returnConsignment(${idx})">İADE EDİLDİ</button>
+            <div class="btn-group">
+                <button class="secondary sm" onclick="generateHandoverPDF(${idx})">TUTANAK</button>
+                <button class="success sm" onclick="returnConsignment(${idx})">İADE EDİLDİ</button>
+            </div>
         </div>`;
     }).join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Konsinye eser yok.</p>";
 }
@@ -1902,6 +1789,31 @@ async function returnConsignment(i) {
         await renderInventory();
     } catch(e) { showToast("Hata", true); }
     showLoading(false);
+}
+
+// Handover Document for Consignment
+function generateHandoverPDF(idx) {
+    const p = currentPortfolio.projects[idx];
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:"portrait", format:"a4" });
+    
+    doc.setFontSize(16);
+    doc.text("ESER TESLIMAT TUTANAGI", 105, 20, {align:"center"});
+    doc.setFontSize(12);
+    doc.text(`Tarih: ${new Date().toLocaleDateString('tr-TR')}`, 20, 40);
+    doc.text(`Gonderilen Kurum/Galeri: ${p.consignVenue || '-'}`, 20, 50);
+    doc.text(`Eser Adi: ${p.title}`, 20, 60);
+    doc.text(`SKU: ${p.certCode || '-'}`, 20, 70);
+    doc.text(`Materyal/Boyut: ${p.material || '-'} | ${p.dimensions || '-'}`, 20, 80);
+    
+    doc.text("Teslim Eden:", 40, 120);
+    doc.text("Ubeydullah Bayrak (UBE RAW)", 40, 130);
+    
+    doc.text("Teslim Alan:", 140, 120);
+    doc.text("..........................", 140, 130);
+    
+    doc.save(`Tutanak-${p.certCode||'Eser'}.pdf`);
+    showToast("Teslimat tutanağı indirildi.", false, true);
 }
 
 function generateCatalogPDF() {
@@ -1994,9 +1906,10 @@ function renderWorkshops() {
                 <div class="progress-bar" style="width:${Math.min(100,((w.enrolled||0)/(w.capacity||10))*100)}%"></div>
             </div>
         </div>`).join('') : "<p style='color:#444;font-size:10px;'>Atölye kaydı yok.</p>";
-
+        
     const students = currentWorkshops.students || [];
-    document.getElementById('student-list').innerHTML = students.length ? students.map((s,i) => `
+    document.getElementById('student-list').innerHTML = students.length ?
+        students.map((s,i) => `
         <div class="item-row">
             <div class="item-info">
                 <b>${s.name}</b>
@@ -2071,7 +1984,8 @@ function generateAttendancePDF(i) {
         let y = 94; doc.setFontSize(10); doc.setTextColor(180,180,180);
         students.forEach((s,i) => { doc.text(`${i+1}. ${s.name}`, 50, y); y+=10; });
     } else {
-        doc.setFontSize(10); doc.setTextColor(100,100,100);
+        doc.setFontSize(10);
+        doc.setTextColor(100,100,100);
         doc.text("(Bu atölye için ayrı sertifika üretiniz)", 105, 100, {align:"center"});
     }
     doc.save(`UBE-RAW-Katilim-${w.name.replace(/\s/g,'-')}.pdf`);
@@ -2154,6 +2068,120 @@ async function translateAllDescriptions() {
         showToast(`${count} açıklama çevrildi.`, false, true);
         addLog("AI ÇEVİRİ", count + " açıklama");
     } catch(e) { showToast("Kayıt hatası", true); }
+    showLoading(false);
+}
+
+// ═══════════════════════════════════════════════
+// GUESTBOOK (Modül 10.5)
+// ═══════════════════════════════════════════════
+async function refreshGuestbook() {
+    try {
+        const d = await ghAction('content/guestbook.json');
+        const list = JSON.parse(b2u(d.content)).messages || [];
+        document.getElementById('stat-msg').innerText = list.length;
+        document.getElementById('guest-list').innerHTML = list.length ?
+            list.map((m,i) => {
+            const realIdx = list.length-1-i;
+            const isSpam = m.message && m.message.trim().length < 3;
+            return `<div class="item-row" style="${isSpam?'opacity:0.4;':''}">
+                <div class="item-info">
+                    <b>${m.name} ${isSpam?'<span class="badge draft">SPAM?</span>':''}</b>
+                    <small>"${m.message}" — ${m.date}</small>
+                </div>
+                <button class="danger sm" onclick="deleteMessage(${realIdx})">SİL</button>
+            </div>`;
+        }).reverse().join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Ziyaretçi mesajı yok.</p>";
+    } catch(e) { document.getElementById('guest-list').innerHTML = "<p style='color:#444;'>Veri okunamadı.</p>"; }
+}
+
+async function approveNewMessage() {
+    const name = document.getElementById('new-g-name').value.trim();
+    const msg = document.getElementById('new-g-msg').value.trim();
+    if(!name||!msg) return showToast("Zorunlu alanları doldurun.", true);
+    showLoading(true);
+    try {
+        let d, data;
+        try { d = await ghAction('content/guestbook.json'); data = JSON.parse(b2u(d.content)); }
+        catch(e) { data = {messages:[]}; }
+        data.messages.push({ name, message:msg, date:new Date().toLocaleDateString('tr-TR') });
+        await ghAction('content/guestbook.json', 'PUT', data, d?d.sha:null);
+        document.getElementById('new-g-name').value='';
+        document.getElementById('new-g-msg').value='';
+        addLog("MESAJ", name + ": " + msg.substring(0,40));
+        await refreshGuestbook();
+    } catch(e) { showToast("Hata oluştu", true); }
+    showLoading(false);
+}
+
+async function deleteMessage(i) {
+    if(!confirm("Mesaj silinsin mi?")) return;
+    showLoading(true);
+    try {
+        const d = await ghAction('content/guestbook.json');
+        let data = JSON.parse(b2u(d.content));
+        data.messages.splice(i,1);
+        await ghAction('content/guestbook.json', 'PUT', data, d.sha);
+        await refreshGuestbook();
+    } catch(e) { showToast("Hata", true); }
+    showLoading(false);
+}
+
+// ═══════════════════════════════════════════════
+// SETTINGS (Modül 9, 10)
+// ═══════════════════════════════════════════════
+async function loadSettings() {
+    try {
+        const d = await ghAction('content/settings.json');
+        const s = JSON.parse(b2u(d.content));
+        currentSettings = s;
+        currentSettings.sha = d.sha;
+        document.getElementById('s-theme').value = s.theme||'#a87f4a';
+        document.getElementById('s-maintenance').checked = s.maintenance||false;
+        document.getElementById('s-goal').value = s.goal||20;
+        document.getElementById('s-timeout').value = s.timeout||120;
+        document.getElementById('s-bio').value = s.bio||'';
+        document.getElementById('s-phone').value = s.phone||'';
+        document.getElementById('s-email').value = s.email||'';
+        document.getElementById('s-address').value = s.address||'';
+        document.getElementById('s-instagram').value = s.instagram||'';
+        document.getElementById('s-behance').value = s.behance||'';
+        document.getElementById('s-portfolio').value = s.portfolio||'';
+        document.getElementById('s-seo').value = s.seo||'';
+        document.documentElement.style.setProperty('--accent', s.theme||'#a87f4a');
+        document.getElementById('goal-input').value = s.goal||20;
+    } catch(e) { console.log("Ayarlar yüklenemedi."); }
+}
+
+function saveGoal(val) {
+    currentSettings.goal = parseInt(val)||20;
+    handleSettingsUpdate();
+}
+
+async function handleSettingsUpdate() {
+    showLoading(true, "AYARLAR KAYDEDİLİYOR...");
+    try {
+        let sha = currentSettings.sha||null;
+        try { const d = await ghAction('content/settings.json'); sha = d.sha; } catch(e){}
+        const data = {
+            theme: document.getElementById('s-theme').value,
+            maintenance: document.getElementById('s-maintenance').checked,
+            goal: parseInt(document.getElementById('s-goal').value)||20,
+            timeout: parseInt(document.getElementById('s-timeout').value)||120,
+            bio: document.getElementById('s-bio').value,
+            phone: document.getElementById('s-phone').value,
+            email: document.getElementById('s-email').value,
+            address: document.getElementById('s-address').value,
+            instagram: document.getElementById('s-instagram').value,
+            behance: document.getElementById('s-behance').value,
+            portfolio: document.getElementById('s-portfolio').value,
+            seo: document.getElementById('s-seo').value,
+        };
+        await ghAction('content/settings.json', 'PUT', data, sha);
+        currentSettings = { ...data, sha };
+        document.documentElement.style.setProperty('--accent', data.theme);
+        addLog("AYARLAR", "Site ayarları güncellendi.");
+        showToast("Ayarlar güncellendi!", false, true);
+    } catch(e) { showToast("Hata oluştu.", true); }
     showLoading(false);
 }
 
