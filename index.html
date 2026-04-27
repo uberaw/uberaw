@@ -130,186 +130,89 @@
 <footer id="footer-copy">UBE RAW ART & DESIGN</footer>
 
 <script>
-    // GitHub Pages kullanıyorsanız repo adını buraya ekleyin (örn: "/uberaw/"), aksi takdirde "" bırakın.
-    const base = "/uberaw/"; 
-    let allWorks = [];
+    let siteData = { settings: {}, portfolio: [], news: {} };
 
     async function init() {
         try {
-            // Sadece content klasöründen verileri çeker
-            const [settings, portfolio, guestbookData] = await Promise.all([
-                fetch(`${base}content/settings.json?v=${Date.now()}`).then(r => r.json()).catch(() => ({})),
-                fetch(`${base}content/portfolio.json?v=${Date.now()}`).then(r => r.json()).catch(() => ({projects:[]})),
-                fetch(`${base}content/guestbook.json?v=${Date.now()}`).then(r => r.json()).catch(() => ({messages:[]}))
-            ]);
+            // Load Settings
+            const sRes = await fetch('content/settings.json');
+            siteData.settings = await sRes.json();
+            applySettings();
 
-            // 1. Bakım Modu Kontrolü (Admin V4 ile uyumlu)
-            if (settings.maintenance) {
-                document.getElementById('maintenance-screen').style.display = 'flex';
-                if(settings.title) document.getElementById('m-title').innerText = settings.title;
-                return;
-            }
+            // Load Portfolio
+            const pRes = await fetch('content/portfolio.json');
+            const pData = await pRes.json();
+            siteData.portfolio = pData.projects || [];
+            renderPortfolio();
 
-            // 2. Tema ve Metin Uygulamaları
-            if (settings.theme) document.documentElement.style.setProperty('--accent', settings.theme);
-            
-            document.getElementById('site-title').innerText = settings.title || "UBE RAW | Art & Design Studio";
-            document.getElementById('footer-copy').innerText = settings.footer || "UBE RAW © 2026";
-            document.getElementById('menu-port-text').innerText = settings.menuPortfolio || "WORKS";
-            document.getElementById('menu-cont-text').innerText = settings.menuContact || "CONTACT";
+            // Load News & Guestbook
+            const nRes = await fetch('content/news.json');
+            siteData.news = await nRes.json();
+            renderAnnouncements();
+            renderGuestbook();
 
-            // Logo kontrolü
-            const logoImg = new Image();
-            logoImg.src = `${base}images/logo.png?v=${Date.now()}`;
-            logoImg.onload = () => {
-                document.getElementById('logo-area').innerHTML = `<img src="${logoImg.src}" alt="UBE RAW">`;
-            };
-
-            if (settings.bio) {
-                const bio = document.getElementById('bio-sec');
-                bio.innerHTML = settings.bio.replace(/\n/g, '<br>');
-                bio.style.display = 'block';
-            }
-
-            // 3. Sosyal Medya
-            let socialHTML = "";
-            if (settings.instagram) socialHTML += `<a href="${settings.instagram.includes('http') ? settings.instagram : 'https://instagram.com/'+settings.instagram}" target="_blank" style="color:var(--accent)">IG</a>`;
-            if (settings.whatsapp || settings.phone) {
-                const phone = settings.whatsapp || settings.phone;
-                socialHTML += `<a href="https://wa.me/${phone.replace(/[^0-9]/g, '')}" target="_blank" style="color:var(--accent)">WA</a>`;
-            }
-            if (settings.behance) socialHTML += `<a href="${settings.behance}" target="_blank" style="color:var(--accent)">BE</a>`;
-            document.getElementById('social-nav').innerHTML = socialHTML;
-
-            // 4. Eserler (Çöp Kutusundakileri, Gizlileri ve Taslakları Filtrele!)
-            allWorks = (portfolio.projects || []).filter(w => !w.isDeleted && !w.isHidden && !w.isDraft);
-            
-            const cats = ['HEPSİ', ...new Set(allWorks.map(w => w.category).filter(c => c))];
-            document.getElementById('cat-nav').innerHTML = cats.map(c => `
-                <span class="filter-btn ${c==='HEPSİ'?'active':''}" onclick="render('${c}', this)">${c}</span>
-            `).join('');
-
-            // 5. Ziyaretçi Defteri (Admin panelden onaylananlar)
-            if(guestbookData.messages && guestbookData.messages.length) {
-                document.getElementById('guestbook-list').innerHTML = guestbookData.messages.map(g => `
-                    <div class="message-item">
-                        <p>"${g.message}"</p>
-                        <small>— ${g.name} (${g.date || ''})</small>
-                    </div>
-                `).reverse().join('');
-            }
-
-            render('HEPSİ');
-        } catch (err) {
-            console.error("Veri yükleme hatası:", err);
+        } catch (e) {
+            console.error("Yükleme hatası:", e);
         }
     }
 
-    function render(cat, btn) {
-        if(btn) {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+    function applySettings() {
+        const s = siteData.settings;
+        document.title = s.title || "UBE RAW";
+        document.getElementById('site-title').innerText = s.title || "UBE RAW";
+        document.documentElement.style.setProperty('--accent', s.theme || '#a87f4a');
+        
+        if(s.maintenance) {
+            document.getElementById('maintenance-screen').style.display = 'flex';
         }
         
-        const filtered = cat === 'HEPSİ' ? allWorks : allWorks.filter(w => w.category === cat);
-        const grid = document.getElementById('main-grid');
+        if(document.getElementById('bio-text')) document.getElementById('bio-text').innerText = s.bio || "";
+        if(document.getElementById('footer-text')) document.getElementById('footer-text').innerText = s.footer || "";
         
-        grid.innerHTML = filtered.map((w, idx) => {
-            const imgs = (w.image || "").split(',');
-            
-            // Satış ve Fiyat Etiketi Mantığı
-            let tagHtml = '';
-            if (w.isSale) {
-                tagHtml = `<div class="sale-tag sold">SATILDI</div>`;
-            } else if (w.price) {
-                tagHtml = `<div class="sale-tag">${w.price} ${w.currency || 'TRY'}</div>`;
-            }
+        // Dynamic Menu Names
+        const pMenu = document.querySelector('a[href="#works"]');
+        if(pMenu && s.menuPortfolio) pMenu.innerText = s.menuPortfolio;
+    }
 
-            // Meta Bilgiler (Materyal, Boyut vb.)
-            let metaHtml = [];
-            if(w.material) metaHtml.push(w.material);
-            if(w.dimensions) metaHtml.push(w.dimensions);
-            const metaStr = metaHtml.length > 0 ? `<div class="meta">${metaHtml.join(' | ')}</div>` : '';
-
-            return `
-            <div class="artwork">
-                ${tagHtml}
-                <div class="slider-container" id="slider-${idx}">
-                    <div class="slider-track" id="track-${idx}">
-                        ${imgs.map(img => `<img src="${base}${img.trim()}" onclick="openL(this.src)" loading="lazy">`).join('')}
-                    </div>
-                    ${imgs.length > 1 ? `
-                        <button class="slider-btn btn-prev" onclick="moveSlider(${idx}, -1)">❮</button>
-                        <button class="slider-btn btn-next" onclick="moveSlider(${idx}, 1)">❯</button>
-                    ` : ''}
-                </div>
-                <div class="info">
-                    <p>${w.category || 'ART'} ${w.subCategory ? `· ${w.subCategory}` : ''}</p>
-                    <h3>${w.title}</h3>
-                    ${metaStr}
-                    ${w.description ? `<div class="desc">${w.description}</div>` : ''}
-                    
-                    ${w.mapLink ? `<a href="${w.mapLink}" target="_blank" class="map-link">📍 LOKASYON / SERGİ</a>` : ''}
+    function renderPortfolio() {
+        const grid = document.getElementById('portfolio-grid');
+        if(!grid) return;
+        grid.innerHTML = siteData.portfolio.map(p => `
+            <div class="project-card" onclick="openProject('${p.title}')">
+                <img src="${p.image.split(',')[0]}" alt="${p.title}" loading="lazy">
+                <div class="project-info">
+                    <h3>${p.title}</h3>
+                    <p>${p.category}</p>
                 </div>
             </div>
-        `}).join('');
+        `).join('');
     }
 
-    let sliderPositions = {};
-    function moveSlider(idx, dir) {
-        const track = document.getElementById(`track-${idx}`);
-        const count = track.querySelectorAll('img').length;
-        if (sliderPositions[idx] === undefined) sliderPositions[idx] = 0;
-        
-        sliderPositions[idx] = (sliderPositions[idx] + dir + count) % count;
-        track.style.transform = `translateX(-${sliderPositions[idx] * 100}%)`;
+    function renderAnnouncements() {
+        const container = document.getElementById('announcements-list');
+        if(!container || !siteData.news.announcements) return;
+        container.innerHTML = siteData.news.announcements.map(a => `
+            <div class="news-item">
+                <small>${a.date}</small>
+                <h4>${a.title}</h4>
+                <p>${a.content}</p>
+            </div>
+        `).join('');
     }
 
-    function openL(s) { 
-        document.getElementById('l-img').src = s;
-        document.getElementById('lightbox').style.display = 'flex'; 
+    function renderGuestbook() {
+        const container = document.getElementById('guestbook-list');
+        if(!container || !siteData.news.guestbook) return;
+        container.innerHTML = siteData.news.guestbook.map(g => `
+            <div class="guest-entry">
+                <strong>${g.name}</strong>
+                <p>${g.content}</p>
+                <small>${g.date}</small>
+            </div>
+        `).join('');
     }
 
-    function checkCert() {
-        const val = document.getElementById('cert-input').value.trim().toUpperCase();
-        if(!val) return;
-        const match = allWorks.find(w => w.certCode?.toUpperCase() === val);
-        const res = document.getElementById('cert-result');
-        if(match) {
-            res.innerHTML = `<span style="color:#4CAF50; font-weight:bold; letter-spacing: 1px;">✔ BU ESER ORİJİNALDİR: ${match.title}</span>`;
-        } else {
-            res.innerHTML = `<span style="color:#ff4444; letter-spacing: 1px;">✘ SİSTEMDE BÖYLE BİR KAYIT BULUNAMADI</span>`;
-        }
-    }
-
-    // Formspree İletişim Formu (Mesajlar güvenli olarak toplanır)
-    function sendGuest() {
-        const name = document.getElementById('g-name').value.trim();
-        const msg = document.getElementById('g-msg').value.trim();
-        if(!name || !msg) return alert("Lütfen tüm alanları doldurun.");
-        
-        const btn = document.getElementById('send-btn');
-        btn.innerText = "GÖNDERİLİYOR...";
-        btn.disabled = true;
-        
-        // KENDI FORMSPREE KODUNUZ: mjgjewqn
-        fetch("https://formspree.io/f/mjgjewqn", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, message: msg, type: "Ziyaretçi Defteri Talebi" })
-        }).then(() => {
-            alert("Mesajınız bize ulaştı. Yönetici onayından sonra ziyaretçi defterinde yayınlanacaktır.");
-            document.getElementById('g-name').value = "";
-            document.getElementById('g-msg').value = "";
-            btn.innerText = "MESAJI GÖNDER";
-            btn.disabled = false;
-        }).catch(() => {
-            alert("Sunucu kaynaklı bir hata oluştu, lütfen daha sonra tekrar deneyin.");
-            btn.disabled = false;
-        });
-    }
-
-    init();
+    window.onload = init;
 </script>
 </body>
 </html>
