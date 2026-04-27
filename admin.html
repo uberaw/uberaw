@@ -223,6 +223,7 @@
             <div class="stat-box"><h3 id="stat-sold">0</h3><p>Satılan Eser</p></div>
             <div class="stat-box"><h3 id="stat-revenue" style="color: #4CAF50;">₺0</h3><p>Tahmini Ciro (Aktif)</p></div>
             <div class="stat-box"><h3 id="stat-orders" style="color: #ffb300;">0</h3><p>Bekleyen Sipariş</p></div>
+            <div class="stat-box"><h3 id="stat-msg" style="color: #64b5f6;">0</h3><p>Ziyaretçi Mesajı</p></div>
         </div>
         <div class="card" style="background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') center/cover; position: relative;">
             <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.8); border-radius: 8px;"></div>
@@ -266,6 +267,8 @@
                 </select>
                 <input type="text" id="f-location" placeholder="Stüdyo Konumu (Örn: Alt Kat Galeri)">
             </div>
+
+            <input type="text" id="f-map" placeholder="Harita / NFT Kontrat Linki (Opsiyonel)" style="margin-top: 10px;">
 
             <label style="display: flex; align-items: center; gap: 10px; font-size: 12px; margin-top: 20px;">
                 <input type="checkbox" id="f-draft"> Bu eseri şimdilik TASLAK olarak kaydet (Siteye gitmez)
@@ -352,6 +355,14 @@
 
     <div id="tab-guest" class="tab">
         <h3>Ziyaretçi Defteri</h3>
+        <div class="card" style="background: #080808; border-color: #222;">
+            <div class="section-title" style="margin-top:0;">Yeni Mesaj Ekle</div>
+            <div class="grid-2">
+                <input type="text" id="new-g-name" placeholder="Ziyaretçi Adı *">
+                <input type="text" id="new-g-msg" placeholder="Mesaj *">
+            </div>
+            <button onclick="approveNewMessage()" style="width:100%; margin-top: 15px;">MESAJI KAYDET</button>
+        </div>
         <div id="guest-list" class="card" style="padding: 10px 25px;">Yükleniyor...</div>
     </div>
 
@@ -362,7 +373,7 @@
             <div style="display: flex; align-items: center; gap: 20px; background: #000; padding: 15px; border-radius: 4px; border: 1px solid #222;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <label style="font-size: 11px;">Vurgu Rengi:</label>
-                    <input type="color" id="s-theme" style="width: 50px; height: 30px; cursor: pointer; padding: 0; border: none; background: transparent;">
+                    <input type="color" id="s-theme" style="width: 50px; height: 30px; cursor: pointer; padding: 0; border: none; background: transparent;" oninput="document.documentElement.style.setProperty('--accent', this.value)">
                 </div>
                 <label style="display: flex; align-items: center; gap: 10px; font-size: 12px; cursor: pointer;">
                     <input type="checkbox" id="s-maintenance" style="width:16px; height:16px; margin:0;"> Bakım Modunu Aktifleştir (Siteyi Kapatır)
@@ -746,8 +757,9 @@
         else currentCRM.collectors[idx] = newCol;
 
         try {
-            const d = await ghAction('content/crm.json');
-            await ghAction('content/crm.json', 'PUT', currentCRM, d ? d.sha : null);
+            let sha = currentCRM.sha || null;
+            try { const d = await ghAction('content/crm.json'); sha = d.sha; } catch(e) {}
+            await ghAction('content/crm.json', 'PUT', { collectors: currentCRM.collectors }, sha);
             document.getElementById('crm-modal').style.display = 'none';
             showToast("Koleksiyoner profili güncellendi.");
             await fetchCRM();
@@ -914,18 +926,20 @@
             const list = JSON.parse(b2u(d.content)).orders || [];
             const pendingCount = list.filter(o => o.status === 'Bekliyor').length;
             document.getElementById('stat-orders').innerText = pendingCount;
-            document.getElementById('orders-list').innerHTML = list.map((o, i) => `
+            document.getElementById('orders-list').innerHTML = list.map((o, i) => {
+                const realIdx = list.length - 1 - i;
+                return `
                 <div class="item-row" style="background: ${o.status === 'Bekliyor' ? 'rgba(255, 179, 0, 0.05)' : 'transparent'};">
                     <div class="item-info">
                         <b>${o.customerName} <span class="badge ${o.status === 'Bekliyor' ? 'pending' : 'sold'}">${o.status}</span></b>
                         <small style="color:#aaa;">Eser: <span style="color:#fff;">${o.artwork}</span> | İletişim: ${o.contact} | Tarih: ${o.date}</small>
                     </div>
                     <div class="btn-group">
-                        ${o.status === 'Bekliyor' ? `<button class="success small" title="Tamamla" onclick="updateOrderStatus(${i}, 'Tamamlandı')">✓ ONAYLA</button>` : ''}
-                        <button class="danger small" onclick="deleteOrder(${i})">SİL</button>
+                        ${o.status === 'Bekliyor' ? `<button class="success small" title="Tamamla" onclick="updateOrderStatus(${realIdx}, 'Tamamlandı')">✓ ONAYLA</button>` : ''}
+                        <button class="danger small" onclick="deleteOrder(${realIdx})">SİL</button>
                     </div>
-                </div>
-            `).reverse().join('') || "<p style='color:#777;'>Kayıtlı bir sipariş bulunmuyor.</p>";
+                </div>`;
+            }).reverse().join('') || "<p style='color:#777;'>Kayıtlı bir sipariş bulunmuyor.</p>";
         } catch(e) { document.getElementById('orders-list').innerHTML = "Sipariş verisi yok."; }
     }
 
@@ -1089,12 +1103,14 @@
             const d = await ghAction('content/guestbook.json');
             const list = JSON.parse(b2u(d.content)).messages || [];
             document.getElementById('stat-msg').innerText = list.length;
-            document.getElementById('guest-list').innerHTML = list.map((m,i) => `
+            document.getElementById('guest-list').innerHTML = list.map((m,i) => {
+                const realIdx = list.length - 1 - i;
+                return `
                 <div class="item-row">
                     <div class="item-info"><b>${m.name}</b><small>"${m.message}" - ${m.date}</small></div>
-                    <button class="danger small" onclick="deleteMessage(${i})">SİL</button>
-                </div>
-            `).reverse().join('') || "<p style='color:#777;'>Ziyaretçi mesajı yok.</p>";
+                    <button class="danger small" onclick="deleteMessage(${realIdx})">SİL</button>
+                </div>`;
+            }).reverse().join('') || "<p style='color:#777;'>Ziyaretçi mesajı yok.</p>";
         } catch(e) { document.getElementById('guest-list').innerHTML = "Veri okunamadı."; }
     }
 
@@ -1133,6 +1149,8 @@
         try {
             const d = await ghAction('content/settings.json');
             const s = JSON.parse(b2u(d.content));
+            currentSettings = s;
+            currentSettings.sha = d.sha;
             
             document.getElementById('s-theme').value = s.theme || "#a87f4a";
             document.getElementById('s-maintenance').checked = s.maintenance || false;
@@ -1143,8 +1161,8 @@
     async function handleSettingsUpdate() {
         showLoading(true, "AYARLAR KAYDEDİLİYOR...");
         try {
-            let d, sha = null;
-            try { d = await ghAction('content/settings.json'); sha = d.sha; } catch(e) {}
+            let sha = currentSettings.sha || null;
+            try { const d = await ghAction('content/settings.json'); sha = d.sha; } catch(e) {}
             
             const data = {
                 theme: document.getElementById('s-theme').value,
@@ -1152,6 +1170,7 @@
             };
             
             await ghAction('content/settings.json', 'PUT', data, sha);
+            currentSettings = { ...data, sha };
             document.documentElement.style.setProperty('--accent', data.theme);
             showToast("Ayarlar güncellendi!");
         } catch(e) { showToast("Hata oluştu.", true); }
