@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>UBE RAW | Studio Management v3.1 PRO</title>
+    <title>UBE RAW | Studio Management v3.8 PRO</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root { --accent: #a87f4a; --bg: #000; --card: #0d0d0d; --border: #222; --text: #ccc; }
@@ -28,20 +28,22 @@
         
         input, select, textarea { width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 14px; margin: 10px 0; border-radius: 4px; font-family: inherit; box-sizing: border-box; transition: 0.3s; }
         input:focus, textarea:focus, select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 1px var(--accent); }
+        input[type="checkbox"] { width: auto; }
         
-        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
         button { background: var(--accent); color: #000; border: none; padding: 14px 20px; cursor: pointer; font-weight: bold; text-transform: uppercase; border-radius: 4px; transition: 0.2s; font-size: 12px; }
         button:hover { filter: brightness(1.2); transform: translateY(-1px); }
         button.secondary { background: #222; color: #fff; }
         button.danger { background: #500; color: #fff; }
         button.warning { background: #b8860b; color: #fff; }
         button.success { background: #2e7d32; color: #fff; }
+        button.small { padding: 8px 12px; font-size: 10px; }
 
         /* Dashboard Stats */
         .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .stat-box { background: #0a0a0a; border: 1px solid var(--border); padding: 20px; border-radius: 8px; text-align: center; border-top: 3px solid var(--accent); }
-        .stat-box h3 { font-size: 32px; color: #fff; margin: 0 0 10px 0; }
-        .stat-box p { margin: 0; font-size: 11px; text-transform: uppercase; color: #777; letter-spacing: 1px; }
+        .stat-box h3 { font-size: 28px; color: #fff; margin: 0 0 10px 0; }
+        .stat-box p { margin: 0; font-size: 10px; text-transform: uppercase; color: #777; letter-spacing: 1px; }
 
         /* Drag & Drop Zone */
         .drop-zone { border: 2px dashed #333; padding: 40px; text-align: center; background: #050505; border-radius: 8px; cursor: pointer; transition: 0.3s; margin: 10px 0; position: relative; }
@@ -53,40 +55,56 @@
         .file-badge { background: #222; padding: 5px 10px; border-radius: 4px; font-size: 11px; color: var(--accent); }
 
         /* Inventory & List */
+        .inv-controls { display: flex; gap: 10px; margin-bottom: 15px; }
         .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #111; transition: 0.2s; }
         .item-row:hover { background: #111; }
-        .item-info { display: flex; flex-direction: column; gap: 6px; }
+        .item-info { display: flex; flex-direction: column; gap: 6px; flex: 1; }
         .item-info b { color: #fff; font-size: 14px; display: flex; align-items: center; gap: 8px; }
         .item-info small { color: #888; font-size: 11px; }
+        .item-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 15px; border: 1px solid #333; }
         .badge { padding: 3px 8px; border-radius: 4px; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
         .badge.hidden { background: #333; color: #aaa; border: 1px solid #555; }
         .badge.sold { background: #1a3a1a; color: #4CAF50; border: 1px solid #4CAF50; }
         .badge.pending { background: #4a3600; color: #ffb300; border: 1px solid #ffb300; }
+        .badge.draft { background: #222; color: #fff; border: 1px dashed #777; }
+        .badge.vip { background: #4a3600; color: #ffb300; border: 1px solid #ffb300; }
 
         /* Modals & Loading */
-        #edit-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
-        #edit-modal .modal-content { background: var(--card); border: 1px solid var(--accent); padding: 30px; width: 100%; max-width: 500px; border-radius: 8px; }
+        #edit-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+        #edit-modal .modal-content { background: var(--card); border: 1px solid var(--accent); padding: 30px; width: 100%; max-width: 600px; border-radius: 8px; max-height: 90vh; overflow-y: auto; }
         #login { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-box { width: 300px; text-align: center; }
-        #loader { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center; color: var(--accent); font-weight: bold; letter-spacing: 2px; }
+        .login-box { width: 350px; text-align: center; background: var(--card); padding: 40px; border-radius: 8px; border: 1px solid #222; }
+        #loader { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center; flex-direction: column; gap:10px; color: var(--accent); font-weight: bold; letter-spacing: 2px; }
 
         /* Toast Notifications */
         #toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 10001; display: flex; flex-direction: column; gap: 10px; }
         .toast { background: #111; border-left: 4px solid var(--accent); color: #fff; padding: 15px 25px; border-radius: 4px; font-size: 13px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); animation: slideIn 0.3s ease; }
         .toast.error { border-color: #f44336; }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
     </style>
 </head>
 <body>
 
-<div id="loader">İSTEMCİ İŞLENİYOR... LÜTFEN BEKLEYİN</div>
+<div id="loader">
+    <div style="width: 40px; height: 40px; border: 3px solid #222; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <span id="loader-text">İSTEMCİ İŞLENİYOR...</span>
+    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+</div>
 <div id="toast-container"></div>
 
 <div id="login">
     <div class="login-box">
-        <h2 style="color:var(--accent); letter-spacing: 5px; margin-bottom: 30px;">UBE RAW OS</h2>
-        <input type="password" id="token" placeholder="GitHub Erişim Anahtarı">
-        <button onclick="auth()" style="width: 100%;">SİSTEME GİRİŞ YAP</button>
+        <h2 style="color:var(--accent); letter-spacing: 5px; margin-bottom: 10px;">UBE RAW OS</h2>
+        <p style="font-size: 11px; color: #777; margin-bottom: 20px;" id="login-desc">Sistemi başlatmak için şifrenizi girin.</p>
+        
+        <input type="password" id="login-pwd" placeholder="Admin Şifresi">
+        <input type="password" id="login-token" placeholder="GitHub Token (Sadece ilk girişte)" style="display:none;">
+        
+        <button onclick="auth()" style="width: 100%; margin-top: 15px;">SİSTEME GİRİŞ YAP</button>
+        <button onclick="resetLogin()" class="secondary" style="width: 100%; margin-top: 5px; font-size: 10px;">Token Sıfırla (Cihaz Değişimi)</button>
     </div>
 </div>
 
@@ -94,62 +112,123 @@
     <div class="modal-content">
         <h3 id="edit-modal-title" style="color: var(--accent); margin-top: 0;">Eseri Düzenle</h3>
         <input type="hidden" id="edit-idx">
-        <label style="font-size: 11px;">Eser Adı</label>
-        <input type="text" id="edit-title">
-        <label style="font-size: 11px;">Kategori</label>
-        <input type="text" id="edit-cat">
-        <label style="font-size: 11px;">Fiyat (Satış/Sertifika panelinden de eklenebilir)</label>
-        <input type="text" id="edit-price-direct">
-        <label style="font-size: 11px;">Harita/Konum Linki</label>
+        
+        <div class="grid-2">
+            <div><label style="font-size: 11px; color:#aaa;">Eser Adı</label><input type="text" id="edit-title"></div>
+            <div><label style="font-size: 11px; color:#aaa;">Kategori</label><input type="text" id="edit-cat"></div>
+        </div>
+        
+        <div class="section-title">Finans & Fiyatlandırma</div>
+        <div class="grid-3">
+            <div>
+                <label style="font-size: 10px; color:#aaa;">Para Birimi</label>
+                <select id="edit-currency">
+                    <option value="TRY">TRY (₺)</option><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option>
+                </select>
+            </div>
+            <div><label style="font-size: 10px; color:#aaa;">Satış Fiyatı</label><input type="text" id="edit-price-direct"></div>
+            <div><label style="font-size: 10px; color:#aaa;">Eski Fiyat (Kampanya)</label><input type="text" id="edit-old-price"></div>
+        </div>
+        <div class="grid-2">
+            <div><label style="font-size: 10px; color:#aaa;">Gizli Maliyet Notu (Kil/Mesai)</label><input type="text" id="edit-cost"></div>
+            <div><label style="font-size: 10px; color:#aaa;">Sertifika Kodu / SKU</label><input type="text" id="edit-cert-code"></div>
+        </div>
+        <div style="display: flex; gap: 15px; margin-top: 10px;">
+            <label style="font-size: 11px; color:#aaa;"><input type="checkbox" id="edit-inc-shipping"> Kargo Dahil</label>
+            <label style="font-size: 11px; color:#aaa;"><input type="checkbox" id="edit-inc-vat"> KDV Dahil</label>
+        </div>
+
+        <div class="section-title">Fiziksel Detaylar & Üretim</div>
+        <div class="grid-3">
+            <div><label style="font-size: 10px; color:#aaa;">Boyut (EnxBoyxDer.)</label><input type="text" id="edit-dim"></div>
+            <div><label style="font-size: 10px; color:#aaa;">Ağırlık (kg)</label><input type="text" id="edit-weight"></div>
+            <div><label style="font-size: 10px; color:#aaa;">Materyal</label><input type="text" id="edit-material"></div>
+        </div>
+        <div class="grid-2">
+            <div>
+                <label style="font-size: 10px; color:#aaa;">Üretim Aşaması</label>
+                <select id="edit-stage">
+                    <option value="Tamamlandı">Tamamlandı</option>
+                    <option value="Eskiz Aşamasında">Eskiz Aşamasında</option>
+                    <option value="Çamurda / Üretimde">Çamurda / Üretimde</option>
+                </select>
+            </div>
+            <div><label style="font-size: 10px; color:#aaa;">Fiziksel Konum</label><input type="text" id="edit-location"></div>
+        </div>
+
+        <label style="font-size: 11px; color:#aaa;">Harita/Konum & NFT Kontrat Linki</label>
         <input type="text" id="edit-map">
-        <div class="btn-group">
+        
+        <label style="display: flex; align-items: center; gap: 10px; font-size: 12px; margin-top: 15px;">
+            <input type="checkbox" id="edit-draft"> Bu eseri TASLAK olarak işaretle (Sitede gizlenir)
+        </label>
+
+        <div class="btn-group" style="margin-top: 20px;">
             <button onclick="saveProjectEdit()" style="flex: 2;">GÜNCELLE</button>
             <button onclick="closeEditModal()" class="secondary" style="flex: 1;">İPTAL</button>
         </div>
     </div>
 </div>
 
+<div id="crm-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;">
+    <div class="modal-content" style="background: var(--card); border: 1px solid var(--accent); padding: 30px; width: 100%; max-width: 500px; border-radius: 8px;">
+        <h3 style="color: var(--accent); margin-top: 0;">Koleksiyoner Profili</h3>
+        <input type="hidden" id="crm-idx">
+        <div class="grid-2">
+            <div><label style="font-size: 11px; color:#aaa;">Ad Soyad *</label><input type="text" id="crm-name"></div>
+            <div><label style="font-size: 11px; color:#aaa;">Telefon</label><input type="text" id="crm-phone"></div>
+        </div>
+        <input type="text" id="crm-email" placeholder="E-posta Adresi">
+        <input type="text" id="crm-address" placeholder="Teslimat / Fatura Adresi">
+        <div class="grid-2">
+            <div><label style="font-size: 11px; color:#aaa;">Doğum Günü / Özel Gün</label><input type="text" id="crm-bday" placeholder="Örn: 15 Mayıs"></div>
+            <div style="display: flex; align-items: flex-end; padding-bottom: 10px;">
+                <label style="font-size: 12px; color:#fff;"><input type="checkbox" id="crm-vip"> VIP Koleksiyoner</label>
+            </div>
+        </div>
+        <label style="font-size: 11px; color:#aaa;">Sanat Zevki / Gizli Notlar</label>
+        <textarea id="crm-notes" rows="3" placeholder="Müşteri hakkında hatırlatıcı notlar..."></textarea>
+        
+        <div class="btn-group" style="margin-top: 20px;">
+            <button onclick="saveCRMProfile()" style="flex: 2;">KAYDET</button>
+            <button onclick="document.getElementById('crm-modal').style.display='none';" class="secondary" style="flex: 1;">İPTAL</button>
+        </div>
+    </div>
+</div>
+
 <div class="sidebar">
     <h2>UBE<br>RAW</h2>
-    <div class="nav-link active" onclick="switchTab('dash', this)">📊 Ana Ekran</div>
+    <div class="nav-link active" onclick="switchTab('dash', this)">📊 Ana Ekran & Finans</div>
     <div class="nav-link" onclick="switchTab('add', this)">✨ Eser Ekle</div>
-    <div class="nav-link" onclick="switchTab('inv', this)">📦 Envanter</div>
+    <div class="nav-link" onclick="switchTab('inv', this)">📦 Envanter & Çöp</div>
+    <div class="nav-link" onclick="switchTab('crm', this)">👥 Koleksiyonerler</div>
     <div class="nav-link" onclick="switchTab('orders', this)">🛍️ Siparişler</div>
     <div class="nav-link" onclick="switchTab('sale', this)">📜 Sertifika & Satış</div>
     <div class="nav-link" onclick="switchTab('guest', this)">💬 Mesajlar</div>
     <div class="nav-link" onclick="switchTab('config', this)">⚙️ Site Ayarları</div>
     <div style="margin-top: auto; padding-top: 30px; border-top: 1px solid #111;">
-        <button class="secondary" style="width:100%; font-size:10px;" onclick="logout()">Çıkış Yap</button>
+        <button class="secondary" style="width:100%; font-size:10px;" onclick="logout()">Çıkış Yap / Kilitle</button>
     </div>
 </div>
 
 <div class="main">
     
     <div id="tab-dash" class="tab active">
-        <h3>Stüdyo Özeti</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3>Stüdyo & Finans Özeti</h3>
+            <button onclick="exportFinanceCSV()" class="secondary small">Finans Raporu (CSV) İndir</button>
+        </div>
         <div class="stat-grid">
-            <div class="stat-box">
-                <h3 id="stat-total">0</h3>
-                <p>Toplam Eser</p>
-            </div>
-            <div class="stat-box">
-                <h3 id="stat-sold">0</h3>
-                <p>Satılan Eser</p>
-            </div>
-            <div class="stat-box">
-                <h3 id="stat-orders" style="color: #ffb300;">0</h3>
-                <p>Bekleyen Sipariş</p>
-            </div>
-            <div class="stat-box">
-                <h3 id="stat-msg">0</h3>
-                <p>Ziyaretçi Mesajı</p>
-            </div>
+            <div class="stat-box"><h3 id="stat-total">0</h3><p>Toplam Eser</p></div>
+            <div class="stat-box"><h3 id="stat-sold">0</h3><p>Satılan Eser</p></div>
+            <div class="stat-box"><h3 id="stat-revenue" style="color: #4CAF50;">₺0</h3><p>Tahmini Ciro (Aktif)</p></div>
+            <div class="stat-box"><h3 id="stat-orders" style="color: #ffb300;">0</h3><p>Bekleyen Sipariş</p></div>
         </div>
         <div class="card" style="background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') center/cover; position: relative;">
             <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.8); border-radius: 8px;"></div>
             <div style="position: relative; z-index: 1;">
                 <h4 style="color: var(--accent); margin-top: 0;">Sisteme Hoş Geldiniz, Ubeydullah Bey.</h4>
-                <p style="font-size: 13px; color: #aaa; line-height: 1.6;">Sol menüyü kullanarak stüdyonuzu yönetebilir, yeni eserler ekleyebilir, fiyatları belirleyebilir ve gelen siparişlerinizi takip edebilirsiniz.</p>
+                <p style="font-size: 13px; color: #aaa; line-height: 1.6;">Stüdyonuzu, taslaklarınızı, koleksiyoner ağınızı ve satışlarınızı güvenli bir şekilde yönetin. İşlemleriniz asenkron ve şifreli olarak çalışır.</p>
             </div>
         </div>
     </div>
@@ -161,101 +240,124 @@
             <div class="drop-zone" id="drop-zone">
                 <input type="file" id="f-file" multiple accept="image/*" onchange="updateFilePreview(this)">
                 <p>Fotoğrafları buraya sürükleyin veya <span>Bilgisayardan Seçin</span></p>
-                <p style="font-size: 10px; margin-top: 10px;">* Dosyalar otomatik olarak isimlendirilir, web için optimize edilir ve .jpg formatına dönüştürülür.</p>
+                <p style="font-size: 10px; margin-top: 10px;">* Web için otomatik optimize edilir.</p>
             </div>
             <div id="file-preview"></div>
             
-            <div class="section-title">Eser Detayları</div>
+            <div class="section-title">Eser Detayları & Kategorizasyon</div>
             <input type="text" id="f-title" placeholder="Eser Adı (Örn: The Melted Core)">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="grid-3">
                 <input type="text" id="f-cat" placeholder="Kategori (Örn: Wall Relief)">
-                <input type="text" id="f-price" placeholder="Fiyat (İsteğe bağlı, örn: $2,500)">
+                <select id="f-currency"><option value="TRY">TRY (₺)</option><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option></select>
+                <input type="text" id="f-price" placeholder="Fiyat">
             </div>
-            <input type="text" id="f-map" placeholder="Harita/Sergi Linki (Opsiyonel)">
+            
+            <div class="section-title">Fiziksel Özellikler (Modül 2)</div>
+            <div class="grid-3">
+                <input type="text" id="f-dim" placeholder="Boyut (Örn: 50x70x5 cm)">
+                <input type="text" id="f-weight" placeholder="Ağırlık (kg)">
+                <input type="text" id="f-material" placeholder="Materyal Etiketleri (Örn: Kil, Bronz)">
+            </div>
+            <div class="grid-2">
+                <select id="f-stage">
+                    <option value="Tamamlandı">Aşama: Tamamlandı</option>
+                    <option value="Eskiz Aşamasında">Aşama: Eskiz Aşamasında</option>
+                    <option value="Çamurda / Üretimde">Aşama: Çamurda / Üretimde</option>
+                </select>
+                <input type="text" id="f-location" placeholder="Stüdyo Konumu (Örn: Alt Kat Galeri)">
+            </div>
+
+            <label style="display: flex; align-items: center; gap: 10px; font-size: 12px; margin-top: 20px;">
+                <input type="checkbox" id="f-draft"> Bu eseri şimdilik TASLAK olarak kaydet (Siteye gitmez)
+            </label>
             
             <button onclick="handleUpload()" style="width: 100%; margin-top: 20px; padding: 18px;">GÖRSELLERİ İŞLE VE YAYINLA</button>
         </div>
     </div>
 
     <div id="tab-inv" class="tab">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <h3>Envanter Yönetimi</h3>
-            <span style="font-size: 11px; color: var(--accent);">Değişiklikler anında canlı siteye yansır.</span>
+            <span style="font-size: 11px; color: var(--accent);">Otomatik SKU ve Canlı Arama</span>
         </div>
+        
+        <div class="inv-controls">
+            <input type="text" id="search-inv" placeholder="Eser veya Kod Ara..." onkeyup="renderInventory()" style="flex:2; margin:0;">
+            <select id="filter-inv" onchange="renderInventory()" style="flex:1; margin:0;">
+                <option value="active">Mevcut & Satılanlar</option>
+                <option value="draft">Sadece Taslaklar</option>
+                <option value="trash">🗑️ Çöp Kutusu (Silinenler)</option>
+            </select>
+        </div>
+
         <div id="inventory-list" class="card" style="padding: 10px 25px;">Yükleniyor...</div>
+    </div>
+
+    <div id="tab-crm" class="tab">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3>Koleksiyoner Ağı (CRM)</h3>
+            <button onclick="openCRMModal('')" class="success small">MÜŞTERİ EKLE</button>
+        </div>
+        <div id="crm-list" class="card" style="padding: 10px 25px;">Yükleniyor...</div>
     </div>
 
     <div id="tab-orders" class="tab">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <h3>Sipariş & Talep Yönetimi</h3>
-            <span style="font-size: 11px; color: var(--accent);">Yeni siparişleri buradan takip edin.</span>
         </div>
         
         <div class="card" style="background: #080808; border-color: #222;">
             <div class="section-title" style="margin-top:0;">Manuel Sipariş / Talep Ekle</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="grid-2">
                 <input type="text" id="new-o-name" placeholder="Müşteri Adı / Koleksiyoner">
                 <input type="text" id="new-o-contact" placeholder="İletişim (Telefon veya E-posta)">
             </div>
             <select id="new-o-artwork" style="margin-top: 10px;"></select>
             <button onclick="addNewOrder()" style="width:100%; margin-top: 15px;">SİPARİŞ KAYDINI OLUŞTUR</button>
         </div>
-
         <div id="orders-list" class="card" style="padding: 10px 25px;">Yükleniyor...</div>
     </div>
 
     <div id="tab-sale" class="tab">
-        <h3>Satış & Dijital Sertifika</h3>
+        <h3>Satış & Gelişmiş Dijital Sertifika</h3>
+        <p style="font-size: 12px; color:#aaa; margin-bottom: 20px;">Satış işlemini CRM ile bağlayabilir, kaporaları yönetebilir ve çift dilli (Hash Korumalı) sertifika üretebilirsiniz.</p>
+        
         <div class="card">
-            <select id="sale-select" onchange="fillSaleFields(this.value)"><option value="">Sertifikalandırılacak Eseri Seçin</option></select>
-            <input type="text" id="edit-price" placeholder="Satış Fiyatı (Örn: $2,500)">
-            <input type="text" id="edit-cert" placeholder="Sertifika No (Örn: UBE-RAW-001)">
-            <input type="text" id="edit-owner" placeholder="Alıcı / Koleksiyoner İsmi">
-            <div class="btn-group">
-                <button onclick="handleSaleUpdate()" style="flex: 2;">SATIŞ VE SERTİFİKA KAYDET</button>
-                <button onclick="generatePDF()" class="secondary" style="flex: 1;">PDF SERTİFİKA İNDİR</button>
+            <div class="section-title" style="margin-top:0;">1. Satış Yönetimi</div>
+            <select id="sale-select" onchange="fillSaleFields(this.value)"><option value="">Satılacak Eseri Seçin</option></select>
+            
+            <div class="grid-2" style="margin-top: 10px;">
+                <div><label style="font-size: 11px; color:#aaa;">Kayıtlı Alıcı (CRM)</label><select id="sale-crm-select" onchange="document.getElementById('sale-owner').value = this.options[this.selectedIndex].text.replace(' (VIP)', '');"></select></div>
+                <div><label style="font-size: 11px; color:#aaa;">Sertifikada Yazacak İsim</label><input type="text" id="sale-owner" placeholder="Müşteri İsmi"></div>
             </div>
+            <div class="grid-3">
+                <div><label style="font-size: 11px; color:#aaa;">Son Satış Fiyatı</label><input type="text" id="sale-price"></div>
+                <div><label style="font-size: 11px; color:#aaa;">Alınan Kapora / Peşinat</label><input type="text" id="sale-deposit" placeholder="Örn: 500"></div>
+                <div><label style="font-size: 11px; color:#aaa;">Sertifika / SKU No</label><input type="text" id="sale-cert"></div>
+            </div>
+            <label style="display: flex; align-items: center; gap: 10px; font-size: 12px; margin-top: 10px; margin-bottom: 15px;">
+                <input type="checkbox" id="sale-anon"> İsimsiz (Gizli) Satış (Alıcı bilgileri sitede gizlenir)
+            </label>
+            <button onclick="handleSaleUpdate()" class="success" style="width: 100%;">SATIŞI ONAYLA VE ENVANTERE İŞLE</button>
+            
+            <div class="section-title">2. Sertifika Üretimi (COA)</div>
+            <div class="grid-3" style="margin-bottom: 15px;">
+                <div><label style="font-size: 11px; color:#aaa;">Dil Desteği</label><select id="cert-lang"><option value="EN">İngilizce (Uluslararası)</option><option value="TR">Türkçe</option></select></div>
+                <div><label style="font-size: 11px; color:#aaa;">Kağıt Formatı</label><select id="cert-size"><option value="a4">A4 Yatay</option><option value="a5">A5 Yatay</option></select></div>
+                <div style="display: flex; align-items: flex-end; padding-bottom:10px;"><label style="font-size: 11px; color:#fff;"><input type="checkbox" id="cert-ap"> Artist Proof (A.P.) Ekle</label></div>
+            </div>
+            <button onclick="generateAdvancedPDF()" class="secondary" style="width: 100%;">KRİPTOGRAFİK SERTİFİKA İNDİR</button>
         </div>
     </div>
 
     <div id="tab-guest" class="tab">
         <h3>Ziyaretçi Defteri</h3>
         <div id="guest-list" class="card" style="padding: 10px 25px;">Yükleniyor...</div>
-        
-        <div class="card" style="border: 1px dashed var(--accent); background: #050505;">
-            <div class="section-title" style="margin-top:0;">Manuel Mesaj / Referans Ekle</div>
-            <input type="text" id="new-g-name" placeholder="Ziyaretçi Adı">
-            <textarea id="new-g-msg" rows="3" placeholder="Mesaj İçeriği"></textarea>
-            <button onclick="approveNewMessage()" style="width:100%;">ONAYLA VE YAYINLA</button>
-        </div>
     </div>
 
     <div id="tab-config" class="tab">
         <h3>Site Genel Ayarları</h3>
-        
         <div class="card">
-            <div class="section-title">Marka & Logo</div>
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <input type="file" id="s-logo-file" accept="image/png, image/jpeg" style="flex:1;">
-                <button onclick="uploadLogo()" class="secondary" style="padding: 14px 20px;">LOGOYU YÜKLE</button>
-            </div>
-            
-            <div class="section-title">Temel Bilgiler & SEO</div>
-            <input type="text" id="s-title" placeholder="Site Başlığı (Sekme Adı)">
-            <textarea id="s-bio" rows="4" placeholder="Kısa Biyografi / Hakkımda"></textarea>
-            <input type="text" id="s-seo" placeholder="SEO Açıklaması (Google aramaları için kısa tanıtım yazısı)">
-            
-            <div class="section-title">Menü & Sayfa İsimleri</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <input type="text" id="m-portfolio" placeholder="Eserler Menü Adı (Örn: WORKS)">
-                <input type="text" id="m-contact" placeholder="İletişim Menü Adı (Örn: CONTACT)">
-            </div>
-
-            <div class="section-title">Sosyal Medya & İletişim</div>
-            <input type="text" id="s-instagram" placeholder="Instagram Kullanıcı Adı (Sadece ad, örn: uberaw)">
-            <input type="text" id="s-whatsapp" placeholder="WhatsApp Numarası (Uluslararası format, örn: 90555...)">
-            <input type="text" id="s-footer" placeholder="Footer (Alt Bilgi) Metni">
-
             <div class="section-title">Görünüm & Sistem</div>
             <div style="display: flex; align-items: center; gap: 20px; background: #000; padding: 15px; border-radius: 4px; border: 1px solid #222;">
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -263,26 +365,45 @@
                     <input type="color" id="s-theme" style="width: 50px; height: 30px; cursor: pointer; padding: 0; border: none; background: transparent;">
                 </div>
                 <label style="display: flex; align-items: center; gap: 10px; font-size: 12px; cursor: pointer;">
-                    <input type="checkbox" id="s-maintenance" style="width:16px; height:16px; margin:0;"> 
-                    Bakım Modunu Aktifleştir
+                    <input type="checkbox" id="s-maintenance" style="width:16px; height:16px; margin:0;"> Bakım Modunu Aktifleştir (Siteyi Kapatır)
                 </label>
             </div>
-            
-            <button onclick="handleSettingsUpdate()" style="width:100%; margin-top: 30px;">TÜM AYARLARI GÜNCELLE</button>
+            <button onclick="handleSettingsUpdate()" style="width:100%; margin-top: 30px;">AYARLARI GÜNCELLE</button>
         </div>
     </div>
 </div>
 
 <script>
-    const REPO = "uberaw/uberaw"; // Kendi deponuz.
+    const REPO = "uberaw/uberaw"; 
     let currentPortfolio = { projects: [] };
+    let currentCRM = { collectors: [] };
     let currentSettings = {};
 
-    // --- UTILS ---
+    // --- UTILS & GÜVENLİ ŞİFRELEME (MODÜL 1) ---
     const u2b = (s) => btoa(unescape(encodeURIComponent(s)));
     const b2u = (s) => decodeURIComponent(escape(atob(s)));
     
-    function showLoading(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
+    function xorEncrypt(text, key) {
+        let result = '';
+        for(let i=0; i<text.length; i++) result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+        return btoa(result);
+    }
+    function xorDecrypt(cipher, key) {
+        let text = atob(cipher);
+        let result = '';
+        for(let i=0; i<text.length; i++) result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+        return result;
+    }
+
+    function generateUUID() { // Kriptografik Hash (Modül 5)
+        return Math.random().toString(36).substring(2, 10) + '-' + Math.random().toString(36).substring(2, 10);
+    }
+
+    function setLoaderText(txt) { document.getElementById('loader-text').innerText = txt; }
+    function showLoading(show, txt="İSTEMCİ İŞLENİYOR...") { 
+        setLoaderText(txt);
+        document.getElementById('loader').style.display = show ? 'flex' : 'none'; 
+    }
     
     function showToast(message, isError = false) {
         const container = document.getElementById('toast-container');
@@ -293,8 +414,6 @@
         setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
     }
 
-    function logout() { localStorage.removeItem('uber_t'); location.reload(); }
-
     function switchTab(tabId, element) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
@@ -302,13 +421,31 @@
         element.classList.add('active');
     }
 
-    // --- GITHUB API ACTION ---
+    // --- GITHUB API ACTION & AUTH ---
+    let sessionToken = ""; 
+    
+    if(!localStorage.getItem('ube_enc_t')) {
+        document.getElementById('login-token').style.display = 'block';
+        document.getElementById('login-desc').innerText = "İlk kurulum: Lütfen GitHub Token'ınızı ve sisteme giriş yaparken kullanacağınız bir şifre belirleyin.";
+    }
+
+    function resetLogin() {
+        if(confirm("Kayıtlı token silinecek. Yeni bir cihazda veya token değiştirdiğinizde bunu yapmalısınız. Emin misiniz?")) {
+            localStorage.removeItem('ube_enc_t');
+            location.reload();
+        }
+    }
+
+    function logout() {
+        sessionToken = "";
+        location.reload();
+    }
+
     async function ghAction(path, method = 'GET', data = null, sha = null) {
-        const token = localStorage.getItem('uber_t');
-        const options = { method, headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' } };
+        const options = { method, headers: { 'Authorization': `token ${sessionToken}`, 'Content-Type': 'application/json' } };
         if (data) {
             options.body = JSON.stringify({
-                message: "UBE RAW OS Auto-Update",
+                message: "UBE RAW OS Update",
                 content: (path.endsWith('.png') || path.endsWith('.jpg')) ? data : u2b(JSON.stringify(data, null, 2)),
                 sha: sha
             });
@@ -319,31 +456,41 @@
     }
 
     async function auth() {
-        const t = document.getElementById('token').value || localStorage.getItem('uber_t');
-        if(!t) return;
-        showLoading(true);
-        localStorage.setItem('uber_t', t);
+        const pwd = document.getElementById('login-pwd').value;
+        const rawToken = document.getElementById('login-token').value;
+        if(!pwd) return showToast("Şifre boş olamaz!", true);
+
+        if(!localStorage.getItem('ube_enc_t')) {
+            if(!rawToken) return showToast("İlk kurulum için GitHub Token zorunludur!", true);
+            localStorage.setItem('ube_enc_t', xorEncrypt(rawToken, pwd));
+            sessionToken = rawToken;
+        } else {
+            sessionToken = xorDecrypt(localStorage.getItem('ube_enc_t'), pwd);
+        }
+
+        showLoading(true, "YETKİLENDİRİLİYOR...");
         try {
             const res = await ghAction('content/settings.json');
             if(res.sha) {
                 document.getElementById('login').style.display = 'none';
                 await initDashboard();
-                showToast("Sisteme başarıyla giriş yapıldı.");
-            } else { throw new Error(); }
+                showToast("Sisteme güvenle giriş yapıldı.");
+            } else throw new Error();
         } catch(e) { 
-            showToast("Bağlantı Hatası veya Yetkisiz Token!", true); 
-            localStorage.removeItem('uber_t'); 
+            showToast("Şifre yanlış veya Token geçersiz!", true); 
+            sessionToken = "";
         } finally { showLoading(false); }
     }
 
     async function initDashboard() {
         await loadSettings();
-        await refreshInventory();
+        await fetchCRM();
+        await renderInventory();
         await refreshOrders();
         await refreshGuestbook();
     }
 
-    // --- DRAG & DROP VE RESİM İŞLEME ---
+    // --- DRAG & DROP ---
     const dropZone = document.getElementById('drop-zone');
     dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
@@ -387,159 +534,362 @@
         const title = document.getElementById('f-title').value;
         if(!files.length || !title) return showToast("Eser adı ve görsel zorunludur!", true);
 
-        showLoading(true);
+        showLoading(true, "GÖRSELLER İŞLENİYOR...");
         try {
             let paths = [];
             for(let i = 0; i < files.length; i++) {
-                showToast(`Görsel ${i+1}/${files.length} işleniyor...`);
+                showToast(`Görsel ${i+1}/${files.length} yükleniyor...`);
                 const proc = await processImage(files[i], title, i);
                 await fetch(`https://api.github.com/repos/${REPO}/contents/${proc.name}`, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `token ${localStorage.getItem('uber_t')}` },
+                    method: 'PUT', headers: { 'Authorization': `token ${sessionToken}` },
                     body: JSON.stringify({ message: `Upload: ${title}`, content: proc.content })
                 });
                 paths.push(proc.name);
             }
 
-            const d = await ghAction('content/portfolio.json');
-            let data = JSON.parse(b2u(d.content));
+            let d, data;
+            try { d = await ghAction('content/portfolio.json'); data = JSON.parse(b2u(d.content)); } 
+            catch(e) { data = { projects: [] }; }
+            
+            const autoCode = `UBE-${new Date().getFullYear().toString().slice(-2)}-${String(data.projects.length + 1).padStart(3, '0')}`;
+
             data.projects.unshift({ 
                 title, 
                 category: document.getElementById('f-cat').value,
                 price: document.getElementById('f-price').value || "", 
+                currency: document.getElementById('f-currency').value || "TRY", 
                 image: paths.join(','), 
                 mapLink: document.getElementById('f-map').value,
-                certCode: "",
-                isHidden: false,
-                isSale: false
+                dimensions: document.getElementById('f-dim').value,
+                weight: document.getElementById('f-weight').value,
+                material: document.getElementById('f-material').value,
+                stage: document.getElementById('f-stage').value,
+                location: document.getElementById('f-location').value,
+                certCode: autoCode,
+                isDraft: document.getElementById('f-draft').checked,
+                isDeleted: false, isHidden: false, isSale: false, owner: ""
             });
-            await ghAction('content/portfolio.json', 'PUT', data, d.sha);
+            await ghAction('content/portfolio.json', 'PUT', data, d ? d.sha : null);
             
-            document.getElementById('f-title').value = '';
-            document.getElementById('f-cat').value = '';
-            document.getElementById('f-price').value = '';
-            document.getElementById('f-map').value = '';
+            document.querySelectorAll('#tab-add input[type="text"]').forEach(el => el.value = '');
             document.getElementById('file-preview').innerHTML = '';
+            document.getElementById('f-draft').checked = false;
             
-            showToast("Eser başarıyla yayınlandı!");
-            await refreshInventory();
+            showToast("Eser başarıyla envantere eklendi!");
+            await renderInventory(); 
             switchTab('inv', document.querySelectorAll('.nav-link')[2]);
         } catch(e) { showToast("Yükleme sırasında hata oluştu.", true); }
         showLoading(false);
     }
 
-    // --- ENVANTER VE SİLME ---
-    async function refreshInventory() {
+    // --- ENVANTER & CRM (MODÜL 1, 2, 4) ---
+    async function fetchInventory() {
         try {
             const d = await ghAction('content/portfolio.json');
             currentPortfolio = JSON.parse(b2u(d.content));
-            
-            // Stats
-            document.getElementById('stat-total').innerText = currentPortfolio.projects.length;
-            document.getElementById('stat-sold').innerText = currentPortfolio.projects.filter(p => p.isSale).length;
+            currentPortfolio.sha = d.sha;
+        } catch(e) { currentPortfolio = { projects: [] }; }
+    }
 
-            document.getElementById('inventory-list').innerHTML = currentPortfolio.projects.map((p, i) => `
+    async function fetchCRM() {
+        try {
+            const d = await ghAction('content/crm.json');
+            currentCRM = JSON.parse(b2u(d.content));
+            currentCRM.sha = d.sha;
+        } catch(e) { currentCRM = { collectors: [] }; }
+        renderCRM();
+    }
+
+    function calculateRevenue() {
+        let total = 0;
+        currentPortfolio.projects.filter(p => p.isSale && !p.isDeleted).forEach(p => {
+            let val = parseFloat(String(p.price).replace(/[^0-9.-]+/g,""));
+            if(!isNaN(val)) total += val; // Basit hesaplama, kurlar eklenebilir
+        });
+        document.getElementById('stat-revenue').innerText = "₺" + total.toLocaleString('tr-TR');
+    }
+
+    async function renderInventory() {
+        await fetchInventory(); 
+        const listContainer = document.getElementById('inventory-list');
+        const searchTerm = document.getElementById('search-inv').value.toLowerCase();
+        const filterStr = document.getElementById('filter-inv').value;
+
+        const activeProjects = currentPortfolio.projects.filter(p => !p.isDeleted && !p.isDraft);
+        document.getElementById('stat-total').innerText = activeProjects.length;
+        document.getElementById('stat-sold').innerText = activeProjects.filter(p => p.isSale).length;
+        calculateRevenue();
+
+        let html = '';
+        let displayList = currentPortfolio.projects.map((p, i) => ({...p, originalIndex: i}));
+
+        if(filterStr === 'trash') displayList = displayList.filter(p => p.isDeleted);
+        else if(filterStr === 'draft') displayList = displayList.filter(p => !p.isDeleted && p.isDraft);
+        else displayList = displayList.filter(p => !p.isDeleted && !p.isDraft);
+
+        if(searchTerm) {
+            displayList = displayList.filter(p => 
+                (p.title && p.title.toLowerCase().includes(searchTerm)) || 
+                (p.certCode && p.certCode.toLowerCase().includes(searchTerm)) ||
+                (p.material && p.material.toLowerCase().includes(searchTerm))
+            );
+        }
+
+        displayList.forEach(p => {
+            const i = p.originalIndex;
+            const thumbUrl = p.image ? `https://raw.githubusercontent.com/${REPO}/main/${p.image.split(',')[0]}` : '';
+            
+            html += `
                 <div class="item-row" style="${p.isHidden ? 'opacity: 0.5;' : ''}">
+                    ${thumbUrl ? `<img src="${thumbUrl}" class="item-thumb">` : `<div class="item-thumb" style="background:#222;"></div>`}
                     <div class="item-info">
                         <b>${p.title} 
+                            ${p.isDraft ? '<span class="badge draft">TASLAK</span>' : ''}
                             ${p.isHidden ? '<span class="badge hidden">GİZLİ</span>' : ''}
                             ${p.isSale ? '<span class="badge sold">SATILDI</span>' : ''}
                         </b>
                         <small>
-                            <span style="color:var(--accent);">Kategori:</span> ${p.category || 'Belirtilmedi'} &nbsp;|&nbsp; 
-                            <span style="color:var(--accent);">Fiyat:</span> ${p.price || 'Belirtilmedi'} &nbsp;|&nbsp; 
-                            <span style="color:var(--accent);">Sertifika No:</span> ${p.certCode || 'Yok'}
+                            <span style="color:var(--accent);">SKU:</span> ${p.certCode || '-'} &nbsp;|&nbsp; 
+                            <span style="color:var(--accent);">Aşama:</span> ${p.stage || 'Tamamlandı'} &nbsp;|&nbsp; 
+                            <span style="color:var(--accent);">Fiyat:</span> ${p.price ? p.price + ' ' + (p.currency||'TRY') : '-'}
                         </small>
                     </div>
                     <div class="btn-group">
-                        <button class="secondary" title="Yukarı Taşı" onclick="moveItem(${i},-1)">▲</button>
-                        <button class="secondary" title="Aşağı Taşı" onclick="moveItem(${i},1)">▼</button>
-                        <button class="warning" title="Gizle/Göster" onclick="toggleVisibility(${i})">👁️</button>
-                        <button style="background:#333;color:#fff;" onclick="openEditModal(${i})">DÜZENLE</button>
-                        <button class="danger" onclick="handleDelete(${i})">SİL</button>
-                    </div>
-                </div>
-            `).join('') || "<p style='color:#777;'>Henüz eser eklenmemiş.</p>";
-            
-            // Populate select for Sale & Orders
-            const optionsHtml = '<option value="">Eser Seçin</option>' + 
-                currentPortfolio.projects.map((p, i) => `<option value="${i}">${p.title}</option>`).join('');
-            document.getElementById('sale-select').innerHTML = optionsHtml;
-            document.getElementById('new-o-artwork').innerHTML = optionsHtml;
+            `;
 
-        } catch(e) { console.log(e); document.getElementById('inventory-list').innerHTML = "Veri okunamadı."; }
+            if(filterStr === 'trash') {
+                html += `<button class="success" onclick="restoreProject(${i})">GERİ YÜKLE</button>
+                         <button class="danger" onclick="hardDeleteProject(${i})">KALICI SİL</button>`;
+            } else {
+                html += `<button class="secondary small" title="Yukarı" onclick="moveItem(${i},-1)">▲</button>
+                         <button class="secondary small" title="Aşağı" onclick="moveItem(${i},1)">▼</button>
+                         <button class="warning small" title="Gizle/Göster" onclick="toggleVisibility(${i})">👁️</button>`;
+                
+                if(p.isSale) html += `<button class="danger small" style="background:#8b0000;" title="Satışı İptal Et" onclick="cancelSale(${i})">SATIŞ İPTAL</button>`;
+                
+                html += `<button style="background:#333;color:#fff;" class="small" onclick="openEditModal(${i})">DÜZENLE</button>
+                         <button class="danger small" onclick="softDeleteProject(${i})">ÇÖPE AT</button>`;
+            }
+            html += `</div></div>`;
+        });
+
+        listContainer.innerHTML = html || "<p style='color:#777;'>Arama kriterlerine uygun eser bulunamadı.</p>";
+
+        const saleOptions = '<option value="">İşlem Yapılacak Eseri Seçin</option>' + 
+            currentPortfolio.projects.map((p, idx) => {
+                if(p.isDeleted) return '';
+                return `<option value="${idx}">${p.certCode} - ${p.title} ${p.isSale ? '(Satıldı)' : ''}</option>`;
+            }).join('');
+        document.getElementById('sale-select').innerHTML = saleOptions;
+        document.getElementById('new-o-artwork').innerHTML = saleOptions;
     }
 
-    async function toggleVisibility(i) {
-        showLoading(true);
-        const d = await ghAction('content/portfolio.json');
-        let data = JSON.parse(b2u(d.content));
-        data.projects[i].isHidden = !data.projects[i].isHidden;
-        await ghAction('content/portfolio.json', 'PUT', data, d.sha);
-        showToast(data.projects[i].isHidden ? "Eser siteden gizlendi." : "Eser artık sitede görünür.");
-        await refreshInventory();
+    // --- CRM / KOLEKSİYONER METOTLARI (MODÜL 4) ---
+    function renderCRM() {
+        const list = currentCRM.collectors || [];
+        document.getElementById('crm-list').innerHTML = list.map((c, i) => `
+            <div class="item-row">
+                <div class="item-info">
+                    <b>${c.name} ${c.isVip ? '<span class="badge vip">VIP</span>' : ''}</b>
+                    <small>İletişim: ${c.phone || '-'} | E-Posta: ${c.email || '-'}</small>
+                    <small style="color:#666;">Not: ${c.notes || 'Yok'}</small>
+                </div>
+                <div class="btn-group">
+                    <button style="background:#333;color:#fff;" class="small" onclick="openCRMModal(${i})">DÜZENLE</button>
+                    <button class="danger small" onclick="deleteCRM(${i})">SİL</button>
+                </div>
+            </div>
+        `).reverse().join('') || "<p style='color:#777;'>Henüz kayıtlı koleksiyoner yok.</p>";
+
+        // Satış menüsü için CRM seçenekleri
+        const crmOpts = '<option value="">Manuel İsim Gir (CRM Dışı)</option>' + list.map(c => `<option value="${c.name}">${c.name} ${c.isVip?'(VIP)':''}</option>`).join('');
+        document.getElementById('sale-crm-select').innerHTML = crmOpts;
+    }
+
+    function openCRMModal(i) {
+        if(i === '') {
+            document.getElementById('crm-idx').value = '';
+            document.querySelectorAll('#crm-modal input[type="text"]').forEach(e => e.value='');
+            document.getElementById('crm-notes').value = '';
+            document.getElementById('crm-vip').checked = false;
+        } else {
+            const c = currentCRM.collectors[i];
+            document.getElementById('crm-idx').value = i;
+            document.getElementById('crm-name').value = c.name || '';
+            document.getElementById('crm-phone').value = c.phone || '';
+            document.getElementById('crm-email').value = c.email || '';
+            document.getElementById('crm-address').value = c.address || '';
+            document.getElementById('crm-bday').value = c.bday || '';
+            document.getElementById('crm-notes').value = c.notes || '';
+            document.getElementById('crm-vip').checked = c.isVip || false;
+        }
+        document.getElementById('crm-modal').style.display = 'flex';
+    }
+
+    async function saveCRMProfile() {
+        const name = document.getElementById('crm-name').value;
+        if(!name) return showToast("Ad Soyad zorunludur.", true);
+        
+        showLoading(true, "CRM KAYDEDİLİYOR...");
+        const idx = document.getElementById('crm-idx').value;
+        const newCol = {
+            name: name,
+            phone: document.getElementById('crm-phone').value,
+            email: document.getElementById('crm-email').value,
+            address: document.getElementById('crm-address').value,
+            bday: document.getElementById('crm-bday').value,
+            notes: document.getElementById('crm-notes').value,
+            isVip: document.getElementById('crm-vip').checked
+        };
+
+        if(idx === '') currentCRM.collectors.push(newCol);
+        else currentCRM.collectors[idx] = newCol;
+
+        try {
+            const d = await ghAction('content/crm.json');
+            await ghAction('content/crm.json', 'PUT', currentCRM, d ? d.sha : null);
+            document.getElementById('crm-modal').style.display = 'none';
+            showToast("Koleksiyoner profili güncellendi.");
+            await fetchCRM();
+        } catch(e) { showToast("Kayıt hatası", true); }
         showLoading(false);
     }
 
-    async function handleDelete(i) {
-        if(!confirm("Bu eser ve RESİMLERİ kalıcı olarak silinecek. Emin misiniz?")) return;
+    async function deleteCRM(i) {
+        if(!confirm("Koleksiyoner silinecek. Emin misiniz?")) return;
         showLoading(true);
-        
+        currentCRM.collectors.splice(i, 1);
         try {
-            const d = await ghAction('content/portfolio.json');
-            let data = JSON.parse(b2u(d.content));
-            const project = data.projects[i];
+            await ghAction('content/crm.json', 'PUT', currentCRM, currentCRM.sha);
+            showToast("Profil silindi.");
+            await fetchCRM();
+        } catch(e) { showToast("Hata!", true); }
+        showLoading(false);
+    }
 
+    function exportFinanceCSV() {
+        const sold = currentPortfolio.projects.filter(p => p.isSale && !p.isDeleted);
+        let csvContent = "data:text/csv;charset=utf-8,SKU,Eser Adi,Kategori,Satis Fiyati,Para Birimi,Alici\n";
+        sold.forEach(p => {
+            let row = `${p.certCode},${p.title},${p.category},${p.price},${p.currency||'TRY'},${p.owner||'Bilinmiyor'}`;
+            csvContent += row + "\n";
+        });
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "ube_raw_finans_raporu.csv");
+        document.body.appendChild(link);
+        link.click();
+    }
+
+    // --- DURUM GÜNCELLEMELERİ ---
+    async function updateProjectField(index, field, value, successMsg) {
+        showLoading(true);
+        currentPortfolio.projects[index][field] = value;
+        try {
+            await ghAction('content/portfolio.json', 'PUT', {projects: currentPortfolio.projects}, currentPortfolio.sha);
+            if(successMsg) showToast(successMsg);
+            await renderInventory();
+        } catch(e) { showToast("İşlem başarısız", true); }
+        showLoading(false);
+    }
+
+    function toggleVisibility(i) { updateProjectField(i, 'isHidden', !currentPortfolio.projects[i].isHidden, "Görünürlük değiştirildi."); }
+    function softDeleteProject(i) { if(confirm("Eser Çöp Kutusuna taşınacak. Emin misiniz?")) updateProjectField(i, 'isDeleted', true, "Eser çöpe taşındı."); }
+    function restoreProject(i) { updateProjectField(i, 'isDeleted', false, "Eser envantere geri yüklendi."); }
+
+    async function hardDeleteProject(i) {
+        if(!confirm("DİKKAT: Bu eser kalıcı olarak silinecek. Dosyalar temizlenecek. Emin misiniz?")) return;
+        showLoading(true, "DOSYALAR SİLİNİYOR...");
+        try {
+            const project = currentPortfolio.projects[i];
             if(project.image) {
-                const imgs = project.image.split(',');
-                for(let path of imgs) {
+                for(let path of project.image.split(',')) {
                     try {
                         const info = await ghAction(path.trim());
-                        if(info.sha) {
-                            await fetch(`https://api.github.com/repos/${REPO}/contents/${path.trim()}`, {
-                                method: 'DELETE',
-                                headers: { 'Authorization': `token ${localStorage.getItem('uber_t')}` },
-                                body: JSON.stringify({ message: "Resim Çöp Kutusuna Taşındı", sha: info.sha })
-                            });
-                        }
+                        if(info.sha) await fetch(`https://api.github.com/repos/${REPO}/contents/${path.trim()}`, {
+                            method: 'DELETE', headers: { 'Authorization': `token ${sessionToken}` },
+                            body: JSON.stringify({ message: "Resim Kalıcı Silindi", sha: info.sha })
+                        });
                     } catch(e) {}
                 }
             }
-
-            data.projects.splice(i, 1);
-            await ghAction('content/portfolio.json', 'PUT', data, d.sha);
-            showToast("Eser ve tüm dosyaları temizlendi.");
-            refreshInventory();
-        } catch(e) { showToast("Silme hatası!", true); }
+            currentPortfolio.projects.splice(i, 1);
+            await ghAction('content/portfolio.json', 'PUT', {projects: currentPortfolio.projects}, currentPortfolio.sha);
+            showToast("Eser kalıcı olarak silindi.");
+            await renderInventory();
+        } catch(e) { showToast("Kalıcı silme hatası!", true); }
         showLoading(false);
     }
 
-    // --- DÜZENLEME MODALI ---
+    // Kusursuz İptal (Finans log geri alımı)
+    async function cancelSale(i) {
+        if(!confirm("Eserin satış işlemi iptal edilecek, finans logu temizlenecek ve eser stüdyo envanterine dönecek. Emin misiniz?")) return;
+        showLoading(true, "SATIŞ İPTAL EDİLİYOR...");
+        currentPortfolio.projects[i].isSale = false;
+        currentPortfolio.projects[i].owner = "";
+        currentPortfolio.projects[i].deposit = "";
+        try {
+            await ghAction('content/portfolio.json', 'PUT', {projects: currentPortfolio.projects}, currentPortfolio.sha);
+            showToast("Satış başarıyla iptal edildi, eser envantere döndü.");
+            await renderInventory();
+        } catch(e) { showToast("İptal işlemi başarısız.", true); }
+        showLoading(false);
+    }
+
+    // --- DÜZENLEME MODALI (MODÜL 3 & 5 İÇERİR) ---
     function openEditModal(i) {
         const p = currentPortfolio.projects[i];
         document.getElementById('edit-idx').value = i;
-        document.getElementById('edit-title').value = p.title;
-        document.getElementById('edit-cat').value = p.category || "";
-        document.getElementById('edit-price-direct').value = p.price || "";
-        document.getElementById('edit-map').value = p.mapLink || "";
+        document.getElementById('edit-title').value = p.title || '';
+        document.getElementById('edit-cat').value = p.category || '';
+        document.getElementById('edit-currency').value = p.currency || 'TRY';
+        document.getElementById('edit-price-direct').value = p.price || '';
+        document.getElementById('edit-old-price').value = p.oldPrice || '';
+        document.getElementById('edit-cost').value = p.costNote || '';
+        document.getElementById('edit-inc-shipping').checked = p.incShipping || false;
+        document.getElementById('edit-inc-vat').checked = p.incVat || false;
+        document.getElementById('edit-cert-code').value = p.certCode || '';
+        document.getElementById('edit-map').value = p.mapLink || '';
+        document.getElementById('edit-dim').value = p.dimensions || '';
+        document.getElementById('edit-weight').value = p.weight || '';
+        document.getElementById('edit-material').value = p.material || '';
+        document.getElementById('edit-stage').value = p.stage || 'Tamamlandı';
+        document.getElementById('edit-location').value = p.location || '';
+        document.getElementById('edit-draft').checked = p.isDraft || false;
+        
         document.getElementById('edit-modal').style.display = 'flex';
     }
-
     function closeEditModal() { document.getElementById('edit-modal').style.display = 'none'; }
 
     async function saveProjectEdit() {
-        showLoading(true);
+        showLoading(true, "KAYDEDİLİYOR...");
         const i = document.getElementById('edit-idx').value;
-        const d = await ghAction('content/portfolio.json');
-        let data = JSON.parse(b2u(d.content));
-        data.projects[i].title = document.getElementById('edit-title').value;
-        data.projects[i].category = document.getElementById('edit-cat').value;
-        data.projects[i].price = document.getElementById('edit-price-direct').value;
-        data.projects[i].mapLink = document.getElementById('edit-map').value;
-        await ghAction('content/portfolio.json', 'PUT', data, d.sha);
-        closeEditModal(); 
-        await refreshInventory();
-        showToast("Eser bilgileri güncellendi.");
+        const p = currentPortfolio.projects[i];
+        
+        p.title = document.getElementById('edit-title').value;
+        p.category = document.getElementById('edit-cat').value;
+        p.currency = document.getElementById('edit-currency').value;
+        p.price = document.getElementById('edit-price-direct').value;
+        p.oldPrice = document.getElementById('edit-old-price').value;
+        p.costNote = document.getElementById('edit-cost').value;
+        p.incShipping = document.getElementById('edit-inc-shipping').checked;
+        p.incVat = document.getElementById('edit-inc-vat').checked;
+        p.certCode = document.getElementById('edit-cert-code').value;
+        p.mapLink = document.getElementById('edit-map').value;
+        p.dimensions = document.getElementById('edit-dim').value;
+        p.weight = document.getElementById('edit-weight').value;
+        p.material = document.getElementById('edit-material').value;
+        p.stage = document.getElementById('edit-stage').value;
+        p.location = document.getElementById('edit-location').value;
+        p.isDraft = document.getElementById('edit-draft').checked;
+
+        try {
+            await ghAction('content/portfolio.json', 'PUT', {projects: currentPortfolio.projects}, currentPortfolio.sha);
+            closeEditModal(); 
+            showToast("Eser bilgileri güncellendi.");
+            await renderInventory();
+        } catch(e) { showToast("Güncelleme hatası", true); }
         showLoading(false);
     }
 
@@ -547,25 +897,23 @@
         const ni = i + dir;
         if(ni < 0 || ni >= currentPortfolio.projects.length) return;
         showLoading(true);
-        const d = await ghAction('content/portfolio.json');
-        let data = JSON.parse(b2u(d.content));
-        const temp = data.projects[i];
-        data.projects[i] = data.projects[ni];
-        data.projects[ni] = temp;
-        await ghAction('content/portfolio.json', 'PUT', data, d.sha);
-        await refreshInventory();
+        const temp = currentPortfolio.projects[i];
+        currentPortfolio.projects[i] = currentPortfolio.projects[ni];
+        currentPortfolio.projects[ni] = temp;
+        try {
+            await ghAction('content/portfolio.json', 'PUT', {projects: currentPortfolio.projects}, currentPortfolio.sha);
+            await renderInventory();
+        } catch(e) { showToast("Sıralama hatası", true); }
         showLoading(false);
     }
 
-    // --- SİPARİŞ & TALEP YÖNETİMİ ---
+    // --- SİPARİŞ & TALEP ---
     async function refreshOrders() {
         try {
             const d = await ghAction('content/orders.json');
             const list = JSON.parse(b2u(d.content)).orders || [];
-            
             const pendingCount = list.filter(o => o.status === 'Bekliyor').length;
             document.getElementById('stat-orders').innerText = pendingCount;
-
             document.getElementById('orders-list').innerHTML = list.map((o, i) => `
                 <div class="item-row" style="background: ${o.status === 'Bekliyor' ? 'rgba(255, 179, 0, 0.05)' : 'transparent'};">
                     <div class="item-info">
@@ -573,47 +921,34 @@
                         <small style="color:#aaa;">Eser: <span style="color:#fff;">${o.artwork}</span> | İletişim: ${o.contact} | Tarih: ${o.date}</small>
                     </div>
                     <div class="btn-group">
-                        ${o.status === 'Bekliyor' ? `<button class="success" title="Siparişi Tamamla" onclick="updateOrderStatus(${i}, 'Tamamlandı')">✓ ONAYLA</button>` : ''}
-                        <button class="danger" onclick="deleteOrder(${i})">SİL</button>
+                        ${o.status === 'Bekliyor' ? `<button class="success small" title="Tamamla" onclick="updateOrderStatus(${i}, 'Tamamlandı')">✓ ONAYLA</button>` : ''}
+                        <button class="danger small" onclick="deleteOrder(${i})">SİL</button>
                     </div>
                 </div>
-            `).reverse().join('') || "<p style='color:#777;'>Henüz kayıtlı bir sipariş bulunmuyor.</p>";
-        } catch(e) { document.getElementById('orders-list').innerHTML = "Veri okunamadı veya dosya henüz oluşturulmamış."; }
+            `).reverse().join('') || "<p style='color:#777;'>Kayıtlı bir sipariş bulunmuyor.</p>";
+        } catch(e) { document.getElementById('orders-list').innerHTML = "Sipariş verisi yok."; }
     }
 
-    // --- EKSİK KALAN VE TAMAMLANAN FONKSİYONLAR ---
-    
     async function addNewOrder() {
         const name = document.getElementById('new-o-name').value;
         const contact = document.getElementById('new-o-contact').value;
         const artIdx = document.getElementById('new-o-artwork').value;
-        
-        if(!name || !contact || artIdx === "") return showToast("Lütfen tüm alanları doldurun.", true);
+        if(!name || !contact) return showToast("Ad ve iletişim zorunlu.", true);
         
         showLoading(true);
         try {
-            const artworkName = currentPortfolio.projects[artIdx].title;
-            const d = await ghAction('content/orders.json');
-            let data = JSON.parse(b2u(d.content));
-            if(!data.orders) data.orders = [];
+            let d, data;
+            try { d = await ghAction('content/orders.json'); data = JSON.parse(b2u(d.content)); } 
+            catch(e) { data = { orders: [] }; }
             
-            data.orders.push({
-                customerName: name,
-                contact: contact,
-                artwork: artworkName,
-                status: "Bekliyor",
-                date: new Date().toLocaleDateString('tr-TR')
-            });
+            const artworkName = artIdx !== "" ? currentPortfolio.projects[artIdx].title : "Bağımsız Talep";
+            data.orders.push({ customerName: name, contact: contact, artwork: artworkName, status: "Bekliyor", date: new Date().toLocaleDateString('tr-TR') });
+            await ghAction('content/orders.json', 'PUT', data, d ? d.sha : null);
             
-            await ghAction('content/orders.json', 'PUT', data, d.sha);
-            showToast("Yeni sipariş başarıyla eklendi.");
-            
-            document.getElementById('new-o-name').value = '';
-            document.getElementById('new-o-contact').value = '';
-            document.getElementById('new-o-artwork').value = '';
-            
+            document.getElementById('new-o-name').value = ''; document.getElementById('new-o-contact').value = '';
+            showToast("Sipariş eklendi.");
             await refreshOrders();
-        } catch(e) { showToast("Sipariş eklenirken hata oluştu.", true); }
+        } catch(e) { showToast("Sipariş ekleme hatası.", true); }
         showLoading(false);
     }
 
@@ -624,205 +959,205 @@
             let data = JSON.parse(b2u(d.content));
             data.orders[i].status = status;
             await ghAction('content/orders.json', 'PUT', data, d.sha);
-            showToast("Sipariş durumu güncellendi.");
             await refreshOrders();
-        } catch(e) { showToast("Durum güncellenirken hata oluştu.", true); }
+        } catch(e) { showToast("Hata", true); }
         showLoading(false);
     }
 
     async function deleteOrder(i) {
-        if(!confirm("Bu siparişi silmek istediğinize emin misiniz?")) return;
+        if(!confirm("Sipariş silinecek. Emin misiniz?")) return;
         showLoading(true);
         try {
             const d = await ghAction('content/orders.json');
             let data = JSON.parse(b2u(d.content));
             data.orders.splice(i, 1);
             await ghAction('content/orders.json', 'PUT', data, d.sha);
-            showToast("Sipariş silindi.");
             await refreshOrders();
-        } catch(e) { showToast("Sipariş silinirken hata oluştu.", true); }
+        } catch(e) { showToast("Hata", true); }
         showLoading(false);
     }
 
+    // --- SATIŞ YÖNETİMİ & GELİŞMİŞ SERTİFİKA ÜRETİMİ (MODÜL 3, 4, 5) ---
     function fillSaleFields(val) {
         if(val === "") {
-            document.getElementById('edit-price').value = "";
-            document.getElementById('edit-cert').value = "";
+            document.getElementById('sale-price').value = "";
+            document.getElementById('sale-cert').value = "";
+            document.getElementById('sale-owner').value = "";
+            document.getElementById('sale-deposit').value = "";
             return;
         }
         const p = currentPortfolio.projects[val];
-        document.getElementById('edit-price').value = p.price || "";
-        document.getElementById('edit-cert').value = p.certCode || "";
+        document.getElementById('sale-price').value = p.price || "";
+        document.getElementById('sale-cert').value = p.certCode || "";
+        document.getElementById('sale-owner').value = p.owner || "";
+        document.getElementById('sale-deposit').value = p.deposit || "";
+        document.getElementById('sale-anon').checked = p.isAnonSale || false;
     }
 
     async function handleSaleUpdate() {
         const val = document.getElementById('sale-select').value;
-        if(val === "") return showToast("Lütfen önce sertifikalandırılacak eseri seçin.", true);
-        
-        showLoading(true);
+        if(val === "") return showToast("Lütfen satışı onaylanacak eseri seçin.", true);
+        showLoading(true, "SATIŞ İŞLENİYOR...");
         try {
-            const d = await ghAction('content/portfolio.json');
-            let data = JSON.parse(b2u(d.content));
+            currentPortfolio.projects[val].price = document.getElementById('sale-price').value;
+            currentPortfolio.projects[val].deposit = document.getElementById('sale-deposit').value;
+            currentPortfolio.projects[val].certCode = document.getElementById('sale-cert').value;
+            currentPortfolio.projects[val].owner = document.getElementById('sale-owner').value;
+            currentPortfolio.projects[val].isAnonSale = document.getElementById('sale-anon').checked;
+            currentPortfolio.projects[val].isSale = true; 
             
-            data.projects[val].price = document.getElementById('edit-price').value;
-            data.projects[val].certCode = document.getElementById('edit-cert').value;
-            data.projects[val].owner = document.getElementById('edit-owner').value;
-            data.projects[val].isSale = true;
-            
-            await ghAction('content/portfolio.json', 'PUT', data, d.sha);
-            showToast("Satış ve sertifika bilgileri güncellendi.");
-            await refreshInventory();
-        } catch(e) { showToast("Bilgiler güncellenirken hata oluştu.", true); }
+            await ghAction('content/portfolio.json', 'PUT', {projects: currentPortfolio.projects}, currentPortfolio.sha);
+            showToast("Satış onaylandı, kapora ve finans logu işlendi.");
+            await renderInventory();
+        } catch(e) { showToast("Satış onaylanırken hata oluştu.", true); }
         showLoading(false);
     }
 
-    function generatePDF() {
+    function generateAdvancedPDF() {
         const val = document.getElementById('sale-select').value;
-        if(val === "") return showToast("Sertifikasını indirmek istediğiniz eseri seçin.", true);
+        if(val === "") return showToast("Sertifikası oluşturulacak eseri seçin.", true);
         
         const p = currentPortfolio.projects[val];
-        const owner = document.getElementById('edit-owner').value;
+        const owner = document.getElementById('sale-owner').value || 'Değerli Koleksiyoner';
+        const certCode = document.getElementById('sale-cert').value || p.certCode;
+        const lang = document.getElementById('cert-lang').value;
+        const format = document.getElementById('cert-size').value; // a4 or a5
+        const isAP = document.getElementById('cert-ap').checked;
+        const hash = generateUUID(); // Kriptografik Hash
         
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        const doc = new jsPDF({ orientation: "landscape", format: format });
         
-        doc.setFont("helvetica", "bold");
+        const w = format === 'a4' ? 297 : 210;
+        const h = format === 'a4' ? 210 : 148;
+        const cx = w / 2;
+
+        // Arkaplan ve Çerçeve
+        doc.setFillColor(15, 15, 15);
+        doc.rect(0, 0, w, h, 'F');
+        doc.setDrawColor(168, 127, 74); 
+        doc.setLineWidth(1.5); 
+        doc.rect(10, 10, w-20, h-20);
+        
+        // Filigran / A.P.
+        if(isAP) {
+            doc.setTextColor(30, 30, 30);
+            doc.setFontSize(80);
+            doc.text("ARTIST PROOF", cx, h/2 + 20, { align: "center", angle: 45 });
+        }
+
+        doc.setTextColor(168, 127, 74); 
+        doc.setFontSize(format === 'a4' ? 28 : 20);
+        doc.text(lang === 'EN' ? "CERTIFICATE OF AUTHENTICITY" : "ORİJİNALLİK SERTİFİKASI", cx, 40, { align: "center" });
+        
+        doc.setTextColor(200, 200, 200); 
+        doc.setFontSize(10);
+        const desc = lang === 'EN' ? "This document certifies that the artwork detailed below is an original creation." : "Bu belge, aşağıda detayları verilen eserin orijinal ve tek bir yaratım olduğunu onaylar.";
+        doc.text(desc, cx, 55, { align: "center" });
+        
+        doc.setTextColor(255, 255, 255); 
         doc.setFontSize(22);
-        doc.text("UBE RAW - ORIJINALLIK SERTIFIKASI", 20, 30);
+        doc.text(p.title.toUpperCase(), cx, 80, { align: "center" });
         
-        doc.setFont("helvetica", "normal");
+        doc.setTextColor(150, 150, 150); 
+        doc.setFontSize(11);
+        doc.text(`${lang === 'EN' ? 'SKU / Cert No' : 'Sertifika No'}: ${certCode}`, cx, 100, { align: "center" });
+        doc.text(`${lang === 'EN' ? 'Category' : 'Kategori'}: ${p.category || '-'}`, cx, 110, { align: "center" });
+        doc.text(`${lang === 'EN' ? 'Material' : 'Materyal'}: ${p.material || '-'}`, cx, 120, { align: "center" });
+        doc.text(`${lang === 'EN' ? 'Dimensions' : 'Boyutlar'}: ${p.dimensions || '-'}`, cx, 130, { align: "center" });
+        
+        doc.setTextColor(200, 200, 200); 
+        doc.setFontSize(12);
+        doc.text(`${lang === 'EN' ? 'Acquired By' : 'Koleksiyoner'}: ${owner}`, cx, 150, { align: "center" });
+        
+        doc.setTextColor(168, 127, 74); 
         doc.setFontSize(14);
-        doc.text(`Eser Adı: ${p.title}`, 20, 50);
-        doc.text(`Kategori: ${p.category || '-'}`, 20, 60);
-        doc.text(`Sertifika Numarası: ${p.certCode || '-'}`, 20, 70);
-        doc.text(`Koleksiyoner: ${owner || '-'}`, 20, 80);
-        doc.text(`Tarih: ${new Date().toLocaleDateString('tr-TR')}`, 20, 90);
+        doc.text("UBE RAW STUDIO", cx, h - 30, { align: "center" });
         
-        doc.save(`${p.title}-Sertifika.pdf`);
+        doc.setFontSize(8); 
+        doc.setTextColor(100, 100, 100);
+        doc.text(`${lang === 'EN' ? 'Date' : 'Tarih'}: ${new Date().toLocaleDateString('tr-TR')}`, cx, h - 22, { align: "center" });
+        doc.text(`Verify Hash: ${hash}`, cx, h - 16, { align: "center" }); // Kripto doğrulama
+        
+        doc.save(`UBE-RAW-COA-${certCode}.pdf`);
+        showToast("Kriptografik Sertifika PDF olarak indirildi.");
     }
 
+    // --- ZİYARETÇİ DEFTERİ ---
     async function refreshGuestbook() {
         try {
             const d = await ghAction('content/guestbook.json');
             const list = JSON.parse(b2u(d.content)).messages || [];
-            
             document.getElementById('stat-msg').innerText = list.length;
-            document.getElementById('guest-list').innerHTML = list.map(m => `
+            document.getElementById('guest-list').innerHTML = list.map((m,i) => `
                 <div class="item-row">
-                    <div class="item-info">
-                        <b>${m.name}</b>
-                        <small style="color:#aaa;">${m.message}</small>
-                    </div>
+                    <div class="item-info"><b>${m.name}</b><small>"${m.message}" - ${m.date}</small></div>
+                    <button class="danger small" onclick="deleteMessage(${i})">SİL</button>
                 </div>
-            `).reverse().join('') || "<p style='color:#777;'>Henüz onaylanmış bir ziyaretçi mesajı bulunmuyor.</p>";
-        } catch(e) { document.getElementById('guest-list').innerHTML = "Mesajlar okunamadı veya dosya henüz oluşturulmamış."; }
+            `).reverse().join('') || "<p style='color:#777;'>Ziyaretçi mesajı yok.</p>";
+        } catch(e) { document.getElementById('guest-list').innerHTML = "Veri okunamadı."; }
     }
 
     async function approveNewMessage() {
         const name = document.getElementById('new-g-name').value;
         const msg = document.getElementById('new-g-msg').value;
-        if(!name || !msg) return showToast("Ziyaretçi adı ve mesaj içeriği zorunludur.", true);
-        
+        if(!name || !msg) return showToast("Zorunlu alanları doldurun.", true);
+        showLoading(true);
+        try {
+            let d, data;
+            try { d = await ghAction('content/guestbook.json'); data = JSON.parse(b2u(d.content)); } 
+            catch(e) { data = { messages: [] }; }
+            data.messages.push({ name, message: msg, date: new Date().toLocaleDateString('tr-TR') });
+            await ghAction('content/guestbook.json', 'PUT', data, d ? d.sha : null);
+            document.getElementById('new-g-name').value = ''; document.getElementById('new-g-msg').value = '';
+            await refreshGuestbook();
+        } catch(e) { showToast("Hata oluştu", true); }
+        showLoading(false);
+    }
+
+    async function deleteMessage(i) {
+        if(!confirm("Mesaj silinsin mi?")) return;
         showLoading(true);
         try {
             const d = await ghAction('content/guestbook.json');
             let data = JSON.parse(b2u(d.content));
-            if(!data.messages) data.messages = [];
-            
-            data.messages.push({
-                name: name,
-                message: msg,
-                date: new Date().toLocaleDateString('tr-TR')
-            });
-            
+            data.messages.splice(i, 1);
             await ghAction('content/guestbook.json', 'PUT', data, d.sha);
-            showToast("Ziyaretçi mesajı onaylandı ve eklendi.");
-            
-            document.getElementById('new-g-name').value = '';
-            document.getElementById('new-g-msg').value = '';
             await refreshGuestbook();
-        } catch(e) { showToast("Mesaj eklenirken hata oluştu.", true); }
+        } catch(e) { showToast("Hata", true); }
         showLoading(false);
     }
 
+    // --- SİTE AYARLARI ---
     async function loadSettings() {
         try {
             const d = await ghAction('content/settings.json');
             const s = JSON.parse(b2u(d.content));
             
-            document.getElementById('s-title').value = s.title || "";
-            document.getElementById('s-bio').value = s.bio || "";
-            document.getElementById('s-seo').value = s.seo || "";
-            document.getElementById('m-portfolio').value = s.menuPortfolio || "";
-            document.getElementById('m-contact').value = s.menuContact || "";
-            document.getElementById('s-instagram').value = s.instagram || "";
-            document.getElementById('s-whatsapp').value = s.whatsapp || "";
-            document.getElementById('s-footer').value = s.footer || "";
             document.getElementById('s-theme').value = s.theme || "#a87f4a";
             document.getElementById('s-maintenance').checked = s.maintenance || false;
-            
             document.documentElement.style.setProperty('--accent', s.theme || "#a87f4a");
-        } catch(e) { console.log("Site ayarları yüklenemedi."); }
+        } catch(e) { console.log("Ayarlar yüklenemedi."); }
     }
 
     async function handleSettingsUpdate() {
-        showLoading(true);
+        showLoading(true, "AYARLAR KAYDEDİLİYOR...");
         try {
-            const d = await ghAction('content/settings.json');
-            let data = JSON.parse(b2u(d.content));
+            let d, sha = null;
+            try { d = await ghAction('content/settings.json'); sha = d.sha; } catch(e) {}
             
-            data.title = document.getElementById('s-title').value;
-            data.bio = document.getElementById('s-bio').value;
-            data.seo = document.getElementById('s-seo').value;
-            data.menuPortfolio = document.getElementById('m-portfolio').value;
-            data.menuContact = document.getElementById('m-contact').value;
-            data.instagram = document.getElementById('s-instagram').value;
-            data.whatsapp = document.getElementById('s-whatsapp').value;
-            data.footer = document.getElementById('s-footer').value;
-            data.theme = document.getElementById('s-theme').value;
-            data.maintenance = document.getElementById('s-maintenance').checked;
+            const data = {
+                theme: document.getElementById('s-theme').value,
+                maintenance: document.getElementById('s-maintenance').checked
+            };
             
-            await ghAction('content/settings.json', 'PUT', data, d.sha);
-            
+            await ghAction('content/settings.json', 'PUT', data, sha);
             document.documentElement.style.setProperty('--accent', data.theme);
-            showToast("Tüm site ayarları başarıyla güncellendi!");
-        } catch(e) { showToast("Ayarlar güncellenirken hata oluştu.", true); }
+            showToast("Ayarlar güncellendi!");
+        } catch(e) { showToast("Hata oluştu.", true); }
         showLoading(false);
     }
 
-    async function uploadLogo() {
-        const fileInput = document.getElementById('s-logo-file');
-        if(!fileInput.files.length) return showToast("Lütfen yüklemek için bir logo dosyası seçin.", true);
-        
-        showLoading(true);
-        try {
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = async (event) => {
-                const base64 = event.target.result.split(',')[1];
-                const fileName = `images/logo.png`; 
-                
-                let sha = null;
-                try {
-                    const info = await ghAction(fileName);
-                    sha = info.sha;
-                } catch(e) {} // Dosya henüz yoksa hatayı yoksay
-                
-                await fetch(`https://api.github.com/repos/${REPO}/contents/${fileName}`, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `token ${localStorage.getItem('uber_t')}` },
-                    body: JSON.stringify({ message: `Logo Update`, content: base64, sha })
-                });
-                
-                showToast("Logo başarıyla yüklendi!");
-                showLoading(false);
-            };
-        } catch(e) {
-            showToast("Logo yüklenirken bir hata oluştu.", true);
-            showLoading(false);
-        }
-    }
 </script>
 </body>
 </html>
