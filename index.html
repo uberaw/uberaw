@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" id="meta-desc" content="UBE RAW | Art & Design Studio">
     <title id="site-title">UBE RAW | Art & Design Studio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500&family=Inter:wght@200;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500&family=Inter:wght@200;400;600&display=swap" rel="stylesheet">
     <style>
         :root { --bg: #0a0a0a; --text: #e5e5e5; --accent: #a87f4a; --border: #1e1e1e; }
         body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; scroll-behavior: smooth; }
@@ -24,9 +24,6 @@
         .nav-menu a { color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; text-decoration: none; transition: 0.3s; }
         .nav-menu a:hover { color: var(--accent); }
 
-        /* Duyuru Barı */
-        #news-bar { background: var(--accent); color: #000; padding: 12px 5%; font-size: 10px; font-weight: bold; text-align: center; display: none; text-transform: uppercase; letter-spacing: 1px; }
-
         /* Biyografi */
         .bio-sec { padding: 80px 5% 40px 5%; text-align: center; max-width: 800px; margin: 0 auto; color: #aaa; font-size: 14px; line-height: 1.8; display: none; }
         
@@ -37,7 +34,7 @@
 
         /* Galeri Izgarası */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 30px; padding: 40px 5%; }
-        .artwork { border: 1px solid var(--border); background: #0d0d0d; position: relative; overflow: hidden; transition: 0.4s; }
+        .artwork { border: 1px solid var(--border); background: #0d0d0d; position: relative; overflow: hidden; transition: 0.4s; display: flex; flex-direction: column; }
         .artwork:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
         /* Slider */
@@ -48,29 +45,32 @@
         .artwork:hover .slider-btn { opacity: 1; }
         .btn-prev { left: 0; } .btn-next { right: 0; }
 
-        .info { padding: 20px; }
+        .info { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
         .info p { font-size: 9px; color: var(--accent); text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 2px; font-weight: bold; }
-        .info h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; margin: 0; color: #fff; font-weight: 300; }
+        .info h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; margin: 0 0 10px 0; color: #fff; font-weight: 300; }
+        .info .meta { font-size: 11px; color: #777; margin-bottom: 12px; line-height: 1.5; }
+        .info .desc { font-size: 12px; color: #aaa; line-height: 1.6; margin-bottom: 20px; font-weight: 200; }
         
-        .map-link { display: inline-block; margin-top: 15px; font-size: 9px; color: var(--accent); text-decoration: none; border: 1px solid var(--accent); padding: 6px 12px; transition: 0.3s; letter-spacing: 1px; }
+        .map-link { display: inline-block; margin-top: auto; font-size: 9px; color: var(--accent); text-decoration: none; border: 1px solid var(--accent); padding: 8px 15px; transition: 0.3s; letter-spacing: 1px; align-self: flex-start; }
         .map-link:hover { background: var(--accent); color: #000; }
 
-        .sale-tag { background: var(--accent); color: #000; font-size: 10px; padding: 6px 12px; position: absolute; top: 15px; right: 15px; font-weight: bold; z-index: 10; letter-spacing: 1px; }
+        .sale-tag { background: var(--accent); color: #000; font-size: 10px; padding: 6px 12px; position: absolute; top: 15px; right: 15px; font-weight: 600; z-index: 10; letter-spacing: 1px; border-radius: 2px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .sale-tag.sold { background: #111; color: #aaa; border: 1px solid #444; }
         
         /* Sertifika & Guestbook Bölümleri */
         .cert-sec { padding: 80px 5%; background: #050505; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 40px; justify-content: center; }
         .cert-box { flex: 1; min-width: 300px; max-width: 500px; border: 1px solid var(--border); padding: 40px; text-align: center; background: #080808; }
-        .cert-box h2 { font-family:'Cormorant Garamond'; color:var(--accent); letter-spacing: 3px; font-size: 24px; margin-bottom: 25px; }
+        .cert-box h2 { font-family:'Cormorant Garamond'; color:var(--accent); letter-spacing: 3px; font-size: 24px; margin-bottom: 25px; font-weight: 300; }
         
         input, textarea { background: #000; border: 1px solid #222; color: #fff; padding: 14px; width: 100%; text-align: center; margin-bottom: 15px; box-sizing: border-box; font-family: inherit; font-size: 13px; }
-        input:focus { border-color: var(--accent); outline: none; }
+        input:focus, textarea:focus { border-color: var(--accent); outline: none; }
         
         .btn-accent { background: var(--accent); border: none; padding: 14px 40px; color: #000; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 11px; letter-spacing: 2px; width: 100%; transition: 0.3s; }
         .btn-accent:hover { filter: brightness(1.1); }
 
         .guestbook-list { padding: 40px 5%; text-align: center; max-width: 900px; margin: 0 auto; }
         .message-item { margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid #111; }
-        .message-item p { font-size: 15px; font-style: italic; color: #ccc; margin-bottom: 10px; }
+        .message-item p { font-size: 15px; font-style: italic; color: #ccc; margin-bottom: 10px; font-family: 'Cormorant Garamond', serif;}
         .message-item small { color: var(--accent); text-transform: uppercase; letter-spacing: 2px; font-size: 10px; }
 
         #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
@@ -79,7 +79,7 @@
         footer { padding: 60px 5%; text-align: center; color: #444; font-size: 10px; letter-spacing: 5px; border-top: 1px solid var(--border); text-transform: uppercase; }
 
         @media (max-width: 768px) {
-            .nav-menu { display: none; } /* Mobil menü için geliştirilebilir */
+            .nav-menu { display: none; } 
             .grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -90,8 +90,6 @@
     <h1 id="m-title">UNDER CONSTRUCTION</h1>
     <p style="color: #666; letter-spacing: 4px;">UBE RAW | STUDIO</p>
 </div>
-
-<div id="news-bar"></div>
 
 <nav>
     <div class="logo-container" id="logo-area" onclick="window.scrollTo(0,0)">
@@ -111,14 +109,15 @@
 <section class="cert-sec" id="cert-area">
     <div class="cert-box">
         <h2>VERIFICATION</h2>
-        <p style="font-size: 11px; color: #666; margin-bottom: 20px;">Eserinizin orijinalliğini sertifika kodu ile sorgulayın.</p>
-        <input type="text" id="cert-input" placeholder="SERTİFİKA KODU">
+        <p style="font-size: 11px; color: #666; margin-bottom: 20px;">Eserinizin orijinalliğini sertifika veya SKU kodu ile sorgulayın.</p>
+        <input type="text" id="cert-input" placeholder="SERTİFİKA KODU (Örn: UBE-26-001)">
         <button class="btn-accent" onclick="checkCert()">SORGULA</button>
         <div id="cert-result" style="margin-top:20px; font-size: 12px;"></div>
     </div>
 
     <div class="cert-box">
         <h2>GUESTBOOK</h2>
+        <p style="font-size: 11px; color: #666; margin-bottom: 20px;">Sanatımız hakkındaki düşüncelerinizi ziyaretçi defterimize bırakın.</p>
         <input type="text" id="g-name" placeholder="İSMİNİZ">
         <textarea id="g-msg" rows="3" placeholder="MESAJINIZ"></textarea>
         <button class="btn-accent" id="send-btn" onclick="sendGuest()">MESAJI GÖNDER</button>
@@ -131,38 +130,40 @@
 <footer id="footer-copy">UBE RAW ART & DESIGN</footer>
 
 <script>
-    // GitHub Pages kullanıyorsanız repo adını buraya ekleyin, aksi takdirde "/" bırakın.
+    // GitHub Pages kullanıyorsanız repo adını buraya ekleyin (örn: "/uberaw/"), aksi takdirde "" bırakın.
     const base = "/uberaw/"; 
     let allWorks = [];
 
     async function init() {
         try {
-            const [settings, portfolio, news] = await Promise.all([
-                fetch(`${base}content/settings.json?v=${Date.now()}`).then(r => r.json()),
-                fetch(`${base}content/portfolio.json?v=${Date.now()}`).then(r => r.json()),
-                fetch(`${base}content/news.json?v=${Date.now()}`).then(r => r.json())
+            // Sadece content klasöründen verileri çeker
+            const [settings, portfolio, guestbookData] = await Promise.all([
+                fetch(`${base}content/settings.json?v=${Date.now()}`).then(r => r.json()).catch(() => ({})),
+                fetch(`${base}content/portfolio.json?v=${Date.now()}`).then(r => r.json()).catch(() => ({projects:[]})),
+                fetch(`${base}content/guestbook.json?v=${Date.now()}`).then(r => r.json()).catch(() => ({messages:[]}))
             ]);
 
-            // 1. Bakım Modu Kontrolü
-            if (settings.maintenanceMode) {
+            // 1. Bakım Modu Kontrolü (Admin V4 ile uyumlu)
+            if (settings.maintenance) {
                 document.getElementById('maintenance-screen').style.display = 'flex';
+                if(settings.title) document.getElementById('m-title').innerText = settings.title;
                 return;
             }
 
-            // 2. Tema ve Logo Uygulama
-            if (settings.themeColor) document.documentElement.style.setProperty('--accent', settings.themeColor);
+            // 2. Tema ve Metin Uygulamaları
+            if (settings.theme) document.documentElement.style.setProperty('--accent', settings.theme);
             
-            // Logo kontrolü (images/logo.png varsa onu bas)
+            document.getElementById('site-title').innerText = settings.title || "UBE RAW | Art & Design Studio";
+            document.getElementById('footer-copy').innerText = settings.footer || "UBE RAW © 2026";
+            document.getElementById('menu-port-text').innerText = settings.menuPortfolio || "WORKS";
+            document.getElementById('menu-cont-text').innerText = settings.menuContact || "CONTACT";
+
+            // Logo kontrolü
             const logoImg = new Image();
             logoImg.src = `${base}images/logo.png?v=${Date.now()}`;
             logoImg.onload = () => {
                 document.getElementById('logo-area').innerHTML = `<img src="${logoImg.src}" alt="UBE RAW">`;
             };
-
-            document.getElementById('site-title').innerText = settings.siteTitle || "UBE RAW";
-            document.getElementById('footer-copy').innerText = settings.footerText || "UBE RAW © 2026";
-            document.getElementById('menu-port-text').innerText = settings.menuPortfolio || "WORKS";
-            document.getElementById('menu-cont-text').innerText = settings.menuContact || "CONTACT";
 
             if (settings.bio) {
                 const bio = document.getElementById('bio-sec');
@@ -173,19 +174,24 @@
             // 3. Sosyal Medya
             let socialHTML = "";
             if (settings.instagram) socialHTML += `<a href="${settings.instagram.includes('http') ? settings.instagram : 'https://instagram.com/'+settings.instagram}" target="_blank" style="color:var(--accent)">IG</a>`;
-            if (settings.whatsapp) socialHTML += `<a href="https://wa.me/${settings.whatsapp.replace(/[^0-9]/g, '')}" target="_blank" style="color:var(--accent)">WA</a>`;
+            if (settings.whatsapp || settings.phone) {
+                const phone = settings.whatsapp || settings.phone;
+                socialHTML += `<a href="https://wa.me/${phone.replace(/[^0-9]/g, '')}" target="_blank" style="color:var(--accent)">WA</a>`;
+            }
+            if (settings.behance) socialHTML += `<a href="${settings.behance}" target="_blank" style="color:var(--accent)">BE</a>`;
             document.getElementById('social-nav').innerHTML = socialHTML;
 
-            // 4. Eserler ve Filtreleme
-            allWorks = portfolio.projects || [];
+            // 4. Eserler (Çöp Kutusundakileri, Gizlileri ve Taslakları Filtrele!)
+            allWorks = (portfolio.projects || []).filter(w => !w.isDeleted && !w.isHidden && !w.isDraft);
+            
             const cats = ['HEPSİ', ...new Set(allWorks.map(w => w.category).filter(c => c))];
             document.getElementById('cat-nav').innerHTML = cats.map(c => `
                 <span class="filter-btn ${c==='HEPSİ'?'active':''}" onclick="render('${c}', this)">${c}</span>
             `).join('');
 
-            // 5. Ziyaretçi Defteri
-            if(news.guestbook?.length) {
-                document.getElementById('guestbook-list').innerHTML = news.guestbook.map(g => `
+            // 5. Ziyaretçi Defteri (Admin panelden onaylananlar)
+            if(guestbookData.messages && guestbookData.messages.length) {
+                document.getElementById('guestbook-list').innerHTML = guestbookData.messages.map(g => `
                     <div class="message-item">
                         <p>"${g.message}"</p>
                         <small>— ${g.name} (${g.date || ''})</small>
@@ -204,14 +210,30 @@
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
         }
+        
         const filtered = cat === 'HEPSİ' ? allWorks : allWorks.filter(w => w.category === cat);
         const grid = document.getElementById('main-grid');
         
         grid.innerHTML = filtered.map((w, idx) => {
             const imgs = (w.image || "").split(',');
+            
+            // Satış ve Fiyat Etiketi Mantığı
+            let tagHtml = '';
+            if (w.isSale) {
+                tagHtml = `<div class="sale-tag sold">SATILDI</div>`;
+            } else if (w.price) {
+                tagHtml = `<div class="sale-tag">${w.price} ${w.currency || 'TRY'}</div>`;
+            }
+
+            // Meta Bilgiler (Materyal, Boyut vb.)
+            let metaHtml = [];
+            if(w.material) metaHtml.push(w.material);
+            if(w.dimensions) metaHtml.push(w.dimensions);
+            const metaStr = metaHtml.length > 0 ? `<div class="meta">${metaHtml.join(' | ')}</div>` : '';
+
             return `
             <div class="artwork">
-                ${w.isSale ? `<div class="sale-tag">${w.price || 'SATIŞTA'}</div>` : ''}
+                ${tagHtml}
                 <div class="slider-container" id="slider-${idx}">
                     <div class="slider-track" id="track-${idx}">
                         ${imgs.map(img => `<img src="${base}${img.trim()}" onclick="openL(this.src)" loading="lazy">`).join('')}
@@ -222,9 +244,12 @@
                     ` : ''}
                 </div>
                 <div class="info">
-                    <p>${w.category || 'ART'}</p>
+                    <p>${w.category || 'ART'} ${w.subCategory ? `· ${w.subCategory}` : ''}</p>
                     <h3>${w.title}</h3>
-                    ${w.mapLink ? `<a href="${w.mapLink}" target="_blank" class="map-link">📍 LOKASYON</a>` : ''}
+                    ${metaStr}
+                    ${w.description ? `<div class="desc">${w.description}</div>` : ''}
+                    
+                    ${w.mapLink ? `<a href="${w.mapLink}" target="_blank" class="map-link">📍 LOKASYON / SERGİ</a>` : ''}
                 </div>
             </div>
         `}).join('');
@@ -241,7 +266,7 @@
     }
 
     function openL(s) { 
-        document.getElementById('l-img').src = s; 
+        document.getElementById('l-img').src = s;
         document.getElementById('lightbox').style.display = 'flex'; 
     }
 
@@ -251,13 +276,14 @@
         const match = allWorks.find(w => w.certCode?.toUpperCase() === val);
         const res = document.getElementById('cert-result');
         if(match) {
-            res.innerHTML = `<span style="color:#4CAF50; font-weight:bold;">✔ BU ESER ORİJİNALDİR: ${match.title}</span>`;
+            res.innerHTML = `<span style="color:#4CAF50; font-weight:bold; letter-spacing: 1px;">✔ BU ESER ORİJİNALDİR: ${match.title}</span>`;
         } else {
-            res.innerHTML = `<span style="color:#ff4444;">✘ KAYIT BULUNAMADI</span>`;
+            res.innerHTML = `<span style="color:#ff4444; letter-spacing: 1px;">✘ SİSTEMDE BÖYLE BİR KAYIT BULUNAMADI</span>`;
         }
     }
 
-    async function sendGuest() {
+    // Formspree İletişim Formu (Mesajlar güvenli olarak toplanır)
+    function sendGuest() {
         const name = document.getElementById('g-name').value.trim();
         const msg = document.getElementById('g-msg').value.trim();
         if(!name || !msg) return alert("Lütfen tüm alanları doldurun.");
@@ -266,19 +292,19 @@
         btn.innerText = "GÖNDERİLİYOR...";
         btn.disabled = true;
         
-        // Formspree ID'nizi buraya yazın
+        // KENDI FORMSPREE KODUNUZ: mjgjewqn
         fetch("https://formspree.io/f/mjgjewqn", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, message: msg })
+            body: JSON.stringify({ name, message: msg, type: "Ziyaretçi Defteri Talebi" })
         }).then(() => {
-            alert("Mesajınız iletildi. Onaylandıktan sonra yayınlanacaktır.");
+            alert("Mesajınız bize ulaştı. Yönetici onayından sonra ziyaretçi defterinde yayınlanacaktır.");
             document.getElementById('g-name').value = "";
             document.getElementById('g-msg').value = "";
             btn.innerText = "MESAJI GÖNDER";
             btn.disabled = false;
         }).catch(() => {
-            alert("Bir hata oluştu.");
+            alert("Sunucu kaynaklı bir hata oluştu, lütfen daha sonra tekrar deneyin.");
             btn.disabled = false;
         });
     }
