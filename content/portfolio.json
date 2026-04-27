@@ -85,7 +85,7 @@
       "stage": "Tamamlandı",
       "location": "",
       "isDraft": false,
-      "isReserved": true
+      "isReserved": false
     }
   ]
 }
