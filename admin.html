@@ -199,12 +199,23 @@
 <div id="login">
     <div class="login-box">
         <h1>UBE RAW</h1>
-        <div class="login-sub">STUDIO OPERATING SYSTEM v4.0</div>
-        <p id="login-desc" style="font-size:10px; color:#444; margin-bottom:20px; letter-spacing:1px;">Sistemi başlatmak için şifrenizi girin.</p>
-        <input type="password" id="login-pwd" placeholder="Admin Şifresi">
-        <input type="password" id="login-token" placeholder="GitHub Token (Sadece ilk girişte)" style="display:none;">
-        <button onclick="auth()" class="full">SİSTEME GİRİŞ YAP</button>
-        <button onclick="resetLogin()" class="secondary full" style="margin-top:6px; font-size:9px;">Token Sıfırla (Cihaz Değişimi)</button>
+        <div class="login-sub">STUDIO OPERATING SYSTEM v5.0</div>
+        <p id="login-desc" style="font-size:10px; color:#444; margin-bottom:20px; letter-spacing:1px;">Admin şifrenizi girin.</p>
+
+        <!-- İlk kurulum wizard -->
+        <div id="setup-wizard" style="display:none; text-align:left; background:#0a0a0a; border:1px solid #1a1a1a; padding:16px; border-radius:4px; margin-bottom:16px;">
+            <div style="font-size:9px; color:var(--accent); letter-spacing:2px; margin-bottom:12px;">⚙ İLK KURULUM</div>
+            <label style="font-size:9px;color:#555;">GitHub Kullanıcı Adı / Repo (örn: uberaw/uberaw)</label>
+            <input type="text" id="setup-repo" placeholder="kullanici/repo" style="margin:6px 0 10px;">
+            <label style="font-size:9px;color:#555;">GitHub Token (repo yetkili)</label>
+            <input type="password" id="login-token" placeholder="ghp_xxxxxxxxxxxx">
+            <label style="font-size:9px;color:#555;margin-top:8px;display:block;">Admin Şifresi Belirle (en az 6 karakter)</label>
+            <input type="password" id="login-pwd-confirm" placeholder="Şifreyi tekrar girin" style="margin-top:6px;">
+        </div>
+
+        <input type="password" id="login-pwd" placeholder="Admin Şifresi" onkeydown="if(event.key==='Enter')auth()">
+        <button onclick="auth()" class="full" style="margin-top:10px;">SİSTEME GİRİŞ YAP</button>
+        <button onclick="resetLogin()" class="secondary full" style="margin-top:6px; font-size:9px;">⚙ Yeniden Kur / Cihaz Değişimi</button>
     </div>
 </div>
 
@@ -1029,7 +1040,6 @@
 // ═══════════════════════════════════════════════
 // CONFIG & STATE
 // ═══════════════════════════════════════════════
-const REPO = "uberaw/uberaw";
 let sessionToken = "";
 let currentPortfolio = { projects: [] };
 let currentCRM = { collectors: [] };
@@ -1082,7 +1092,7 @@ function switchInnerTab(prefix, panel) {
         if(el.classList.contains('inner-tab-panel')) el.classList.remove('active');
     });
     document.getElementById(`${prefix}-${panel}`)?.classList.add('active');
-    const tabMap = { ws:'workshop', config:'config', ai:'ai', gallery:'gallery' };
+    const tabMap = { ws:'workshop', config:'config', ai:'ai', gallery:'gallery', media:'media' };
     const parentTab = document.getElementById(`tab-${tabMap[prefix] || prefix}`);
     parentTab?.querySelectorAll('.inner-tab-btn').forEach((btn, i) => {
         const panels = parentTab.querySelectorAll('.inner-tab-panel');
@@ -1091,47 +1101,88 @@ function switchInnerTab(prefix, panel) {
 }
 
 // ═══════════════════════════════════════════════
-// SESSION & AUTH
+// SESSION & AUTH — Şifreyle her yerden giriş
 // ═══════════════════════════════════════════════
-if(!localStorage.getItem('ube_enc_t')) {
-    document.getElementById('login-token').style.display = 'block';
-    document.getElementById('login-desc').innerText = "İlk kurulum: GitHub Token ve şifre belirleyin.";
-}
+let REPO = localStorage.getItem('ube_repo') || "uberaw/uberaw";
+
+// İlk kurulum kontrolü
+(function checkFirstRun() {
+    if(!localStorage.getItem('ube_enc_t')) {
+        document.getElementById('setup-wizard').style.display = 'block';
+        document.getElementById('login-desc').innerText = "İlk kurulum: Repo, token ve şifre belirleyin.";
+        if(localStorage.getItem('ube_repo')) document.getElementById('setup-repo').value = localStorage.getItem('ube_repo');
+    }
+})();
+
 function resetLogin() {
-    if(confirm("Kayıtlı token silinecek. Emin misiniz?")) { localStorage.removeItem('ube_enc_t'); location.reload(); }
+    if(confirm("Tüm kayıtlı veriler silinecek (token, repo). Yeni kurulum yapacaksınız. Emin misiniz?")) {
+        ['ube_enc_t','ube_repo','ube_log'].forEach(k => localStorage.removeItem(k));
+        location.reload();
+    }
 }
-function logout() { sessionToken=""; clearTimeout(sessionExpireTimer); location.reload(); }
+function logout() {
+    sessionToken = "";
+    clearTimeout(sessionExpireTimer);
+    document.getElementById('login').style.display = 'flex';
+    document.getElementById('login-pwd').value = '';
+    showToast("Oturumunuz kapatıldı.");
+}
 function resetSessionTimer() {
     clearTimeout(sessionExpireTimer);
     const timeout = (parseInt(currentSettings.timeout) || SESSION_TIMEOUT_DEFAULT) * 60 * 1000;
     sessionExpireTimer = setTimeout(() => {
         showToast("Oturum süresi doldu. Güvenlik nedeniyle çıkış yapıldı.", false);
-        setTimeout(logout, 2000);
+        setTimeout(logout, 1500);
     }, timeout);
 }
+
 async function auth() {
-    const pwd = document.getElementById('login-pwd').value;
-    const rawToken = document.getElementById('login-token').value;
+    const pwd = document.getElementById('login-pwd').value.trim();
     if(!pwd) return showToast("Şifre boş olamaz!", true);
+
+    // İlk kurulum
     if(!localStorage.getItem('ube_enc_t')) {
-        if(!rawToken) return showToast("İlk kurulum için GitHub Token zorunludur!", true);
+        const rawToken = document.getElementById('login-token').value.trim();
+        const repo = document.getElementById('setup-repo').value.trim();
+        const confirm2 = document.getElementById('login-pwd-confirm').value.trim();
+        if(!rawToken) return showToast("GitHub Token zorunludur!", true);
+        if(!repo || !repo.includes('/')) return showToast("Geçerli bir repo formatı girin (kullanici/repo)", true);
+        if(pwd !== confirm2) return showToast("Şifreler eşleşmiyor!", true);
+        if(pwd.length < 6) return showToast("Şifre en az 6 karakter olmalı!", true);
+        REPO = repo;
+        localStorage.setItem('ube_repo', repo);
         localStorage.setItem('ube_enc_t', xorEncrypt(rawToken, pwd));
+        // Şifrenin hash'ini sakla (doğrulama için)
+        localStorage.setItem('ube_pwd_h', btoa(pwd.split('').map((c,i)=>String.fromCharCode(c.charCodeAt(0)+i%7)).join('')));
         sessionToken = rawToken;
     } else {
+        // Şifre doğrulama
+        const storedHash = localStorage.getItem('ube_pwd_h');
+        const inputHash = btoa(pwd.split('').map((c,i)=>String.fromCharCode(c.charCodeAt(0)+i%7)).join(''));
+        if(storedHash && storedHash !== inputHash) {
+            // Yanlış şifre kontrolü — token'ı çözmeye çalış
+            const testToken = xorDecrypt(localStorage.getItem('ube_enc_t'), pwd);
+            if(!testToken || testToken.length < 10) {
+                showToast("Yanlış şifre!", true);
+                return;
+            }
+        }
+        REPO = localStorage.getItem('ube_repo') || REPO;
         sessionToken = xorDecrypt(localStorage.getItem('ube_enc_t'), pwd);
     }
+
     showLoading(true, "YETKİLENDİRİLİYOR...");
     try {
         const res = await ghAction('content/settings.json');
-        if(res.sha) {
+        if(res.sha || res.content) {
             document.getElementById('login').style.display = 'none';
             await initDashboard();
             showToast("Sisteme güvenle giriş yapıldı.", false, true);
-            addLog("AUTH", "Sisteme giriş yapıldı.");
+            addLog("AUTH", "Sisteme giriş · " + new Date().toLocaleString('tr-TR'));
             resetSessionTimer();
-        } else throw new Error();
+        } else throw new Error("Geçersiz yanıt");
     } catch(e) {
-        showToast("Şifre yanlış veya Token geçersiz!", true);
+        showToast("Giriş başarısız: Şifre yanlış veya GitHub erişim hatası.", true);
         sessionToken = "";
     } finally { showLoading(false); }
 }
@@ -1156,17 +1207,6 @@ async function ghAction(path, method='GET', data=null, sha=null) {
 // ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
-async function initDashboard() {
-    await loadSettings();
-    await fetchCRM();
-    await renderInventory();
-    await refreshOrders();
-    await refreshGuestbook();
-    await refreshWorkshops();
-    renderExpoSelectLists();
-    renderReminderList();
-}
-
 // ═══════════════════════════════════════════════
 // LOG SYSTEM (Modül 10)
 // ═══════════════════════════════════════════════
@@ -1427,7 +1467,7 @@ async function renderInventory() {
             ${thumbUrl ? `<img src="${thumbUrl}" class="item-thumb" onerror="this.style.display='none';this.nextSibling.style.display='flex';">
             <div class="item-thumb-placeholder" style="display:none;">🖼</div>` : `<div class="item-thumb-placeholder">🖼</div>`}
             <div class="item-info">
-                <b>${p.title || '—'} ${badges}</b>
+                <b>${p.title || '—'} ${badges} ${p.awards?.length ? `<span class="badge" style="background:#1a1000;color:#ffb300;border:1px solid #3a2500;">🏆 ${p.awards.length} ÖDÜL</span>` : ''}</b>
                 <small>
                     <span style="color:var(--accent);">SKU</span> ${p.certCode||'-'} &nbsp;·&nbsp;
                     <span style="color:var(--accent);">Kat.</span> ${p.category||'-'} &nbsp;·&nbsp;
@@ -1446,7 +1486,8 @@ async function renderInventory() {
                      <button class="secondary sm" onclick="moveItem(${i},1)">▼</button>
                      <button class="warning sm" onclick="toggleVisibility(${i})">👁</button>
                      <button class="info sm" onclick="toggleReserved(${i})">${p.isReserved?'✓RZV':'RZV'}</button>
-                     <button class="secondary sm" onclick="openConsignModal(${i})">↗</button>`;
+                     <button class="secondary sm" onclick="openConsignModal(${i})">↗</button>
+                     <button class="secondary sm" onclick="generateDeliveryPDF(${i})" title="Çıkış Tutanağı">📋</button>`;
             if(p.isSale) html += `<button class="danger sm" onclick="cancelSale(${i})">İPTAL</button>`;
             html += `<button class="secondary sm" onclick="openEditModal(${i})">DÜZENLE</button>
                      <button class="danger sm" onclick="softDeleteProject(${i})">ÇÖP</button>`;
@@ -2731,6 +2772,425 @@ function setLoaderText(txt) { document.getElementById('loader-text').innerText =
 // ═══════════════════════════════════════════════
 // INIT ON LOAD
 // ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// BLOG & HABERLER (Modül 9.3)
+// ═══════════════════════════════════════════════
+let currentNews = { announcements: [], guestbook: [] };
+
+async function fetchNews() {
+    try {
+        const d = await ghAction('content/news.json');
+        currentNews = JSON.parse(b2u(d.content));
+        currentNews.sha = d.sha;
+    } catch(e) { currentNews = { announcements: [], guestbook: [] }; }
+}
+
+async function refreshBlog() {
+    await fetchNews();
+    const list = currentNews.announcements || [];
+    const el = document.getElementById('blog-list');
+    if(!el) return;
+    el.innerHTML = list.length ? [...list].reverse().map((post, ri) => {
+        const i = list.length - 1 - ri;
+        return `<div class="item-row">
+            <div class="item-info">
+                <b>${post.title} ${post.pinned?'<span class="badge featured">📌 DUYURU</span>':''} ${!post.published?'<span class="badge draft">TASLAK</span>':''}</b>
+                <small>${post.date||''} · ${post.tag||'—'} · ${(post.summary||'').substring(0,80)}</small>
+            </div>
+            <div class="btn-group">
+                <button class="secondary sm" onclick="openBlogModal(${i})">DÜZENLE</button>
+                <button class="danger sm" onclick="deleteBlogPost(${i})">SİL</button>
+            </div>
+        </div>`;
+    }).join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Henüz blog yazısı yok.</p>";
+}
+
+function openBlogModal(i) {
+    if(i === undefined || i === '') {
+        document.getElementById('blog-idx').value = '';
+        ['blog-title','blog-summary','blog-content','blog-date','blog-tag'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('blog-pinned').checked = false;
+        document.getElementById('blog-published').checked = true;
+        document.getElementById('blog-date').value = new Date().toLocaleDateString('tr-TR', {day:'numeric',month:'long',year:'numeric'});
+    } else {
+        const post = currentNews.announcements[i];
+        document.getElementById('blog-idx').value = i;
+        document.getElementById('blog-title').value = post.title || '';
+        document.getElementById('blog-summary').value = post.summary || '';
+        document.getElementById('blog-content').value = post.content || '';
+        document.getElementById('blog-date').value = post.date || '';
+        document.getElementById('blog-tag').value = post.tag || '';
+        document.getElementById('blog-pinned').checked = post.pinned || false;
+        document.getElementById('blog-published').checked = post.published !== false;
+    }
+    document.getElementById('blog-modal').classList.add('open');
+}
+
+async function saveBlogPost() {
+    const title = document.getElementById('blog-title').value.trim();
+    if(!title) return showToast("Başlık zorunludur.", true);
+    showLoading(true, "BLOG KAYDEDİLİYOR...");
+    const idx = document.getElementById('blog-idx').value;
+    const post = {
+        title,
+        summary: document.getElementById('blog-summary').value,
+        content: document.getElementById('blog-content').value,
+        date: document.getElementById('blog-date').value,
+        tag: document.getElementById('blog-tag').value,
+        pinned: document.getElementById('blog-pinned').checked,
+        published: document.getElementById('blog-published').checked,
+        id: idx === '' ? 'post_' + Date.now() : currentNews.announcements[idx]?.id || 'post_' + Date.now()
+    };
+    if(idx === '') currentNews.announcements.push(post);
+    else currentNews.announcements[idx] = post;
+    try {
+        let sha = currentNews.sha || null;
+        try { const d = await ghAction('content/news.json'); sha = d.sha; } catch(e) {}
+        await ghAction('content/news.json', 'PUT', { announcements: currentNews.announcements, guestbook: currentNews.guestbook || [] }, sha);
+        document.getElementById('blog-modal').classList.remove('open');
+        addLog("BLOG", (idx===''?"Yeni yazı: ":"Güncellendi: ") + title);
+        showToast("Blog yazısı kaydedildi.", false, true);
+        await refreshBlog();
+    } catch(e) { showToast("Kayıt hatası: " + e.message, true); }
+    showLoading(false);
+}
+
+async function deleteBlogPost(i) {
+    if(!confirm("Bu yazı silinecek?")) return;
+    showLoading(true);
+    const title = currentNews.announcements[i]?.title;
+    currentNews.announcements.splice(i, 1);
+    try {
+        let sha = currentNews.sha || null;
+        try { const d = await ghAction('content/news.json'); sha = d.sha; } catch(e) {}
+        await ghAction('content/news.json', 'PUT', { announcements: currentNews.announcements, guestbook: currentNews.guestbook || [] }, sha);
+        addLog("BLOG SİLME", title);
+        showToast("Yazı silindi.");
+        await refreshBlog();
+    } catch(e) { showToast("Hata", true); }
+    showLoading(false);
+}
+
+// ═══════════════════════════════════════════════
+// MEDYA: KKIRPMA & DÖNDÜRME (Modül 8.5)
+// ═══════════════════════════════════════════════
+let cropState = { img: null, rotation: 0, flipH: false, flipV: false, selecting: false, sel: null, startX: 0, startY: 0 };
+
+function loadCropImage(input) {
+    if(!input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+            cropState.img = img;
+            cropState.rotation = 0;
+            cropState.flipH = false;
+            cropState.flipV = false;
+            cropState.sel = null;
+            document.getElementById('crop-workspace').style.display = 'block';
+            drawCropCanvas();
+            setupCropEvents();
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
+function drawCropCanvas() {
+    const { img, rotation, flipH, flipV, sel } = cropState;
+    if(!img) return;
+    const canvas = document.getElementById('crop-canvas');
+    const isRotated = rotation === 90 || rotation === 270;
+    const maxW = Math.min(560, img.width);
+    const scale = maxW / (isRotated ? img.height : img.width);
+    canvas.width = isRotated ? img.height * scale : img.width * scale;
+    canvas.height = isRotated ? img.width * scale : img.height * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate((rotation * Math.PI) / 180);
+    ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+    ctx.drawImage(img, -img.width * scale / 2, -img.height * scale / 2, img.width * scale, img.height * scale);
+    ctx.restore();
+    // Draw selection
+    if(sel) {
+        ctx.strokeStyle = 'rgba(168,127,74,0.9)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 3]);
+        ctx.strokeRect(sel.x, sel.y, sel.w, sel.h);
+        ctx.fillStyle = 'rgba(168,127,74,0.08)';
+        ctx.fillRect(sel.x, sel.y, sel.w, sel.h);
+        ctx.setLineDash([]);
+        document.getElementById('crop-info').innerText = `${Math.round(sel.w)} × ${Math.round(sel.h)} px`;
+    }
+}
+
+function setupCropEvents() {
+    const canvas = document.getElementById('crop-canvas');
+    const getPos = e => {
+        const r = canvas.getBoundingClientRect();
+        const touch = e.touches ? e.touches[0] : e;
+        return { x: touch.clientX - r.left, y: touch.clientY - r.top };
+    };
+    canvas.onmousedown = canvas.ontouchstart = e => {
+        e.preventDefault();
+        const p = getPos(e);
+        cropState.selecting = true;
+        cropState.startX = p.x; cropState.startY = p.y;
+        cropState.sel = { x: p.x, y: p.y, w: 0, h: 0 };
+    };
+    canvas.onmousemove = canvas.ontouchmove = e => {
+        if(!cropState.selecting) return;
+        e.preventDefault();
+        const p = getPos(e);
+        cropState.sel = { x: Math.min(p.x, cropState.startX), y: Math.min(p.y, cropState.startY), w: Math.abs(p.x - cropState.startX), h: Math.abs(p.y - cropState.startY) };
+        drawCropCanvas();
+    };
+    canvas.onmouseup = canvas.ontouchend = () => { cropState.selecting = false; };
+}
+
+function rotateCrop(deg) { cropState.rotation = (cropState.rotation + deg + 360) % 360; cropState.sel = null; drawCropCanvas(); }
+function flipCrop(dir) { if(dir === 'h') cropState.flipH = !cropState.flipH; else cropState.flipV = !cropState.flipV; drawCropCanvas(); }
+function resetCrop() { cropState.rotation = 0; cropState.flipH = false; cropState.flipV = false; cropState.sel = null; drawCropCanvas(); }
+
+function applyCrop() {
+    const canvas = document.getElementById('crop-canvas');
+    const { sel } = cropState;
+    const out = document.createElement('canvas');
+    if(sel && sel.w > 10 && sel.h > 10) {
+        out.width = sel.w; out.height = sel.h;
+        out.getContext('2d').drawImage(canvas, sel.x, sel.y, sel.w, sel.h, 0, 0, sel.w, sel.h);
+    } else {
+        out.width = canvas.width; out.height = canvas.height;
+        out.getContext('2d').drawImage(canvas, 0, 0);
+    }
+    const a = document.createElement('a');
+    a.href = out.toDataURL('image/jpeg', 0.92);
+    a.download = 'ube-raw-cropped-' + Date.now() + '.jpg';
+    a.click();
+    showToast("Görsel indirildi.", false, true);
+    addLog("MEDYA", "Görsel kırpıldı ve indirildi.");
+}
+
+// ═══════════════════════════════════════════════
+// MEDYA: KAYIP MEDYA TARAYICI (Modül 8.10)
+// ═══════════════════════════════════════════════
+async function scanMissingMedia() {
+    const el = document.getElementById('scan-result');
+    el.innerHTML = '<p style="color:#555;">Tarama başlıyor... Bu işlem biraz sürebilir.</p>';
+    showLoading(true, "MEDYA TARANIYOR...");
+    const broken = [], ok = [];
+    const projects = currentPortfolio.projects.filter(p => !p.isDeleted && p.image);
+    let checked = 0;
+    for(const p of projects) {
+        const imgs = p.image.split(',').map(s => s.trim()).filter(Boolean);
+        for(const imgPath of imgs) {
+            const url = `https://raw.githubusercontent.com/${REPO}/main/${imgPath}`;
+            try {
+                const r = await fetch(url, { method: 'HEAD' });
+                if(!r.ok) broken.push({ title: p.title, path: imgPath });
+                else ok.push(imgPath);
+            } catch(e) { broken.push({ title: p.title, path: imgPath }); }
+        }
+        checked++;
+        setLoaderText(`Taranıyor ${checked}/${projects.length}: ${p.title}`);
+    }
+    showLoading(false);
+    if(broken.length === 0) {
+        el.innerHTML = `<div class="info-box" style="border-left-color:#4caf50;background:rgba(76,175,80,0.05);">✓ ${ok.length} görsel kontrol edildi. Kırık bağlantı bulunamadı.</div>`;
+    } else {
+        el.innerHTML = `<div class="info-box warn">⚠ ${broken.length} kırık medya bulundu (${ok.length} sağlıklı).</div>` +
+            broken.map(b => `<div class="item-row">
+                <div class="item-info"><b style="color:#f66;">${b.title}</b><small style="color:#555;">${b.path}</small></div>
+            </div>`).join('');
+    }
+    addLog("MEDYA TARAMA", `${ok.length} sağlıklı, ${broken.length} kırık`);
+}
+
+// ═══════════════════════════════════════════════
+// ÖDÜL & ROZETLER (Modül 6.10)
+// ═══════════════════════════════════════════════
+function renderAwardList() {
+    const el = document.getElementById('award-list');
+    const awardSel = document.getElementById('award-artwork-select');
+    if(!el) return;
+    const withAwards = currentPortfolio.projects.filter(p => !p.isDeleted && p.awards?.length);
+    el.innerHTML = withAwards.length ? withAwards.map(p => {
+        const idx = currentPortfolio.projects.indexOf(p);
+        return p.awards.map((award, ai) => `
+            <div class="item-row">
+                <div class="item-info">
+                    <b>🏆 ${award}</b>
+                    <small>${p.title} · ${p.certCode || '—'}</small>
+                </div>
+                <button class="danger sm" onclick="removeAward(${idx},${ai})">KALDIR</button>
+            </div>`).join('');
+    }).join('') : "<p style='color:#444;font-size:10px;padding:12px;'>Henüz ödül kaydı yok.</p>";
+
+    if(awardSel) {
+        awardSel.innerHTML = '<option value="">Eser Seçin</option>' +
+            currentPortfolio.projects.filter(p=>!p.isDeleted).map((p,i) =>
+                `<option value="${currentPortfolio.projects.indexOf(p)}">${p.certCode||'?'} — ${p.title}</option>`
+            ).join('');
+    }
+}
+
+async function addAward() {
+    const idx = document.getElementById('award-artwork-select').value;
+    const awardText = document.getElementById('award-text').value.trim();
+    if(idx === '' || !awardText) return showToast("Eser ve ödül metni gerekli.", true);
+    showLoading(true);
+    if(!currentPortfolio.projects[idx].awards) currentPortfolio.projects[idx].awards = [];
+    currentPortfolio.projects[idx].awards.push(awardText);
+    try {
+        await ghAction('content/portfolio.json', 'PUT', {projects: currentPortfolio.projects}, currentPortfolio.sha);
+        document.getElementById('award-text').value = '';
+        addLog("ÖDÜL", currentPortfolio.projects[idx].title + " · " + awardText);
+        showToast("Ödül rozeti eklendi.", false, true);
+        renderAwardList();
+        await renderInventory();
+    } catch(e) { showToast("Hata", true); }
+    showLoading(false);
+}
+
+async function removeAward(idx, ai) {
+    if(!confirm("Rozet kaldırılsın mı?")) return;
+    showLoading(true);
+    currentPortfolio.projects[idx].awards.splice(ai, 1);
+    try {
+        await ghAction('content/portfolio.json', 'PUT', {projects: currentPortfolio.projects}, currentPortfolio.sha);
+        showToast("Rozet kaldırıldı.");
+        renderAwardList();
+        await renderInventory();
+    } catch(e) { showToast("Hata", true); }
+    showLoading(false);
+}
+
+// ═══════════════════════════════════════════════
+// BEKLEME LİSTESİ (Modül 4.7)
+// ═══════════════════════════════════════════════
+function renderWaitlist() {
+    const el = document.getElementById('waitlist-content');
+    if(!el) return;
+    const list = JSON.parse(localStorage.getItem('ube_waitlist') || '[]');
+    el.innerHTML = list.length ? list.map((w, i) => `
+        <div class="item-row">
+            <div class="item-info">
+                <b>${w.name}</b>
+                <small>${w.contact} · ${w.desc}</small>
+                <small style="color:#333;">${w.date}</small>
+            </div>
+            <button class="danger sm" onclick="removeWaitlist(${i})">SİL</button>
+        </div>`).join('') : "<p style='color:#444;font-size:10px;padding:12px;'>Bekleme listesi boş.</p>";
+}
+
+function addWaitlist() {
+    const name = document.getElementById('wl-name').value.trim();
+    const contact = document.getElementById('wl-contact').value.trim();
+    const desc = document.getElementById('wl-desc').value.trim();
+    if(!name || !contact) return showToast("Ad ve iletişim zorunlu.", true);
+    const list = JSON.parse(localStorage.getItem('ube_waitlist') || '[]');
+    list.push({ name, contact, desc, date: nowStr(), id: 'wl_' + Date.now() });
+    localStorage.setItem('ube_waitlist', JSON.stringify(list));
+    ['wl-name','wl-contact','wl-desc'].forEach(id => document.getElementById(id).value = '');
+    addLog("BEKLEME", name + " · " + desc);
+    showToast("Bekleme listesine eklendi.", false, true);
+    renderWaitlist();
+}
+
+function removeWaitlist(i) {
+    const list = JSON.parse(localStorage.getItem('ube_waitlist') || '[]');
+    list.splice(i, 1);
+    localStorage.setItem('ube_waitlist', JSON.stringify(list));
+    renderWaitlist();
+}
+
+// ═══════════════════════════════════════════════
+// ÖĞRENCI İNDİRİM KODLARI (Modül 7.9)
+// ═══════════════════════════════════════════════
+function generateDiscountCode(studentName) {
+    const code = 'UBE-' + studentName.replace(/\s/g,'').toUpperCase().substring(0,4) + '-' + Math.random().toString(36).substring(2,6).toUpperCase();
+    const discounts = JSON.parse(localStorage.getItem('ube_discounts') || '[]');
+    discounts.push({ code, student: studentName, created: nowStr(), used: false, pct: 10 });
+    localStorage.setItem('ube_discounts', JSON.stringify(discounts));
+    showToast(`İndirim kodu: ${code}`, false, true);
+    addLog("İNDİRİM", studentName + " → " + code);
+    return code;
+}
+
+// ═══════════════════════════════════════════════
+// TESLİMAT / ÇIKIŞ TUTANAĞI PDF (Modül 6.7)
+// ═══════════════════════════════════════════════
+function generateDeliveryPDF(projectIdx) {
+    const p = currentPortfolio.projects[projectIdx];
+    if(!p) return showToast("Eser bulunamadı.", true);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: "portrait", format: "a4" });
+    const w = 210, cx = w/2;
+    doc.setFillColor(8,8,8); doc.rect(0,0,w,297,'F');
+    doc.setDrawColor(168,127,74); doc.setLineWidth(0.8); doc.rect(10,10,w-20,277);
+    doc.setTextColor(168,127,74); doc.setFontSize(18);
+    doc.text("UBE RAW STUDIO", cx, 28, {align:"center"});
+    doc.setFontSize(13); doc.setTextColor(200,200,200);
+    doc.text("TESLİMAT / ÇIKIŞ TUTANAĞI", cx, 40, {align:"center"});
+    doc.setDrawColor(168,127,74,50); doc.line(20,46,190,46);
+    doc.setFontSize(10); doc.setTextColor(150,150,150);
+    const rows = [
+        ["Tarih", new Date().toLocaleDateString('tr-TR')],
+        ["Eser Adı", p.title],
+        ["SKU / Sertifika No", p.certCode || '—'],
+        ["Kategori", p.category || '—'],
+        ["Materyal", p.material || '—'],
+        ["Boyut", p.dimensions || '—'],
+        ["Ağırlık", p.weight ? p.weight + ' kg' : '—'],
+        ["Konum (Çıkış Öncesi)", p.location || '—'],
+        ["Teslim Alan", p.isConsignment ? p.consignVenue || '—' : (p.owner || '—')],
+    ];
+    let y = 60;
+    rows.forEach(([label, val]) => {
+        doc.setTextColor(120,120,120); doc.text(label + ":", 22, y);
+        doc.setTextColor(200,200,200); doc.text(String(val), 80, y);
+        y += 12;
+    });
+    doc.setTextColor(120,120,120); doc.setFontSize(9);
+    doc.text("TESLIM EDEN İMZA:", 22, 200);
+    doc.line(22, 218, 100, 218);
+    doc.text("TESLİM ALAN İMZA:", 115, 200);
+    doc.line(115, 218, 193, 218);
+    doc.text("Ubeydullah Bayrak / UBE RAW", 22, 225);
+    doc.setFontSize(8); doc.setTextColor(60,60,60);
+    doc.text("Bu belge UBE RAW Studio tarafından düzenlenmiştir.", cx, 270, {align:"center"});
+    doc.save(`UBE-RAW-Tutanak-${p.certCode||'eser'}-${Date.now()}.pdf`);
+    addLog("TUTANAK", p.title);
+    showToast("Çıkış tutanağı oluşturuldu.", false, true);
+}
+
+// ═══════════════════════════════════════════════
+// CMS: settings.json → index.html yazma (Mod 9)
+// ═══════════════════════════════════════════════
+// Settings alanlarını index'e besle
+// (settings.json güncellenince index.html otomatik okuyor)
+
+// ═══════════════════════════════════════════════
+// INIT — TÜM MODÜLLER
+// ═══════════════════════════════════════════════
+async function initDashboard() {
+    await loadSettings();
+    await fetchCRM();
+    await fetchNews();
+    await renderInventory();
+    await refreshOrders();
+    await refreshGuestbook();
+    await refreshWorkshops();
+    await refreshBlog();
+    renderExpoSelectLists();
+    renderReminderList();
+    renderWaitlist();
+    renderAwardList();
+    renderChatHistory();
+}
+
 renderLog();
 renderChatHistory();
 </script>
