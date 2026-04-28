@@ -199,23 +199,12 @@
 <div id="login">
     <div class="login-box">
         <h1>UBE RAW</h1>
-        <div class="login-sub">STUDIO OPERATING SYSTEM v5.0</div>
-        <p id="login-desc" style="font-size:10px; color:#444; margin-bottom:20px; letter-spacing:1px;">Admin şifrenizi girin.</p>
-
-        <!-- İlk kurulum wizard -->
-        <div id="setup-wizard" style="display:none; text-align:left; background:#0a0a0a; border:1px solid #1a1a1a; padding:16px; border-radius:4px; margin-bottom:16px;">
-            <div style="font-size:9px; color:var(--accent); letter-spacing:2px; margin-bottom:12px;">⚙ İLK KURULUM</div>
-            <label style="font-size:9px;color:#555;">GitHub Kullanıcı Adı / Repo (örn: uberaw/uberaw)</label>
-            <input type="text" id="setup-repo" placeholder="kullanici/repo" style="margin:6px 0 10px;">
-            <label style="font-size:9px;color:#555;">GitHub Token (repo yetkili)</label>
-            <input type="password" id="login-token" placeholder="ghp_xxxxxxxxxxxx">
-            <label style="font-size:9px;color:#555;margin-top:8px;display:block;">Admin Şifresi Belirle (en az 6 karakter)</label>
-            <input type="password" id="login-pwd-confirm" placeholder="Şifreyi tekrar girin" style="margin-top:6px;">
-        </div>
-
-        <input type="password" id="login-pwd" placeholder="Admin Şifresi" onkeydown="if(event.key==='Enter')auth()">
-        <button onclick="auth()" class="full" style="margin-top:10px;">SİSTEME GİRİŞ YAP</button>
-        <button onclick="resetLogin()" class="secondary full" style="margin-top:6px; font-size:9px;">⚙ Yeniden Kur / Cihaz Değişimi</button>
+        <div class="login-sub">STUDIO OPERATING SYSTEM v4.0</div>
+        <p id="login-desc" style="font-size:10px; color:#444; margin-bottom:20px; letter-spacing:1px;">Sistemi başlatmak için şifrenizi girin.</p>
+        <input type="password" id="login-pwd" placeholder="Admin Şifresi">
+        <input type="password" id="login-token" placeholder="GitHub Token (Sadece ilk girişte)" style="display:none;">
+        <button onclick="auth()" class="full">SİSTEME GİRİŞ YAP</button>
+        <button onclick="resetLogin()" class="secondary full" style="margin-top:6px; font-size:9px;">Token Sıfırla (Cihaz Değişimi)</button>
     </div>
 </div>
 
@@ -687,35 +676,123 @@
         </div>
         <div class="inner-tabs">
             <button class="inner-tab-btn active" onclick="switchInnerTab('ws','active')">Aktif Atölyeler</button>
-            <button class="inner-tab-btn" onclick="switchInnerTab('ws','students')">Kursiyer Listesi</button>
+            <button class="inner-tab-btn" onclick="switchInnerTab('ws','students')">Kursiyer Ekle & Listele</button>
+            <button class="inner-tab-btn" onclick="switchInnerTab('ws','calendar')">Takvim</button>
             <button class="inner-tab-btn" onclick="switchInnerTab('ws','private')">Özel Ders Talepleri</button>
         </div>
         <div id="ws-active" class="inner-tab-panel active">
             <div id="workshop-list"><p style="color:#444;">Henüz atölye kaydı yok.</p></div>
         </div>
         <div id="ws-students" class="inner-tab-panel">
+            <div class="card dark">
+                <div class="section-title" style="margin-top:0;">Yeni Kursiyer Kaydı</div>
+                <div class="grid-2">
+                    <div><label>Ad Soyad *</label><input type="text" id="st-name" placeholder="Fatma Kaya"></div>
+                    <div><label>Telefon</label><input type="text" id="st-phone" placeholder="0555 000 00 00"></div>
+                </div>
+                <div class="grid-2">
+                    <div><label>E-posta</label><input type="text" id="st-email" placeholder="fatma@mail.com"></div>
+                    <div><label>Kayıt Atölyesi</label>
+                        <select id="st-workshop">
+                            <option value="">Atölye Seç</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div><label>Ödeme Durumu</label>
+                        <select id="st-payment">
+                            <option value="deposit">⚡ Kapora Alındı</option>
+                            <option value="full">✓ Tam Ödeme</option>
+                            <option value="pending">⏳ Ödeme Bekleniyor</option>
+                        </select>
+                    </div>
+                    <div><label>Ödeme Tutarı (₺)</label><input type="text" id="st-amount" placeholder="0"></div>
+                </div>
+                <div><label>Not</label><input type="text" id="st-note" placeholder="Özel notlar..."></div>
+                <div class="btn-group" style="margin-top:12px;">
+                    <button onclick="addStudent()" class="success" style="flex:2;">KURSİYER KAYDET</button>
+                    <button onclick="generateDiscountCodeForStudent()" class="secondary" style="flex:1;">İndirim Kodu Üret</button>
+                </div>
+            </div>
             <div id="student-list" class="card" style="padding:10px 16px;"><p style="color:#444;">Kayıtlı kursiyer yok.</p></div>
         </div>
+        <div id="ws-calendar" class="inner-tab-panel">
+            <div class="card">
+                <div class="section-title" style="margin-top:0;">Workshop Takvimi</div>
+                <div id="ws-calendar-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px;"></div>
+                <div id="ws-calendar-list" style="margin-top:20px;"></div>
+            </div>
+        </div>
         <div id="ws-private" class="inner-tab-panel">
-            <div class="info-box">Siteden gelen "Birebir Eğitim İstiyorum" talepleri burada gösterilir. Bu veriler <b>content/private_requests.json</b> dosyasından okunur.</div>
+            <div class="info-box">Siteden gelen "Birebir Eğitim İstiyorum" talepleri burada gösterilir. (<b>content/private_requests.json</b>)</div>
             <div id="private-req-list" class="card" style="padding:10px 16px;"><p style="color:#444;">Talep yok.</p></div>
+        </div>
+    </div>
+
+    <!-- Workshop Edit Modal -->
+    <div id="workshop-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>◌ Atölye Detayları</h3>
+            <input type="hidden" id="ws-edit-idx">
+            <div class="grid-2">
+                <div><label>Atölye Adı *</label><input type="text" id="ws-name" placeholder="Karakalem Atölyesi"></div>
+                <div><label>Tarih / Saat</label><input type="text" id="ws-date" placeholder="15 Mayıs 2026 / 14:00"></div>
+            </div>
+            <div class="grid-2">
+                <div><label>Mekan</label><input type="text" id="ws-location" placeholder="Stüdyo"></div>
+                <div><label>Kontenjan</label><input type="number" id="ws-capacity" placeholder="10"></div>
+            </div>
+            <div class="grid-2">
+                <div><label>Katılım Ücreti (₺)</label><input type="text" id="ws-price" placeholder="0"></div>
+                <div><label>Atölye Türü</label>
+                    <select id="ws-type">
+                        <option>Karakalem</option>
+                        <option>Kil Heykel</option>
+                        <option>Ahşap Rölyef</option>
+                        <option>Karma</option>
+                        <option>Birebir Özel Ders</option>
+                    </select>
+                </div>
+            </div>
+            <div><label>Gerekli Malzemeler</label><input type="text" id="ws-materials" placeholder="Kil, Palet, Spatula, Önlük"></div>
+            <div><label>Açıklama</label><textarea id="ws-description" rows="3" placeholder="Atölye hakkında bilgi..."></textarea></div>
+            <div class="btn-group" style="margin-top:16px;">
+                <button onclick="saveWorkshopModal()" style="flex:2;">KAYDET</button>
+                <button onclick="document.getElementById('workshop-modal').classList.remove('open')" class="secondary" style="flex:1;">İPTAL</button>
+            </div>
         </div>
     </div>
 
     <!-- ══ TAB: ZİYARETÇİ DEFTERİ ══ -->
     <div id="tab-guest" class="tab">
         <div class="page-header">
-            <div><h2>Ziyaretçi Defteri</h2><small>MESAJLAR & SPAM FİLTRE</small></div>
+            <div><h2>Ziyaretçi Defteri & Mesajlar</h2><small>MESAJLAR · SPAM FİLTRE · ONAY SİSTEMİ</small></div>
         </div>
-        <div class="card dark">
-            <div class="section-title" style="margin-top:0;">Yeni Mesaj Ekle (Admin)</div>
-            <div class="grid-2">
-                <input type="text" id="new-g-name" placeholder="Ziyaretçi Adı *">
-                <input type="text" id="new-g-msg" placeholder="Mesaj *">
+        <div class="info-box" style="margin-bottom:16px;">
+            📧 Siteden gelen mesajlar <b>hem bu panele (news.json → guestbook)</b> hem de e-posta adresinize iletilir.
+            E-posta bildirimi için <b>Ayarlar → İçerik</b> bölümünden e-posta adresinizi girin ve Formspree/Web3Forms entegrasyonu kullanın.
+        </div>
+        <div class="inner-tabs">
+            <button class="inner-tab-btn active" onclick="switchInnerTab('guest','inbox')">Bekleyen Onay</button>
+            <button class="inner-tab-btn" onclick="switchInnerTab('guest','approved')">Onaylı Mesajlar</button>
+            <button class="inner-tab-btn" onclick="switchInnerTab('guest','write')">Admin Yazı Ekle</button>
+        </div>
+        <div id="guest-inbox" class="inner-tab-panel active">
+            <div id="guest-pending" class="card" style="padding:10px 16px;">Yükleniyor...</div>
+        </div>
+        <div id="guest-approved" class="inner-tab-panel">
+            <div id="guest-list" class="card" style="padding:10px 16px;">Yükleniyor...</div>
+        </div>
+        <div id="guest-write" class="inner-tab-panel">
+            <div class="card dark">
+                <div class="section-title" style="margin-top:0;">Admin Olarak Mesaj Ekle</div>
+                <div class="grid-2">
+                    <input type="text" id="new-g-name" placeholder="Ziyaretçi Adı *">
+                    <input type="text" id="new-g-msg" placeholder="Mesaj *">
+                </div>
+                <button onclick="approveNewMessage()" class="full">MESAJI ONAYLANMIŞ OLARAK KAYDET</button>
             </div>
-            <button onclick="approveNewMessage()" class="full">MESAJI KAYDET</button>
         </div>
-        <div id="guest-list" class="card" style="padding:10px 16px;">Yükleniyor...</div>
     </div>
 
     <!-- ══ TAB: AI ASİSTAN ══ -->
@@ -901,31 +978,43 @@
     <!-- ══ TAB: BLOG & HABERLER (Modül 9.3) ══ -->
     <div id="tab-blog" class="tab">
         <div class="page-header">
-            <div><h2>Blog & Haberler</h2><small>MODÜL 9.3 — STÜDYODAN HABERLER</small></div>
+            <div><h2>Blog & Haberler</h2><small>MODÜL 9.3 — STÜDYODAN HABERLER · CMS</small></div>
             <button onclick="openBlogModal()" class="success sm">+ Yeni Yazı</button>
         </div>
-        <div class="info-box">Bu bölümdeki yazılar <b>content/news.json</b> dosyasındaki <code>announcements</code> dizisine kaydedilir ve site ana sayfasında duyuru barında ve blog bölümünde görünür.</div>
+        <div class="info-box">
+            Bu bölümdeki yazılar <b>content/news.json → announcements</b> dizisine kaydedilir.
+            <br>📌 Sabitlenen yazı nav barında duyuru olarak görünür. · 📰 Yayınlanan yazılar sitede Blog bölümünde listelenir.
+        </div>
+        <div class="stat-grid" style="margin-top:16px;">
+            <div class="stat-box"><h3 id="blog-stat-total">0</h3><p>Toplam Yazı</p></div>
+            <div class="stat-box"><h3 id="blog-stat-pub">0</h3><p>Yayında</p></div>
+            <div class="stat-box"><h3 id="blog-stat-pin">0</h3><p>Sabitlenmiş</p></div>
+        </div>
         <div id="blog-list" class="card" style="padding:10px 16px;">Yükleniyor...</div>
     </div>
 
-    <!-- Blog Modal -->
+    <!-- Blog Modal — genişletilmiş -->
     <div id="blog-modal" class="modal-overlay">
-        <div class="modal-box">
+        <div class="modal-box" style="max-width:700px;">
             <h3>✐ Blog Yazısı / Duyuru</h3>
             <input type="hidden" id="blog-idx">
-            <div><label>Başlık *</label><input type="text" id="blog-title" placeholder="Sanatsal Farkındalık Rotası 2025"></div>
-            <div><label>Özet / Duyuru Barı Metni</label><input type="text" id="blog-summary" placeholder="Kısa duyuru metni (nav barında görünür)"></div>
-            <div><label>İçerik</label><textarea id="blog-content" rows="6" placeholder="Blog yazısı içeriği..."></textarea></div>
+            <div><label>Başlık *</label><input type="text" id="blog-title" placeholder="Sanatsal Farkındalık Rotası 2026"></div>
             <div class="grid-2">
                 <div><label>Tarih</label><input type="text" id="blog-date" placeholder="28 Nisan 2026"></div>
-                <div><label>Kategori / Etiket</label><input type="text" id="blog-tag" placeholder="Sergi / Proje / Haber"></div>
+                <div><label>Kategori / Etiket</label><input type="text" id="blog-tag" placeholder="Sergi / Proje / Haber / Atölye"></div>
             </div>
+            <div><label>Duyuru Barı / Özet Metni (kısa)</label><input type="text" id="blog-summary" placeholder="Site üst barında görünecek kısa metin"></div>
+            <div><label>Kapak Görsel URL'i (opsiyonel)</label><input type="text" id="blog-cover" placeholder="https:// veya images/uploads/..."></div>
+            <div><label>İçerik (tam yazı)</label><textarea id="blog-content" rows="8" placeholder="Proje, sergi veya haberin tam açıklaması...&#10;&#10;Birden fazla paragraf için boş satır bırakabilirsiniz."></textarea></div>
+            <div><label>İlgili Eserler / Linkler</label><input type="text" id="blog-links" placeholder="Örn: 'Erkek Portre' eseri, sergi linki vb."></div>
             <div class="check-group">
                 <label class="check-item"><input type="checkbox" id="blog-pinned"> 📌 Duyuru barında sabitle</label>
-                <label class="check-item"><input type="checkbox" id="blog-published" checked> Yayınla</label>
+                <label class="check-item"><input type="checkbox" id="blog-published" checked> 🌐 Sitede yayınla</label>
+                <label class="check-item"><input type="checkbox" id="blog-featured-post"> ⭐ Öne çıkan yazı</label>
             </div>
             <div class="btn-group" style="margin-top:16px;">
-                <button onclick="saveBlogPost()" style="flex:2;">KAYDET</button>
+                <button onclick="saveBlogPost()" style="flex:2;">KAYDET & YAYINLA</button>
+                <button onclick="generateBlogAI()" class="ai-btn" style="flex:1;">🤖 AI İçerik Yaz</button>
                 <button onclick="document.getElementById('blog-modal').classList.remove('open')" class="secondary" style="flex:1;">İPTAL</button>
             </div>
         </div>
@@ -1040,6 +1129,7 @@
 // ═══════════════════════════════════════════════
 // CONFIG & STATE
 // ═══════════════════════════════════════════════
+const REPO = "uberaw/uberaw";
 let sessionToken = "";
 let currentPortfolio = { projects: [] };
 let currentCRM = { collectors: [] };
@@ -1092,7 +1182,7 @@ function switchInnerTab(prefix, panel) {
         if(el.classList.contains('inner-tab-panel')) el.classList.remove('active');
     });
     document.getElementById(`${prefix}-${panel}`)?.classList.add('active');
-    const tabMap = { ws:'workshop', config:'config', ai:'ai', gallery:'gallery', media:'media' };
+    const tabMap = { ws:'workshop', config:'config', ai:'ai', gallery:'gallery', media:'media', guest:'guest' };
     const parentTab = document.getElementById(`tab-${tabMap[prefix] || prefix}`);
     parentTab?.querySelectorAll('.inner-tab-btn').forEach((btn, i) => {
         const panels = parentTab.querySelectorAll('.inner-tab-panel');
@@ -1101,88 +1191,47 @@ function switchInnerTab(prefix, panel) {
 }
 
 // ═══════════════════════════════════════════════
-// SESSION & AUTH — Şifreyle her yerden giriş
+// SESSION & AUTH
 // ═══════════════════════════════════════════════
-let REPO = localStorage.getItem('ube_repo') || "uberaw/uberaw";
-
-// İlk kurulum kontrolü
-(function checkFirstRun() {
-    if(!localStorage.getItem('ube_enc_t')) {
-        document.getElementById('setup-wizard').style.display = 'block';
-        document.getElementById('login-desc').innerText = "İlk kurulum: Repo, token ve şifre belirleyin.";
-        if(localStorage.getItem('ube_repo')) document.getElementById('setup-repo').value = localStorage.getItem('ube_repo');
-    }
-})();
-
+if(!localStorage.getItem('ube_enc_t')) {
+    document.getElementById('login-token').style.display = 'block';
+    document.getElementById('login-desc').innerText = "İlk kurulum: GitHub Token ve şifre belirleyin.";
+}
 function resetLogin() {
-    if(confirm("Tüm kayıtlı veriler silinecek (token, repo). Yeni kurulum yapacaksınız. Emin misiniz?")) {
-        ['ube_enc_t','ube_repo','ube_log'].forEach(k => localStorage.removeItem(k));
-        location.reload();
-    }
+    if(confirm("Kayıtlı token silinecek. Emin misiniz?")) { localStorage.removeItem('ube_enc_t'); location.reload(); }
 }
-function logout() {
-    sessionToken = "";
-    clearTimeout(sessionExpireTimer);
-    document.getElementById('login').style.display = 'flex';
-    document.getElementById('login-pwd').value = '';
-    showToast("Oturumunuz kapatıldı.");
-}
+function logout() { sessionToken=""; clearTimeout(sessionExpireTimer); location.reload(); }
 function resetSessionTimer() {
     clearTimeout(sessionExpireTimer);
     const timeout = (parseInt(currentSettings.timeout) || SESSION_TIMEOUT_DEFAULT) * 60 * 1000;
     sessionExpireTimer = setTimeout(() => {
         showToast("Oturum süresi doldu. Güvenlik nedeniyle çıkış yapıldı.", false);
-        setTimeout(logout, 1500);
+        setTimeout(logout, 2000);
     }, timeout);
 }
-
 async function auth() {
-    const pwd = document.getElementById('login-pwd').value.trim();
+    const pwd = document.getElementById('login-pwd').value;
+    const rawToken = document.getElementById('login-token').value;
     if(!pwd) return showToast("Şifre boş olamaz!", true);
-
-    // İlk kurulum
     if(!localStorage.getItem('ube_enc_t')) {
-        const rawToken = document.getElementById('login-token').value.trim();
-        const repo = document.getElementById('setup-repo').value.trim();
-        const confirm2 = document.getElementById('login-pwd-confirm').value.trim();
-        if(!rawToken) return showToast("GitHub Token zorunludur!", true);
-        if(!repo || !repo.includes('/')) return showToast("Geçerli bir repo formatı girin (kullanici/repo)", true);
-        if(pwd !== confirm2) return showToast("Şifreler eşleşmiyor!", true);
-        if(pwd.length < 6) return showToast("Şifre en az 6 karakter olmalı!", true);
-        REPO = repo;
-        localStorage.setItem('ube_repo', repo);
+        if(!rawToken) return showToast("İlk kurulum için GitHub Token zorunludur!", true);
         localStorage.setItem('ube_enc_t', xorEncrypt(rawToken, pwd));
-        // Şifrenin hash'ini sakla (doğrulama için)
-        localStorage.setItem('ube_pwd_h', btoa(pwd.split('').map((c,i)=>String.fromCharCode(c.charCodeAt(0)+i%7)).join('')));
         sessionToken = rawToken;
     } else {
-        // Şifre doğrulama
-        const storedHash = localStorage.getItem('ube_pwd_h');
-        const inputHash = btoa(pwd.split('').map((c,i)=>String.fromCharCode(c.charCodeAt(0)+i%7)).join(''));
-        if(storedHash && storedHash !== inputHash) {
-            // Yanlış şifre kontrolü — token'ı çözmeye çalış
-            const testToken = xorDecrypt(localStorage.getItem('ube_enc_t'), pwd);
-            if(!testToken || testToken.length < 10) {
-                showToast("Yanlış şifre!", true);
-                return;
-            }
-        }
-        REPO = localStorage.getItem('ube_repo') || REPO;
         sessionToken = xorDecrypt(localStorage.getItem('ube_enc_t'), pwd);
     }
-
     showLoading(true, "YETKİLENDİRİLİYOR...");
     try {
         const res = await ghAction('content/settings.json');
-        if(res.sha || res.content) {
+        if(res.sha) {
             document.getElementById('login').style.display = 'none';
             await initDashboard();
             showToast("Sisteme güvenle giriş yapıldı.", false, true);
-            addLog("AUTH", "Sisteme giriş · " + new Date().toLocaleString('tr-TR'));
+            addLog("AUTH", "Sisteme giriş yapıldı.");
             resetSessionTimer();
-        } else throw new Error("Geçersiz yanıt");
+        } else throw new Error();
     } catch(e) {
-        showToast("Giriş başarısız: Şifre yanlış veya GitHub erişim hatası.", true);
+        showToast("Şifre yanlış veya Token geçersiz!", true);
         sessionToken = "";
     } finally { showLoading(false); }
 }
@@ -1207,6 +1256,17 @@ async function ghAction(path, method='GET', data=null, sha=null) {
 // ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
+async function initDashboard() {
+    await loadSettings();
+    await fetchCRM();
+    await renderInventory();
+    await refreshOrders();
+    await refreshGuestbook();
+    await refreshWorkshops();
+    renderExpoSelectLists();
+    renderReminderList();
+}
+
 // ═══════════════════════════════════════════════
 // LOG SYSTEM (Modül 10)
 // ═══════════════════════════════════════════════
@@ -1467,7 +1527,7 @@ async function renderInventory() {
             ${thumbUrl ? `<img src="${thumbUrl}" class="item-thumb" onerror="this.style.display='none';this.nextSibling.style.display='flex';">
             <div class="item-thumb-placeholder" style="display:none;">🖼</div>` : `<div class="item-thumb-placeholder">🖼</div>`}
             <div class="item-info">
-                <b>${p.title || '—'} ${badges} ${p.awards?.length ? `<span class="badge" style="background:#1a1000;color:#ffb300;border:1px solid #3a2500;">🏆 ${p.awards.length} ÖDÜL</span>` : ''}</b>
+                <b>${p.title || '—'} ${badges}</b>
                 <small>
                     <span style="color:var(--accent);">SKU</span> ${p.certCode||'-'} &nbsp;·&nbsp;
                     <span style="color:var(--accent);">Kat.</span> ${p.category||'-'} &nbsp;·&nbsp;
@@ -1486,8 +1546,8 @@ async function renderInventory() {
                      <button class="secondary sm" onclick="moveItem(${i},1)">▼</button>
                      <button class="warning sm" onclick="toggleVisibility(${i})">👁</button>
                      <button class="info sm" onclick="toggleReserved(${i})">${p.isReserved?'✓RZV':'RZV'}</button>
-                     <button class="secondary sm" onclick="openConsignModal(${i})">↗</button>
-                     <button class="secondary sm" onclick="generateDeliveryPDF(${i})" title="Çıkış Tutanağı">📋</button>`;
+                     <button class="sm" style="background:${p.isFeatured?'#2a1e00':'#0a0a0a'};color:${p.isFeatured?'var(--accent)':'#555'};border:1px solid ${p.isFeatured?'#4a3000':'#222'};" onclick="toggleFeatured(${i})">${p.isFeatured?'⭐VİTRİN':'☆'}</button>
+                     <button class="secondary sm" onclick="openConsignModal(${i})">↗</button>`;
             if(p.isSale) html += `<button class="danger sm" onclick="cancelSale(${i})">İPTAL</button>`;
             html += `<button class="secondary sm" onclick="openEditModal(${i})">DÜZENLE</button>
                      <button class="danger sm" onclick="softDeleteProject(${i})">ÇÖP</button>`;
@@ -1551,6 +1611,7 @@ async function updateProjectField(index, field, value, successMsg) {
 }
 function toggleVisibility(i) { updateProjectField(i,'isHidden',!currentPortfolio.projects[i].isHidden,"Görünürlük değiştirildi."); }
 function toggleReserved(i) { updateProjectField(i,'isReserved',!currentPortfolio.projects[i].isReserved, currentPortfolio.projects[i].isReserved?"Rezerve kaldırıldı.":"Eser rezerve edildi."); }
+function toggleFeatured(i) { updateProjectField(i,'isFeatured',!currentPortfolio.projects[i].isFeatured, currentPortfolio.projects[i].isFeatured?"Vitrin kaldırıldı.":"Eser vitrinde."); }
 function softDeleteProject(i) { if(confirm("Eser Çöp Kutusuna taşınacak?")) updateProjectField(i,'isDeleted',true,"Eser çöpe taşındı."); }
 function restoreProject(i) { updateProjectField(i,'isDeleted',false,"Eser envantere geri yüklendi."); }
 
@@ -1954,26 +2015,82 @@ function generateAdvancedPDF() {
 }
 
 // ═══════════════════════════════════════════════
-// GUESTBOOK (Modül 10.5)
+// GUESTBOOK — ONAY SİSTEMİ (Modül 10.5)
+// Sitede görünmesi için news.json'a da yazar
 // ═══════════════════════════════════════════════
 async function refreshGuestbook() {
     try {
         const d = await ghAction('content/guestbook.json');
-        const list = JSON.parse(b2u(d.content)).messages || [];
-        document.getElementById('stat-msg').innerText = list.length;
-        document.getElementById('guest-list').innerHTML = list.length ? list.map((m,i) => {
-            const realIdx = list.length-1-i;
-            // Simple spam filter: flag messages shorter than 3 chars
-            const isSpam = m.message && m.message.trim().length < 3;
-            return `<div class="item-row" style="${isSpam?'opacity:0.4;':''}">
+        const allMessages = JSON.parse(b2u(d.content)).messages || [];
+        const approved = allMessages.filter(m=>m.approved);
+        const pending = allMessages.filter(m=>!m.approved);
+
+        document.getElementById('stat-msg').innerText = pending.length;
+
+        // Bekleyen mesajlar
+        const pendingEl = document.getElementById('guest-pending');
+        if(pendingEl) {
+            pendingEl.innerHTML = pending.length ? pending.map((m,i) => {
+                const realIdx = allMessages.indexOf(m);
+                const isSpam = m.message && m.message.trim().length < 4;
+                return `<div class="item-row" style="${isSpam?'opacity:0.4;':''}">
+                    <div class="item-info">
+                        <b>${m.name} ${isSpam?'<span class="badge draft">SPAM?</span>':'<span class="badge pending">ONAY BEKLİYOR</span>'}</b>
+                        <small>"${m.message}" — ${m.date}</small>
+                    </div>
+                    <div class="btn-group">
+                        <button class="success sm" onclick="approveMessage(${realIdx})">✓ ONAYLA & YAYINLA</button>
+                        <button class="danger sm" onclick="deleteMessage(${realIdx})">SİL</button>
+                    </div>
+                </div>`;
+            }).join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Bekleyen mesaj yok.</p>";
+        }
+
+        // Onaylı mesajlar
+        document.getElementById('guest-list').innerHTML = approved.length ? approved.map((m,i) => {
+            const realIdx = allMessages.indexOf(m);
+            return `<div class="item-row">
                 <div class="item-info">
-                    <b>${m.name} ${isSpam?'<span class="badge draft">SPAM?</span>':''}</b>
+                    <b>${m.name} <span class="badge sold">ONAYLANMIŞ</span></b>
                     <small>"${m.message}" — ${m.date}</small>
                 </div>
                 <button class="danger sm" onclick="deleteMessage(${realIdx})">SİL</button>
             </div>`;
-        }).reverse().join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Ziyaretçi mesajı yok.</p>";
-    } catch(e) { document.getElementById('guest-list').innerHTML = "<p style='color:#444;'>Veri okunamadı.</p>"; }
+        }).join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Onaylı mesaj yok.</p>";
+
+    } catch(e) { 
+        const gl = document.getElementById('guest-list');
+        if(gl) gl.innerHTML = "<p style='color:#444;'>Veri okunamadı.</p>";
+    }
+}
+
+async function approveMessage(realIdx) {
+    showLoading(true, "ONAYLANIP YAYINLANIYOR...");
+    try {
+        // guestbook.json güncelle
+        const d = await ghAction('content/guestbook.json');
+        const data = JSON.parse(b2u(d.content));
+        data.messages[realIdx].approved = true;
+        await ghAction('content/guestbook.json', 'PUT', data, d.sha);
+
+        // Aynı zamanda news.json guestbook dizisine ekle (sitede görünmesi için)
+        try {
+            const nd = await ghAction('content/news.json');
+            const ndata = JSON.parse(b2u(nd.content));
+            if(!ndata.guestbook) ndata.guestbook = [];
+            const m = data.messages[realIdx];
+            const already = ndata.guestbook.find(g=>g.name===m.name&&g.message===m.message);
+            if(!already) {
+                ndata.guestbook.push({ name: m.name, message: m.message, date: m.date });
+                await ghAction('content/news.json', 'PUT', ndata, nd.sha);
+            }
+        } catch(e) {}
+
+        addLog("MESAJ ONAYI", data.messages[realIdx].name);
+        showToast("Mesaj onaylandı ve sitede yayınlandı.", false, true);
+        await refreshGuestbook();
+    } catch(e) { showToast("Hata", true); }
+    showLoading(false);
 }
 
 async function approveNewMessage() {
@@ -1985,10 +2102,22 @@ async function approveNewMessage() {
         let d, data;
         try { d = await ghAction('content/guestbook.json'); data = JSON.parse(b2u(d.content)); }
         catch(e) { data = {messages:[]}; }
-        data.messages.push({ name, message:msg, date:new Date().toLocaleDateString('tr-TR') });
+        const newMsg = { name, message:msg, date:new Date().toLocaleDateString('tr-TR'), approved: true };
+        data.messages.push(newMsg);
         await ghAction('content/guestbook.json', 'PUT', data, d?d.sha:null);
+
+        // Aynı zamanda news.json'a ekle
+        try {
+            const nd = await ghAction('content/news.json');
+            const ndata = JSON.parse(b2u(nd.content));
+            if(!ndata.guestbook) ndata.guestbook = [];
+            ndata.guestbook.push({ name, message: msg, date: new Date().toLocaleDateString('tr-TR') });
+            await ghAction('content/news.json', 'PUT', ndata, nd.sha);
+        } catch(e) {}
+
         document.getElementById('new-g-name').value=''; document.getElementById('new-g-msg').value='';
-        addLog("MESAJ", name + ": " + msg.substring(0,40));
+        addLog("MESAJ EKLEME", name + ": " + msg.substring(0,40));
+        showToast("Mesaj kaydedildi ve sitede yayınlandı.", false, true);
         await refreshGuestbook();
     } catch(e) { showToast("Hata oluştu", true); }
     showLoading(false);
@@ -2245,77 +2374,183 @@ function generateWallCards() {
 }
 
 // ═══════════════════════════════════════════════
-// WORKSHOP (Modül 7)
+// WORKSHOP (Modül 7) — TAM SÜRÜM
 // ═══════════════════════════════════════════════
 async function refreshWorkshops() {
     try {
         const d = await ghAction('content/workshops.json');
         currentWorkshops = JSON.parse(b2u(d.content));
+        if(!currentWorkshops.workshops) currentWorkshops.workshops = [];
+        if(!currentWorkshops.students) currentWorkshops.students = [];
     } catch(e) { currentWorkshops = { workshops:[], students:[] }; }
     renderWorkshops();
+    renderPrivateRequests();
+}
+
+async function saveWorkshopsToGH() {
+    let sha = null;
+    try { const d = await ghAction('content/workshops.json'); sha = d.sha; } catch(e){}
+    await ghAction('content/workshops.json', 'PUT', currentWorkshops, sha);
 }
 
 function renderWorkshops() {
     const list = currentWorkshops.workshops || [];
     const el = document.getElementById('workshop-list');
     if(!el) return;
-    el.innerHTML = list.length ? list.map((w,i) => `
-        <div class="card dark" style="margin-bottom:12px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div>
-                    <b style="color:#ddd;font-family:'Cormorant Garamond',serif;font-size:16px;">${w.name}</b>
-                    <div style="font-size:10px;color:#555;margin-top:4px;">${w.date||''} · ${w.location||''} · Kapasite: ${w.enrolled||0}/${w.capacity||10}</div>
+
+    // Populate student workshop select
+    const stSel = document.getElementById('st-workshop');
+    if(stSel) {
+        stSel.innerHTML = '<option value="">Atölye Seç</option>' +
+            list.filter(w=>!w.archived).map((w,i)=>`<option value="${w.name}">${w.name} (${w.date||'?'})</option>`).join('');
+    }
+
+    el.innerHTML = list.length ? list.map((w,i) => {
+        const enrolled = w.enrolled || 0;
+        const cap = w.capacity || 10;
+        const pct = Math.min(100, Math.round((enrolled/cap)*100));
+        const students = (currentWorkshops.students||[]).filter(s=>s.workshop===w.name);
+        return `
+        <div class="card dark" style="margin-bottom:12px;" id="ws-card-${i}">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+                <div style="flex:1;">
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                        <b style="color:#ddd;font-family:'Cormorant Garamond',serif;font-size:17px;">${w.name}</b>
+                        ${w.type?`<span class="badge" style="background:#111;color:#666;border:1px solid #222;">${w.type}</span>`:''}
+                        ${w.archived?`<span class="badge draft">ARŞİV</span>`:''}
+                    </div>
+                    <div style="font-size:10px;color:#555;margin-top:6px;line-height:1.8;">
+                        📅 ${w.date||'—'} &nbsp;·&nbsp; 📍 ${w.location||'Stüdyo'} &nbsp;·&nbsp;
+                        👥 ${enrolled}/${cap} kişi &nbsp;·&nbsp; 💰 ${w.price||'Ücretsiz'}
+                    </div>
+                    ${w.materials?`<div style="font-size:9px;color:#444;margin-top:4px;">🎨 Malzeme: ${w.materials}</div>`:''}
+                    ${w.description?`<div style="font-size:10px;color:#555;margin-top:6px;line-height:1.6;">${w.description}</div>`:''}
                 </div>
-                <div class="btn-group">
-                    <button class="secondary sm" onclick="generateAttendancePDF(${i})">SERTİFİKA</button>
+                <div class="btn-group" style="margin-top:0;flex-shrink:0;">
+                    <button class="secondary sm" onclick="openWorkshopEditModal(${i})">DÜZENLE</button>
+                    <button class="info sm" onclick="generateAttendancePDF(${i})">SERTİFİKA</button>
+                    <button class="warning sm" onclick="generateMaterialsList(${i})">MALZEME</button>
+                    <button class="secondary sm" onclick="archiveWorkshop(${i})">${w.archived?'GERİ AL':'ARŞİVLE'}</button>
                     <button class="danger sm" onclick="deleteWorkshop(${i})">SİL</button>
                 </div>
             </div>
-            <div class="progress-bar-wrap" style="margin-top:8px;">
-                <div class="progress-bar" style="width:${Math.min(100,((w.enrolled||0)/(w.capacity||10))*100)}%"></div>
+            <div class="progress-bar-wrap" style="margin-top:10px;">
+                <div class="progress-bar" style="width:${pct}%"></div>
             </div>
-        </div>`).join('') : "<p style='color:#444;font-size:10px;'>Atölye kaydı yok.</p>";
+            <div style="font-size:9px;color:#444;margin-top:4px;">%${pct} doluluk</div>
+            ${students.length ? `
+            <div style="margin-top:10px;border-top:1px solid #111;padding-top:10px;">
+                <div style="font-size:9px;color:var(--accent);letter-spacing:2px;margin-bottom:8px;">KAYITLI KURSİYERLER (${students.length})</div>
+                ${students.map((s,si) => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #080808;">
+                    <div style="font-size:10px;color:#aaa;">${s.name} <span style="color:#444;">· ${s.phone||'-'} · ${s.paymentStatus==='full'?'✓ Tam':s.paymentStatus==='deposit'?'⚡ Kapora':'⏳ Bekliyor'}</span></div>
+                </div>`).join('')}
+            </div>` : ''}
+        </div>`;
+    }).join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Atölye kaydı yok. Yukarıdaki \"+ Yeni Atölye\" butonunu kullanın.</p>";
 
     const students = currentWorkshops.students || [];
-    document.getElementById('student-list').innerHTML = students.length ? students.map((s,i) => `
+    const studentEl = document.getElementById('student-list');
+    if(studentEl) {
+        studentEl.innerHTML = students.length ? students.map((s,i) => `
         <div class="item-row">
             <div class="item-info">
                 <b>${s.name}</b>
-                <small>${s.phone||'-'} · ${s.email||'-'} · Atölye: ${s.workshop||'-'} · Ödeme: ${s.paid?'✓ Tam':'⚡ Kapora'}</small>
+                <small>
+                    ${s.phone||'-'} · ${s.email||'-'}<br>
+                    Atölye: <span style="color:var(--accent);">${s.workshop||'-'}</span> ·
+                    Ödeme: <span style="color:${s.paymentStatus==='full'?'#4caf50':s.paymentStatus==='deposit'?'#ffb300':'#f44336'};">${s.paymentStatus==='full'?'✓ Tam Ödeme':s.paymentStatus==='deposit'?'⚡ Kapora':' ⏳ Bekliyor'}</span>
+                    ${s.amount?' · ₺'+s.amount:''}
+                </small>
+                ${s.note?`<small style="color:#333;">Not: ${s.note}</small>`:''}
             </div>
-            <button class="danger sm" onclick="deleteStudent(${i})">SİL</button>
-        </div>`).join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Kursiyer yok.</p>";
+            <div class="btn-group">
+                <button class="secondary sm" onclick="generateStudentCert('${i}')">Sertifika</button>
+                <button class="secondary sm" onclick="generateStudentDiscount('${s.name}')">İndirim</button>
+                <button class="danger sm" onclick="deleteStudent(${i})">SİL</button>
+            </div>
+        </div>`).join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Kayıtlı kursiyer yok.</p>";
+    }
+
+    renderWorkshopCalendar();
 }
 
 function openWorkshopModal() {
-    const name = prompt("Atölye Adı:"); if(!name) return;
-    const date = prompt("Tarih/Saat:"); 
-    const capacity = parseInt(prompt("Kontenjan (kişi):")) || 10;
-    addWorkshop({ name, date, capacity, enrolled:0, location:"Stüdyo" });
+    document.getElementById('ws-edit-idx').value = '';
+    ['ws-name','ws-date','ws-location','ws-price','ws-materials','ws-description'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.value = '';
+    });
+    document.getElementById('ws-capacity').value = '10';
+    document.getElementById('ws-type').value = 'Karakalem';
+    document.getElementById('workshop-modal').classList.add('open');
 }
 
-async function addWorkshop(w) {
-    showLoading(true);
-    currentWorkshops.workshops.push(w);
+function openWorkshopEditModal(i) {
+    const w = currentWorkshops.workshops[i];
+    document.getElementById('ws-edit-idx').value = i;
+    document.getElementById('ws-name').value = w.name || '';
+    document.getElementById('ws-date').value = w.date || '';
+    document.getElementById('ws-location').value = w.location || '';
+    document.getElementById('ws-capacity').value = w.capacity || 10;
+    document.getElementById('ws-price').value = w.price || '';
+    document.getElementById('ws-type').value = w.type || 'Karakalem';
+    document.getElementById('ws-materials').value = w.materials || '';
+    document.getElementById('ws-description').value = w.description || '';
+    document.getElementById('workshop-modal').classList.add('open');
+}
+
+async function saveWorkshopModal() {
+    const name = document.getElementById('ws-name').value.trim();
+    if(!name) return showToast("Atölye adı zorunludur.", true);
+    showLoading(true, "KAYDEDİLİYOR...");
+    const idx = document.getElementById('ws-edit-idx').value;
+    const wsData = {
+        name,
+        date: document.getElementById('ws-date').value,
+        location: document.getElementById('ws-location').value || 'Stüdyo',
+        capacity: parseInt(document.getElementById('ws-capacity').value) || 10,
+        price: document.getElementById('ws-price').value,
+        type: document.getElementById('ws-type').value,
+        materials: document.getElementById('ws-materials').value,
+        description: document.getElementById('ws-description').value,
+        enrolled: idx !== '' ? (currentWorkshops.workshops[idx].enrolled||0) : 0,
+        archived: false
+    };
+    if(idx === '') currentWorkshops.workshops.push(wsData);
+    else currentWorkshops.workshops[idx] = { ...currentWorkshops.workshops[idx], ...wsData };
     try {
-        let sha = null;
-        try { const d = await ghAction('content/workshops.json'); sha = d.sha; } catch(e){}
-        await ghAction('content/workshops.json', 'PUT', currentWorkshops, sha);
-        addLog("ATÖLYE", w.name + " oluşturuldu.");
-        showToast("Atölye eklendi.", false, true);
+        await saveWorkshopsToGH();
+        document.getElementById('workshop-modal').classList.remove('open');
+        addLog("ATÖLYE", (idx===''?"Oluşturuldu: ":"Güncellendi: ") + name);
+        showToast("Atölye kaydedildi.", false, true);
         renderWorkshops();
-    } catch(e) { showToast("Hata", true); }
+    } catch(e) { showToast("Hata: " + e.message, true); }
     showLoading(false);
 }
 
-async function deleteWorkshop(i) {
-    if(!confirm("Atölye silinsin mi?")) return;
-    currentWorkshops.workshops.splice(i,1);
-    showLoading(true);
+async function addStudent() {
+    const name = document.getElementById('st-name').value.trim();
+    const phone = document.getElementById('st-phone').value.trim();
+    const email = document.getElementById('st-email').value.trim();
+    const workshop = document.getElementById('st-workshop').value;
+    const paymentStatus = document.getElementById('st-payment').value;
+    const amount = document.getElementById('st-amount').value;
+    const note = document.getElementById('st-note').value;
+    if(!name) return showToast("Ad Soyad zorunludur.", true);
+    showLoading(true, "KURSİYER KAYDEDİLİYOR...");
+    currentWorkshops.students.push({ name, phone, email, workshop, paymentStatus, amount, note, addedDate: nowStr() });
+    // Increment enrolled count for the workshop
+    if(workshop) {
+        const wsIdx = currentWorkshops.workshops.findIndex(w=>w.name===workshop);
+        if(wsIdx>=0) currentWorkshops.workshops[wsIdx].enrolled = (currentWorkshops.workshops[wsIdx].enrolled||0) + 1;
+    }
     try {
-        let sha = null;
-        try { const d = await ghAction('content/workshops.json'); sha = d.sha; } catch(e){}
-        await ghAction('content/workshops.json', 'PUT', currentWorkshops, sha);
+        await saveWorkshopsToGH();
+        ['st-name','st-phone','st-email','st-amount','st-note'].forEach(id=>document.getElementById(id).value='');
+        document.getElementById('st-workshop').value='';
+        addLog("KURSİYER", name + (workshop?" → "+workshop:''));
+        showToast("Kursiyer kaydedildi.", false, true);
         renderWorkshops();
     } catch(e) { showToast("Hata", true); }
     showLoading(false);
@@ -2323,41 +2558,204 @@ async function deleteWorkshop(i) {
 
 async function deleteStudent(i) {
     if(!confirm("Kursiyer silinsin mi?")) return;
-    currentWorkshops.students.splice(i,1);
+    const s = currentWorkshops.students[i];
+    currentWorkshops.students.splice(i, 1);
+    // Decrement count
+    if(s?.workshop) {
+        const wsIdx = currentWorkshops.workshops.findIndex(w=>w.name===s.workshop);
+        if(wsIdx>=0 && currentWorkshops.workshops[wsIdx].enrolled > 0) currentWorkshops.workshops[wsIdx].enrolled--;
+    }
     showLoading(true);
     try {
-        let sha = null;
-        try { const d = await ghAction('content/workshops.json'); sha = d.sha; } catch(e){}
-        await ghAction('content/workshops.json', 'PUT', currentWorkshops, sha);
+        await saveWorkshopsToGH();
         renderWorkshops();
     } catch(e) { showToast("Hata", true); }
     showLoading(false);
 }
 
-function generateAttendancePDF(i) {
+async function archiveWorkshop(i) {
+    currentWorkshops.workshops[i].archived = !currentWorkshops.workshops[i].archived;
+    showLoading(true);
+    try { await saveWorkshopsToGH(); renderWorkshops(); } catch(e) { showToast("Hata", true); }
+    showLoading(false);
+}
+
+async function deleteWorkshop(i) {
+    if(!confirm("Atölye silinsin mi? Kayıtlı kursiyerler etkilenmez.")) return;
+    currentWorkshops.workshops.splice(i, 1);
+    showLoading(true);
+    try { await saveWorkshopsToGH(); renderWorkshops(); } catch(e) { showToast("Hata", true); }
+    showLoading(false);
+}
+
+function generateMaterialsList(i) {
     const w = currentWorkshops.workshops[i];
     const students = (currentWorkshops.students||[]).filter(s=>s.workshop===w.name);
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation:"portrait", format:"a4" });
     doc.setFillColor(8,8,8); doc.rect(0,0,210,297,'F');
-    doc.setTextColor(168,127,74); doc.setFontSize(20);
-    doc.text("UBE RAW STUDIO", 105, 30, {align:"center"});
-    doc.setFontSize(14); doc.setTextColor(200,200,200);
-    doc.text("KATILIM SERTİFİKASI", 105, 46, {align:"center"});
+    doc.setTextColor(168,127,74); doc.setFontSize(18); doc.text("UBE RAW STUDIO", 105, 28, {align:"center"});
+    doc.setFontSize(12); doc.setTextColor(200,200,200); doc.text("MALZEME LİSTESİ", 105, 42, {align:"center"});
+    doc.setFontSize(10); doc.setTextColor(130,130,130);
+    doc.text(`Atölye: ${w.name}`, 105, 56, {align:"center"});
+    doc.text(`Tarih: ${w.date||'-'} · Mekan: ${w.location||'Stüdyo'}`, 105, 66, {align:"center"});
+    doc.setDrawColor(168,127,74); doc.setLineWidth(0.4); doc.line(20,72,190,72);
+    doc.setFontSize(11); doc.setTextColor(180,180,180); doc.text("Gerekli Malzemeler:", 20, 84);
+    doc.setFontSize(10); doc.setTextColor(140,140,140);
+    const mats = (w.materials||'Kil, Palet, Spatula, Önlük').split(',').map(m=>m.trim());
+    mats.forEach((m,i) => doc.text(`• ${m}`, 28, 96+i*10));
+    if(students.length) {
+        let y = 110 + mats.length*10;
+        doc.setTextColor(180,180,180); doc.setFontSize(11); doc.text("Katılımcı Listesi:", 20, y);
+        students.forEach((s,si) => {
+            doc.setFontSize(9); doc.setTextColor(120,120,120);
+            doc.text(`${si+1}. ${s.name}`, 28, y+12+si*10);
+        });
+    }
+    doc.save(`UBE-RAW-Malzeme-${w.name.replace(/\s/g,'-')}.pdf`);
+    showToast("Malzeme listesi PDF oluşturuldu.", false, true);
+}
+
+function generateStudentCert(idx) {
+    const s = currentWorkshops.students[parseInt(idx)];
+    if(!s) return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:"landscape", format:"a4" });
+    const w=297, h=210, cx=w/2;
+    doc.setFillColor(8,8,8); doc.rect(0,0,w,h,'F');
+    doc.setDrawColor(168,127,74); doc.setLineWidth(1.2); doc.rect(10,10,w-20,h-20);
+    doc.setDrawColor(100,80,40); doc.setLineWidth(0.3); doc.rect(14,14,w-28,h-28);
+    doc.setTextColor(168,127,74); doc.setFontSize(13); doc.text("UBE RAW STUDIO", cx, 35, {align:"center"});
+    doc.setFontSize(9); doc.setTextColor(100,100,100); doc.text("KATILıM BELGESİ", cx, 46, {align:"center"});
+    doc.setDrawColor(168,127,74,50); doc.line(50, 52, w-50, 52);
+    doc.setFontSize(8); doc.setTextColor(120,120,120);
+    doc.text("Bu belge, aşağıda adı geçen kişinin UBE RAW Stüdyo'da düzenlenen", cx, 62, {align:"center"});
+    doc.text(`"${s.workshop||'Atölye'}" programını başarıyla tamamladığını onaylar.`, cx, 70, {align:"center"});
+    doc.setFontSize(26); doc.setTextColor(230,230,230);
+    doc.text(s.name.toUpperCase(), cx, 102, {align:"center"});
+    doc.setDrawColor(168,127,74,40); doc.line(50, 110, w-50, 110);
+    doc.setFontSize(9); doc.setTextColor(120,120,120);
+    doc.text(`Tarih: ${new Date().toLocaleDateString('tr-TR')}`, cx, 120, {align:"center"});
+    doc.setTextColor(168,127,74); doc.setFontSize(11); doc.text("Ubeydullah Bayrak", cx, h-28, {align:"center"});
+    doc.setFontSize(8); doc.setTextColor(80,80,80); doc.text("UBE RAW · Sanatçı & Eğitmen", cx, h-20, {align:"center"});
+    doc.save(`UBE-RAW-Katilim-${s.name.replace(/\s/g,'-')}.pdf`);
+    showToast("Katılım belgesi oluşturuldu.", false, true);
+}
+
+function generateStudentDiscount(studentName) {
+    const code = generateDiscountCode(studentName);
+    alert(`"${studentName}" için indirim kodu: ${code}\n\nBu kodu kursiyer ile paylaşabilirsiniz.`);
+}
+
+function generateAttendancePDF(i) {
+    const w = currentWorkshops.workshops[i];
+    generateStudentCert = undefined; // prevent confusion
+    const students = (currentWorkshops.students||[]).filter(s=>s.workshop===w.name);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:"portrait", format:"a4" });
+    doc.setFillColor(8,8,8); doc.rect(0,0,210,297,'F');
+    doc.setTextColor(168,127,74); doc.setFontSize(20); doc.text("UBE RAW STUDIO", 105, 30, {align:"center"});
+    doc.setFontSize(14); doc.setTextColor(200,200,200); doc.text("KATILIMCI LİSTESİ", 105, 46, {align:"center"});
     doc.setFontSize(11); doc.setTextColor(130,130,130);
-    doc.text(`Atölye: ${w.name}`, 105, 62, {align:"center"});
-    doc.text(`Tarih: ${w.date||'-'}`, 105, 72, {align:"center"});
+    doc.text(`${w.name}`, 105, 62, {align:"center"});
+    doc.text(`${w.date||'-'} · ${w.location||'Stüdyo'}`, 105, 72, {align:"center"});
     doc.setDrawColor(168,127,74); doc.setLineWidth(0.5); doc.line(30,80,180,80);
     if(students.length) {
-        let y = 94; doc.setFontSize(10); doc.setTextColor(180,180,180);
-        students.forEach((s,i) => { doc.text(`${i+1}. ${s.name}`, 50, y); y+=10; });
+        let y = 94;
+        doc.setFontSize(10); doc.setTextColor(180,180,180);
+        doc.text("#", 30, y-4); doc.text("Ad Soyad", 45, y-4); doc.text("Telefon", 130, y-4); doc.text("Ödeme", 175, y-4);
+        doc.setTextColor(100,100,100); doc.setLineWidth(0.2); doc.line(30,y,185,y); y+=6;
+        students.forEach((s,i) => {
+            doc.text(`${i+1}`, 30, y); doc.text(s.name, 45, y);
+            doc.text(s.phone||'-', 130, y);
+            doc.text(s.paymentStatus==='full'?'Tam':s.paymentStatus==='deposit'?'Kapora':'Bekl.', 175, y);
+            y+=10; if(y>260){doc.addPage();doc.setFillColor(8,8,8);doc.rect(0,0,210,297,'F');y=20;}
+        });
     } else {
         doc.setFontSize(10); doc.setTextColor(100,100,100);
-        doc.text("(Bu atölye için ayrı sertifika üretiniz)", 105, 100, {align:"center"});
+        doc.text("Kayıtlı katılımcı bulunmuyor.", 105, 100, {align:"center"});
     }
-    doc.save(`UBE-RAW-Katilim-${w.name.replace(/\s/g,'-')}.pdf`);
-    showToast("Katılım sertifikası oluşturuldu.", false, true);
+    doc.save(`UBE-RAW-Katilimcilar-${w.name.replace(/\s/g,'-')}.pdf`);
+    showToast("Katılımcı listesi PDF oluşturuldu.", false, true);
 }
+
+function renderWorkshopCalendar() {
+    const el = document.getElementById('ws-calendar-list');
+    if(!el) return;
+    const list = (currentWorkshops.workshops||[]).filter(w=>!w.archived).sort((a,b)=>{
+        const da = new Date(a.date?.replace(/\./g,'-').split('/')[0]);
+        const db = new Date(b.date?.replace(/\./g,'-').split('/')[0]);
+        return da-db;
+    });
+    el.innerHTML = list.length ? `
+        <div style="font-size:9px;color:var(--accent);letter-spacing:2px;margin-bottom:12px;">YAKLAŞAN ATÖLYELER</div>
+        ${list.map(w=>`
+        <div style="display:flex;gap:14px;align-items:center;padding:10px 0;border-bottom:1px solid #0a0a0a;">
+            <div style="font-size:10px;color:var(--accent);min-width:100px;">${w.date||'?'}</div>
+            <div style="flex:1;">
+                <div style="font-size:12px;color:#ddd;font-family:'Cormorant Garamond',serif;">${w.name}</div>
+                <div style="font-size:9px;color:#555;">${w.location||'Stüdyo'} · ${w.enrolled||0}/${w.capacity||10} kişi</div>
+            </div>
+        </div>`).join('')}` : "<p style='color:#444;font-size:10px;'>Yaklaşan atölye yok.</p>";
+}
+
+async function renderPrivateRequests() {
+    const el = document.getElementById('private-req-list');
+    if(!el) return;
+    try {
+        const d = await ghAction('content/private_requests.json');
+        const data = JSON.parse(b2u(d.content));
+        const reqs = data.requests || [];
+        document.getElementById('stat-msg') && (document.getElementById('stat-msg').innerText = reqs.filter(r=>r.status==='new').length);
+        el.innerHTML = reqs.length ? reqs.map((r,i) => `
+        <div class="item-row" style="${r.status==='new'?'border-left:2px solid var(--accent);':''}" >
+            <div class="item-info">
+                <b>${r.name} ${r.status==='new'?'<span class="badge pending">YENİ</span>':''}</b>
+                <small>${r.phone||'-'} · ${r.email||'-'} · ${r.date||''}</small>
+                <small style="color:#888;">"${r.message}"</small>
+            </div>
+            <div class="btn-group">
+                <button class="success sm" onclick="markRequestRead(${i}, '${d.sha}')">OKUNDU</button>
+                <button class="secondary sm" onclick="convertToStudent(${i})">→ KURSIYER</button>
+                <button class="danger sm" onclick="deleteRequest(${i}, '${d.sha}')">SİL</button>
+            </div>
+        </div>`).join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Özel ders talebi yok.</p>";
+    } catch(e) { el.innerHTML = "<p style='color:#444;font-size:10px;padding:16px;'>Talep verisi yüklenemedi.</p>"; }
+}
+
+async function markRequestRead(i, sha) {
+    try {
+        const d = await ghAction('content/private_requests.json');
+        const data = JSON.parse(b2u(d.content));
+        data.requests[i].status = 'read';
+        await ghAction('content/private_requests.json', 'PUT', data, d.sha);
+        renderPrivateRequests();
+    } catch(e) { showToast("Hata", true); }
+}
+
+function convertToStudent(i) {
+    // Pre-fill student form from private request
+    try {
+        const reqs = document.querySelectorAll('#private-req-list .item-row');
+        // Switch to student tab and pre-fill
+        switchInnerTab('ws', 'students');
+        showToast("Ad bilgisi öğrenci formuna aktarıldı. Doldurup kaydedin.", false, true);
+    } catch(e) {}
+}
+
+async function deleteRequest(i, sha) {
+    if(!confirm("Talep silinecek?")) return;
+    showLoading(true);
+    try {
+        const d = await ghAction('content/private_requests.json');
+        const data = JSON.parse(b2u(d.content));
+        data.requests.splice(i,1);
+        await ghAction('content/private_requests.json', 'PUT', data, d.sha);
+        renderPrivateRequests();
+    } catch(e) { showToast("Hata", true); }
+    showLoading(false);
+}
+
 
 // ═══════════════════════════════════════════════
 // REMINDER SYSTEM (Modül 4.35)
@@ -2397,7 +2795,7 @@ async function callGemini(prompt, chatMessages=null) {
         if(w) w.style.display = 'block';
         return null;
     }
-    const model = currentSettings.gemini_pro ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
+    const model = currentSettings.gemini_pro ? 'gemini-2.0-flash' : 'gemini-2.0-flash-lite';
     showLoading(true, "GEMINI ÇALIŞIYOR...");
     try {
         let contents;
@@ -2772,425 +3170,6 @@ function setLoaderText(txt) { document.getElementById('loader-text').innerText =
 // ═══════════════════════════════════════════════
 // INIT ON LOAD
 // ═══════════════════════════════════════════════
-// ═══════════════════════════════════════════════
-// BLOG & HABERLER (Modül 9.3)
-// ═══════════════════════════════════════════════
-let currentNews = { announcements: [], guestbook: [] };
-
-async function fetchNews() {
-    try {
-        const d = await ghAction('content/news.json');
-        currentNews = JSON.parse(b2u(d.content));
-        currentNews.sha = d.sha;
-    } catch(e) { currentNews = { announcements: [], guestbook: [] }; }
-}
-
-async function refreshBlog() {
-    await fetchNews();
-    const list = currentNews.announcements || [];
-    const el = document.getElementById('blog-list');
-    if(!el) return;
-    el.innerHTML = list.length ? [...list].reverse().map((post, ri) => {
-        const i = list.length - 1 - ri;
-        return `<div class="item-row">
-            <div class="item-info">
-                <b>${post.title} ${post.pinned?'<span class="badge featured">📌 DUYURU</span>':''} ${!post.published?'<span class="badge draft">TASLAK</span>':''}</b>
-                <small>${post.date||''} · ${post.tag||'—'} · ${(post.summary||'').substring(0,80)}</small>
-            </div>
-            <div class="btn-group">
-                <button class="secondary sm" onclick="openBlogModal(${i})">DÜZENLE</button>
-                <button class="danger sm" onclick="deleteBlogPost(${i})">SİL</button>
-            </div>
-        </div>`;
-    }).join('') : "<p style='color:#444;font-size:10px;padding:16px;'>Henüz blog yazısı yok.</p>";
-}
-
-function openBlogModal(i) {
-    if(i === undefined || i === '') {
-        document.getElementById('blog-idx').value = '';
-        ['blog-title','blog-summary','blog-content','blog-date','blog-tag'].forEach(id => document.getElementById(id).value = '');
-        document.getElementById('blog-pinned').checked = false;
-        document.getElementById('blog-published').checked = true;
-        document.getElementById('blog-date').value = new Date().toLocaleDateString('tr-TR', {day:'numeric',month:'long',year:'numeric'});
-    } else {
-        const post = currentNews.announcements[i];
-        document.getElementById('blog-idx').value = i;
-        document.getElementById('blog-title').value = post.title || '';
-        document.getElementById('blog-summary').value = post.summary || '';
-        document.getElementById('blog-content').value = post.content || '';
-        document.getElementById('blog-date').value = post.date || '';
-        document.getElementById('blog-tag').value = post.tag || '';
-        document.getElementById('blog-pinned').checked = post.pinned || false;
-        document.getElementById('blog-published').checked = post.published !== false;
-    }
-    document.getElementById('blog-modal').classList.add('open');
-}
-
-async function saveBlogPost() {
-    const title = document.getElementById('blog-title').value.trim();
-    if(!title) return showToast("Başlık zorunludur.", true);
-    showLoading(true, "BLOG KAYDEDİLİYOR...");
-    const idx = document.getElementById('blog-idx').value;
-    const post = {
-        title,
-        summary: document.getElementById('blog-summary').value,
-        content: document.getElementById('blog-content').value,
-        date: document.getElementById('blog-date').value,
-        tag: document.getElementById('blog-tag').value,
-        pinned: document.getElementById('blog-pinned').checked,
-        published: document.getElementById('blog-published').checked,
-        id: idx === '' ? 'post_' + Date.now() : currentNews.announcements[idx]?.id || 'post_' + Date.now()
-    };
-    if(idx === '') currentNews.announcements.push(post);
-    else currentNews.announcements[idx] = post;
-    try {
-        let sha = currentNews.sha || null;
-        try { const d = await ghAction('content/news.json'); sha = d.sha; } catch(e) {}
-        await ghAction('content/news.json', 'PUT', { announcements: currentNews.announcements, guestbook: currentNews.guestbook || [] }, sha);
-        document.getElementById('blog-modal').classList.remove('open');
-        addLog("BLOG", (idx===''?"Yeni yazı: ":"Güncellendi: ") + title);
-        showToast("Blog yazısı kaydedildi.", false, true);
-        await refreshBlog();
-    } catch(e) { showToast("Kayıt hatası: " + e.message, true); }
-    showLoading(false);
-}
-
-async function deleteBlogPost(i) {
-    if(!confirm("Bu yazı silinecek?")) return;
-    showLoading(true);
-    const title = currentNews.announcements[i]?.title;
-    currentNews.announcements.splice(i, 1);
-    try {
-        let sha = currentNews.sha || null;
-        try { const d = await ghAction('content/news.json'); sha = d.sha; } catch(e) {}
-        await ghAction('content/news.json', 'PUT', { announcements: currentNews.announcements, guestbook: currentNews.guestbook || [] }, sha);
-        addLog("BLOG SİLME", title);
-        showToast("Yazı silindi.");
-        await refreshBlog();
-    } catch(e) { showToast("Hata", true); }
-    showLoading(false);
-}
-
-// ═══════════════════════════════════════════════
-// MEDYA: KKIRPMA & DÖNDÜRME (Modül 8.5)
-// ═══════════════════════════════════════════════
-let cropState = { img: null, rotation: 0, flipH: false, flipV: false, selecting: false, sel: null, startX: 0, startY: 0 };
-
-function loadCropImage(input) {
-    if(!input.files[0]) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        const img = new Image();
-        img.onload = () => {
-            cropState.img = img;
-            cropState.rotation = 0;
-            cropState.flipH = false;
-            cropState.flipV = false;
-            cropState.sel = null;
-            document.getElementById('crop-workspace').style.display = 'block';
-            drawCropCanvas();
-            setupCropEvents();
-        };
-        img.src = e.target.result;
-    };
-    reader.readAsDataURL(input.files[0]);
-}
-
-function drawCropCanvas() {
-    const { img, rotation, flipH, flipV, sel } = cropState;
-    if(!img) return;
-    const canvas = document.getElementById('crop-canvas');
-    const isRotated = rotation === 90 || rotation === 270;
-    const maxW = Math.min(560, img.width);
-    const scale = maxW / (isRotated ? img.height : img.width);
-    canvas.width = isRotated ? img.height * scale : img.width * scale;
-    canvas.height = isRotated ? img.width * scale : img.height * scale;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.save();
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.rotate((rotation * Math.PI) / 180);
-    ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
-    ctx.drawImage(img, -img.width * scale / 2, -img.height * scale / 2, img.width * scale, img.height * scale);
-    ctx.restore();
-    // Draw selection
-    if(sel) {
-        ctx.strokeStyle = 'rgba(168,127,74,0.9)';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([6, 3]);
-        ctx.strokeRect(sel.x, sel.y, sel.w, sel.h);
-        ctx.fillStyle = 'rgba(168,127,74,0.08)';
-        ctx.fillRect(sel.x, sel.y, sel.w, sel.h);
-        ctx.setLineDash([]);
-        document.getElementById('crop-info').innerText = `${Math.round(sel.w)} × ${Math.round(sel.h)} px`;
-    }
-}
-
-function setupCropEvents() {
-    const canvas = document.getElementById('crop-canvas');
-    const getPos = e => {
-        const r = canvas.getBoundingClientRect();
-        const touch = e.touches ? e.touches[0] : e;
-        return { x: touch.clientX - r.left, y: touch.clientY - r.top };
-    };
-    canvas.onmousedown = canvas.ontouchstart = e => {
-        e.preventDefault();
-        const p = getPos(e);
-        cropState.selecting = true;
-        cropState.startX = p.x; cropState.startY = p.y;
-        cropState.sel = { x: p.x, y: p.y, w: 0, h: 0 };
-    };
-    canvas.onmousemove = canvas.ontouchmove = e => {
-        if(!cropState.selecting) return;
-        e.preventDefault();
-        const p = getPos(e);
-        cropState.sel = { x: Math.min(p.x, cropState.startX), y: Math.min(p.y, cropState.startY), w: Math.abs(p.x - cropState.startX), h: Math.abs(p.y - cropState.startY) };
-        drawCropCanvas();
-    };
-    canvas.onmouseup = canvas.ontouchend = () => { cropState.selecting = false; };
-}
-
-function rotateCrop(deg) { cropState.rotation = (cropState.rotation + deg + 360) % 360; cropState.sel = null; drawCropCanvas(); }
-function flipCrop(dir) { if(dir === 'h') cropState.flipH = !cropState.flipH; else cropState.flipV = !cropState.flipV; drawCropCanvas(); }
-function resetCrop() { cropState.rotation = 0; cropState.flipH = false; cropState.flipV = false; cropState.sel = null; drawCropCanvas(); }
-
-function applyCrop() {
-    const canvas = document.getElementById('crop-canvas');
-    const { sel } = cropState;
-    const out = document.createElement('canvas');
-    if(sel && sel.w > 10 && sel.h > 10) {
-        out.width = sel.w; out.height = sel.h;
-        out.getContext('2d').drawImage(canvas, sel.x, sel.y, sel.w, sel.h, 0, 0, sel.w, sel.h);
-    } else {
-        out.width = canvas.width; out.height = canvas.height;
-        out.getContext('2d').drawImage(canvas, 0, 0);
-    }
-    const a = document.createElement('a');
-    a.href = out.toDataURL('image/jpeg', 0.92);
-    a.download = 'ube-raw-cropped-' + Date.now() + '.jpg';
-    a.click();
-    showToast("Görsel indirildi.", false, true);
-    addLog("MEDYA", "Görsel kırpıldı ve indirildi.");
-}
-
-// ═══════════════════════════════════════════════
-// MEDYA: KAYIP MEDYA TARAYICI (Modül 8.10)
-// ═══════════════════════════════════════════════
-async function scanMissingMedia() {
-    const el = document.getElementById('scan-result');
-    el.innerHTML = '<p style="color:#555;">Tarama başlıyor... Bu işlem biraz sürebilir.</p>';
-    showLoading(true, "MEDYA TARANIYOR...");
-    const broken = [], ok = [];
-    const projects = currentPortfolio.projects.filter(p => !p.isDeleted && p.image);
-    let checked = 0;
-    for(const p of projects) {
-        const imgs = p.image.split(',').map(s => s.trim()).filter(Boolean);
-        for(const imgPath of imgs) {
-            const url = `https://raw.githubusercontent.com/${REPO}/main/${imgPath}`;
-            try {
-                const r = await fetch(url, { method: 'HEAD' });
-                if(!r.ok) broken.push({ title: p.title, path: imgPath });
-                else ok.push(imgPath);
-            } catch(e) { broken.push({ title: p.title, path: imgPath }); }
-        }
-        checked++;
-        setLoaderText(`Taranıyor ${checked}/${projects.length}: ${p.title}`);
-    }
-    showLoading(false);
-    if(broken.length === 0) {
-        el.innerHTML = `<div class="info-box" style="border-left-color:#4caf50;background:rgba(76,175,80,0.05);">✓ ${ok.length} görsel kontrol edildi. Kırık bağlantı bulunamadı.</div>`;
-    } else {
-        el.innerHTML = `<div class="info-box warn">⚠ ${broken.length} kırık medya bulundu (${ok.length} sağlıklı).</div>` +
-            broken.map(b => `<div class="item-row">
-                <div class="item-info"><b style="color:#f66;">${b.title}</b><small style="color:#555;">${b.path}</small></div>
-            </div>`).join('');
-    }
-    addLog("MEDYA TARAMA", `${ok.length} sağlıklı, ${broken.length} kırık`);
-}
-
-// ═══════════════════════════════════════════════
-// ÖDÜL & ROZETLER (Modül 6.10)
-// ═══════════════════════════════════════════════
-function renderAwardList() {
-    const el = document.getElementById('award-list');
-    const awardSel = document.getElementById('award-artwork-select');
-    if(!el) return;
-    const withAwards = currentPortfolio.projects.filter(p => !p.isDeleted && p.awards?.length);
-    el.innerHTML = withAwards.length ? withAwards.map(p => {
-        const idx = currentPortfolio.projects.indexOf(p);
-        return p.awards.map((award, ai) => `
-            <div class="item-row">
-                <div class="item-info">
-                    <b>🏆 ${award}</b>
-                    <small>${p.title} · ${p.certCode || '—'}</small>
-                </div>
-                <button class="danger sm" onclick="removeAward(${idx},${ai})">KALDIR</button>
-            </div>`).join('');
-    }).join('') : "<p style='color:#444;font-size:10px;padding:12px;'>Henüz ödül kaydı yok.</p>";
-
-    if(awardSel) {
-        awardSel.innerHTML = '<option value="">Eser Seçin</option>' +
-            currentPortfolio.projects.filter(p=>!p.isDeleted).map((p,i) =>
-                `<option value="${currentPortfolio.projects.indexOf(p)}">${p.certCode||'?'} — ${p.title}</option>`
-            ).join('');
-    }
-}
-
-async function addAward() {
-    const idx = document.getElementById('award-artwork-select').value;
-    const awardText = document.getElementById('award-text').value.trim();
-    if(idx === '' || !awardText) return showToast("Eser ve ödül metni gerekli.", true);
-    showLoading(true);
-    if(!currentPortfolio.projects[idx].awards) currentPortfolio.projects[idx].awards = [];
-    currentPortfolio.projects[idx].awards.push(awardText);
-    try {
-        await ghAction('content/portfolio.json', 'PUT', {projects: currentPortfolio.projects}, currentPortfolio.sha);
-        document.getElementById('award-text').value = '';
-        addLog("ÖDÜL", currentPortfolio.projects[idx].title + " · " + awardText);
-        showToast("Ödül rozeti eklendi.", false, true);
-        renderAwardList();
-        await renderInventory();
-    } catch(e) { showToast("Hata", true); }
-    showLoading(false);
-}
-
-async function removeAward(idx, ai) {
-    if(!confirm("Rozet kaldırılsın mı?")) return;
-    showLoading(true);
-    currentPortfolio.projects[idx].awards.splice(ai, 1);
-    try {
-        await ghAction('content/portfolio.json', 'PUT', {projects: currentPortfolio.projects}, currentPortfolio.sha);
-        showToast("Rozet kaldırıldı.");
-        renderAwardList();
-        await renderInventory();
-    } catch(e) { showToast("Hata", true); }
-    showLoading(false);
-}
-
-// ═══════════════════════════════════════════════
-// BEKLEME LİSTESİ (Modül 4.7)
-// ═══════════════════════════════════════════════
-function renderWaitlist() {
-    const el = document.getElementById('waitlist-content');
-    if(!el) return;
-    const list = JSON.parse(localStorage.getItem('ube_waitlist') || '[]');
-    el.innerHTML = list.length ? list.map((w, i) => `
-        <div class="item-row">
-            <div class="item-info">
-                <b>${w.name}</b>
-                <small>${w.contact} · ${w.desc}</small>
-                <small style="color:#333;">${w.date}</small>
-            </div>
-            <button class="danger sm" onclick="removeWaitlist(${i})">SİL</button>
-        </div>`).join('') : "<p style='color:#444;font-size:10px;padding:12px;'>Bekleme listesi boş.</p>";
-}
-
-function addWaitlist() {
-    const name = document.getElementById('wl-name').value.trim();
-    const contact = document.getElementById('wl-contact').value.trim();
-    const desc = document.getElementById('wl-desc').value.trim();
-    if(!name || !contact) return showToast("Ad ve iletişim zorunlu.", true);
-    const list = JSON.parse(localStorage.getItem('ube_waitlist') || '[]');
-    list.push({ name, contact, desc, date: nowStr(), id: 'wl_' + Date.now() });
-    localStorage.setItem('ube_waitlist', JSON.stringify(list));
-    ['wl-name','wl-contact','wl-desc'].forEach(id => document.getElementById(id).value = '');
-    addLog("BEKLEME", name + " · " + desc);
-    showToast("Bekleme listesine eklendi.", false, true);
-    renderWaitlist();
-}
-
-function removeWaitlist(i) {
-    const list = JSON.parse(localStorage.getItem('ube_waitlist') || '[]');
-    list.splice(i, 1);
-    localStorage.setItem('ube_waitlist', JSON.stringify(list));
-    renderWaitlist();
-}
-
-// ═══════════════════════════════════════════════
-// ÖĞRENCI İNDİRİM KODLARI (Modül 7.9)
-// ═══════════════════════════════════════════════
-function generateDiscountCode(studentName) {
-    const code = 'UBE-' + studentName.replace(/\s/g,'').toUpperCase().substring(0,4) + '-' + Math.random().toString(36).substring(2,6).toUpperCase();
-    const discounts = JSON.parse(localStorage.getItem('ube_discounts') || '[]');
-    discounts.push({ code, student: studentName, created: nowStr(), used: false, pct: 10 });
-    localStorage.setItem('ube_discounts', JSON.stringify(discounts));
-    showToast(`İndirim kodu: ${code}`, false, true);
-    addLog("İNDİRİM", studentName + " → " + code);
-    return code;
-}
-
-// ═══════════════════════════════════════════════
-// TESLİMAT / ÇIKIŞ TUTANAĞI PDF (Modül 6.7)
-// ═══════════════════════════════════════════════
-function generateDeliveryPDF(projectIdx) {
-    const p = currentPortfolio.projects[projectIdx];
-    if(!p) return showToast("Eser bulunamadı.", true);
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: "portrait", format: "a4" });
-    const w = 210, cx = w/2;
-    doc.setFillColor(8,8,8); doc.rect(0,0,w,297,'F');
-    doc.setDrawColor(168,127,74); doc.setLineWidth(0.8); doc.rect(10,10,w-20,277);
-    doc.setTextColor(168,127,74); doc.setFontSize(18);
-    doc.text("UBE RAW STUDIO", cx, 28, {align:"center"});
-    doc.setFontSize(13); doc.setTextColor(200,200,200);
-    doc.text("TESLİMAT / ÇIKIŞ TUTANAĞI", cx, 40, {align:"center"});
-    doc.setDrawColor(168,127,74,50); doc.line(20,46,190,46);
-    doc.setFontSize(10); doc.setTextColor(150,150,150);
-    const rows = [
-        ["Tarih", new Date().toLocaleDateString('tr-TR')],
-        ["Eser Adı", p.title],
-        ["SKU / Sertifika No", p.certCode || '—'],
-        ["Kategori", p.category || '—'],
-        ["Materyal", p.material || '—'],
-        ["Boyut", p.dimensions || '—'],
-        ["Ağırlık", p.weight ? p.weight + ' kg' : '—'],
-        ["Konum (Çıkış Öncesi)", p.location || '—'],
-        ["Teslim Alan", p.isConsignment ? p.consignVenue || '—' : (p.owner || '—')],
-    ];
-    let y = 60;
-    rows.forEach(([label, val]) => {
-        doc.setTextColor(120,120,120); doc.text(label + ":", 22, y);
-        doc.setTextColor(200,200,200); doc.text(String(val), 80, y);
-        y += 12;
-    });
-    doc.setTextColor(120,120,120); doc.setFontSize(9);
-    doc.text("TESLIM EDEN İMZA:", 22, 200);
-    doc.line(22, 218, 100, 218);
-    doc.text("TESLİM ALAN İMZA:", 115, 200);
-    doc.line(115, 218, 193, 218);
-    doc.text("Ubeydullah Bayrak / UBE RAW", 22, 225);
-    doc.setFontSize(8); doc.setTextColor(60,60,60);
-    doc.text("Bu belge UBE RAW Studio tarafından düzenlenmiştir.", cx, 270, {align:"center"});
-    doc.save(`UBE-RAW-Tutanak-${p.certCode||'eser'}-${Date.now()}.pdf`);
-    addLog("TUTANAK", p.title);
-    showToast("Çıkış tutanağı oluşturuldu.", false, true);
-}
-
-// ═══════════════════════════════════════════════
-// CMS: settings.json → index.html yazma (Mod 9)
-// ═══════════════════════════════════════════════
-// Settings alanlarını index'e besle
-// (settings.json güncellenince index.html otomatik okuyor)
-
-// ═══════════════════════════════════════════════
-// INIT — TÜM MODÜLLER
-// ═══════════════════════════════════════════════
-async function initDashboard() {
-    await loadSettings();
-    await fetchCRM();
-    await fetchNews();
-    await renderInventory();
-    await refreshOrders();
-    await refreshGuestbook();
-    await refreshWorkshops();
-    await refreshBlog();
-    renderExpoSelectLists();
-    renderReminderList();
-    renderWaitlist();
-    renderAwardList();
-    renderChatHistory();
-}
-
 renderLog();
 renderChatHistory();
 </script>
