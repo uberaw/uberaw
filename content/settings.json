@@ -1,6 +1,6 @@
 {
   "theme": "#a87f4a",
-  "maintenance": false,
+  "maintenance": true,
   "goal": 20,
   "timeout": 120,
   "bio": "Resim, kişiliğimin sonsuz süren bir dakikasıdır.\n— Salvador Dali",
