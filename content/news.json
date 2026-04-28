@@ -1,14 +1,14 @@
 {
   "announcements": [
     {
-      "id": "post_1714210001",
       "title": "UBE RAW Studio Açıldı",
       "summary": "Stüdyo resmi olarak faaliyete geçti — eserler ve atölyeler için takipte kalın.",
-      "content": "UBE RAW Art & Design Studio, Kayseri'de Ubeydullah Bayrak'ın liderliğinde faaliyete geçmiştir. Heykel, karakalem ve ahşap rölyef alanlarında özgün eserler üretilmekte, aynı zamanda atölye eğitimleri düzenlenmektedir.",
-      "tag": "HABER",
+      "content": "UBE RAW Art & Design Studio, Rize'de Ubeydullah Bayrak'ın liderliğinde faaliyete geçmiştir. Heykel, karakalem ve ahşap rölyef alanlarında özgün eserler üretilmekte, aynı zamanda atölye eğitimleri düzenlenmektedir.",
       "date": "28 Nisan 2026",
+      "tag": "HABER",
       "pinned": true,
-      "published": true
+      "published": true,
+      "id": "post_1714210001"
     }
   ],
   "guestbook": []
