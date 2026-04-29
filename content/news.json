@@ -1,16 +1,6 @@
 {
   "announcements": [
     {
-      "title": "UBE RAW Studio A??ld?",
-      "summary": "St?dyo resmi olarak faaliyete ge?ti ? eserler ve at?lyeler i?in takipte kal?n.",
-      "content": "UBE RAW Art & Design Studio, Rize'de Ubeydullah Bayrak'?n liderli?inde faaliyete ge?mi?tir. Heykel, karakalem ve ah?ap r?lyef alanlar?nda ?zg?n eserler ?retilmekte, ayn? zamanda at?lye e?itimleri d?zenlenmektedir.",
-      "date": "28 Nisan 2026",
-      "tag": "HABER",
-      "pinned": true,
-      "published": true,
-      "id": "post_1714210001"
-    },
-    {
       "id": "post_1777456774748",
       "title": "Fark?ndal?k Rotas?",
       "summary": "",
@@ -21,87 +11,5 @@
       "published": true
     }
   ],
-  "guestbook": [],
-  "news": [
-    {
-      "id": "guest_1777472022262",
-      "title": "ddd",
-      "content": "ddd",
-      "date": "29.04.2026 17:13:41",
-      "category": "GUESTBOOK",
-      "approved": false
-    },
-    {
-      "id": "guest_1777471819620",
-      "title": "ghjhjh",
-      "content": "hjhj",
-      "date": "29.04.2026 17:10:19",
-      "category": "GUESTBOOK",
-      "approved": false
-    },
-    {
-      "id": "guest_1777471804047",
-      "title": "ffff",
-      "content": "ffffff",
-      "date": "29.04.2026 17:10:03",
-      "category": "GUESTBOOK",
-      "approved": false
-    },
-    {
-      "id": "guest_1777471631148",
-      "title": "ffff",
-      "content": "ffffff",
-      "date": "29.04.2026 17:07:10",
-      "category": "GUESTBOOK",
-      "approved": false
-    },
-    {
-      "id": "guest_1777471560334",
-      "title": "saaa",
-      "content": "aaaa",
-      "date": "29.04.2026 17:06:00",
-      "category": "GUESTBOOK",
-      "approved": false
-    },
-    {
-      "id": "guest_1777471528669",
-      "title": "czxcz",
-      "content": "dfgdh",
-      "date": "29.04.2026 17:05:28",
-      "category": "GUESTBOOK",
-      "approved": false
-    },
-    {
-      "id": "guest_1777471504264",
-      "title": "hasan",
-      "content": "hjhjh",
-      "date": "29.04.2026 17:05:03",
-      "category": "GUESTBOOK",
-      "approved": false
-    },
-    {
-      "id": "guest_1777471485492",
-      "title": "hasan",
-      "content": "hhhh",
-      "date": "29.04.2026 17:04:45",
-      "category": "GUESTBOOK",
-      "approved": false
-    },
-    {
-      "id": "guest_1777471462902",
-      "title": "hasan",
-      "content": "aaaaaaaaa",
-      "date": "29.04.2026 17:04:22",
-      "category": "GUESTBOOK",
-      "approved": false
-    },
-    {
-      "id": "guest_1777471426576",
-      "title": "hasan",
-      "content": "aaaaa",
-      "date": "29.04.2026 17:03:46",
-      "category": "GUESTBOOK",
-      "approved": false
-    }
-  ]
+  "guestbook": []
 }
