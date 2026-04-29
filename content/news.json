@@ -1,4 +1,14 @@
 {
-  "announcements": [],
-  "guestbook": [] 
+  "announcements": [
+    {
+      "id": "post_1777480287434",
+      "title": "ddfsdf",
+      "summary": "dfsdf",
+      "content": "sdfsd",
+      "date": "29 Nisan 2026",
+      "tag": "sdfs",
+      "pinned": true,
+      "published": true
+    }
+  ]
 }
