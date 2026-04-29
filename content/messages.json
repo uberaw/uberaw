@@ -1,17 +1,12 @@
-{
-  "lastUpdate": "2026-04-29T22:50:00Z",
-  "system": {
-    "version": "5.0",
-    "maintenance": false
-  },
-  "notifications": {
-    "success": "İşlem başarıyla tamamlandı.",
-    "error": "Bir hata oluştu, lütfen tekrar deneyin.",
-    "loading": "Veriler işleniyor..."
-  },
-  "ui_strings": {
-    "brand": "UBE RAW",
-    "workshop_status": "Kayıtlar Devam Ediyor",
-    "footer_note": "Handcrafted in Rize / Turkey"
+[
+  {
+    "id": "MSG-1714421100",
+    "formType": "Direkt Mesaj",
+    "adSoyad": "Örnek Kullanıcı",
+    "email": "ornek@email.com",
+    "konu": "Eser Bilgisi",
+    "mesaj": "Merhaba, duvar rölyefleriniz hakkında bilgi alabilir miyim?",
+    "tarih": "29.04.2026 22:55:00",
+    "okundu": false
   }
-}
+]
