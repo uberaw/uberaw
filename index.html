@@ -84,8 +84,8 @@
     
     nav { display: flex; gap: 45px; }
     nav a {
-      color: #999; text-decoration: none; font-size: 10px;
-      text-transform: uppercase; letter-spacing: 4px; transition: color 0.4s; position: relative;
+      color: #999; text-decoration: none; font-size: 10px; text-transform: uppercase;
+      letter-spacing: 4px; transition: color 0.4s; position: relative;
     }
     nav a:hover, nav a.active { color: #fff; }
     nav a::after { content: ''; position: absolute; width: 0; height: 1px; bottom: -6px; left: 50%; transform: translateX(-50%); background: var(--accent); transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
@@ -140,8 +140,7 @@
     /* ══ EDİTORYAL MODAL (Eser İnceleme) ══ */
     .modal {
       position: fixed; inset: 0; background: rgba(0,0,0,0.98); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-      z-index: 100000; display: none; opacity: 0; transition: opacity 0.5s;
-      align-items: center; justify-content: center; padding: 0;
+      z-index: 100000; display: none; opacity: 0; transition: opacity 0.5s; align-items: center; justify-content: center; padding: 0;
     }
     .modal.active { display: flex; opacity: 1; }
     .modal-close { position: absolute; top: 30px; right: 40px; background: none; border: none; color: #fff; font-size: 50px; cursor: pointer; transition: color 0.3s, transform 0.3s; z-index: 10; font-weight: 100; line-height: 1; }
@@ -331,10 +330,7 @@
       <h3 class="serif" style="font-size: 36px; color: var(--accent); margin-bottom: 10px;">Kayıt Talebi</h3>
       <p style="font-size: 11px; color: var(--text-dim); margin-bottom: 40px; letter-spacing: 1px;">Aşağıdaki formu doldurarak stüdyo atölyelerimize ön kayıt oluşturabilirsiniz.</p>
       
-      <form action="https://script.google.com/macros/s/AKfycbyEgugdfK9xecJSV2zRTO3ApPtGjOhsaRRqE_O2nZgy9WEY8VJGoVndeW3OIwNwe-6wPg/exec" method="POST">
-        <input type="hidden" name="_next" value="https://uberaw.github.io/uberaw/thanks.html">
-        <input type="hidden" name="_subject" value="[UBE RAW] Yeni Atölye Kayıt Talebi!">
-        <input type="hidden" name="_captcha" value="false">
+      <form id="workshop-form">
         <input type="text" id="reg-ws-name" name="Talep_Edilen_Atolye" readonly style="color: var(--accent); font-weight: 600; border-bottom-color: var(--accent);">
         <input type="text" name="Ad_Soyad" placeholder="Adınız Soyadınız *" required class="cursor-hover">
         <input type="email" name="Email" placeholder="E-posta Adresiniz *" required class="cursor-hover">
@@ -367,10 +363,7 @@
         <h3 class="serif" style="font-size: 32px; margin-bottom: 15px; color: #fff;">Direkt Mesaj</h3>
         <p style="font-size: 11px; color: var(--text-dim); margin-bottom: 40px; letter-spacing: 1px;">Komisyon işler, portfolyo sunumu veya genel bilgi talepleri için form üzerinden iletişime geçebilirsiniz.</p>
         
-        <form action="https://formsubmit.co/ubeybayrak@gmail.com" method="POST">
-          <input type="hidden" name="_next" value="https://uberaw.github.io/uberaw/thanks.html">
-          <input type="hidden" name="_subject" value="[UBE RAW] Yeni İletişim Mesajı!">
-          <input type="hidden" name="_captcha" value="false">
+        <form id="contact-form">
           <input type="text" id="iletisim-konu" name="Konu" placeholder="Konu (Örn: Sipariş, Bilgi)" required class="cursor-hover">
           <input type="text" name="Ad_Soyad" placeholder="Adınız Soyadınız *" required class="cursor-hover">
           <input type="email" name="Email" placeholder="E-posta Adresiniz *" required class="cursor-hover">
@@ -385,10 +378,7 @@
         <h3 class="serif" style="font-size: 32px; margin-bottom: 30px;">Ziyaretçi Defteri</h3>
         
         <div class="gb-form">
-          <form action="https://script.google.com/macros/s/AKfycbx0G19KA2e7D4e5kB4LWB-dspDNGRucq831kHcdQoWqIdnkfFiqwkgSctN2p_k5Mk_v/exec" method="POST" style="gap: 20px;">
-            <input type="hidden" name="_next" value="https://uberaw.github.io/uberaw/thanks.html">
-            <input type="hidden" name="_subject" value="[UBE RAW] Ziyaretçi Defterine Yeni Mesaj!">
-            <input type="hidden" name="_captcha" value="false">
+          <form id="guestbook-form" style="gap: 20px;">
             <input type="text" name="Ziyaretci_Adi" placeholder="İsminiz *" required class="cursor-hover">
             <textarea name="Ziyaretci_Mesaji" rows="2" placeholder="Stüdyo ve eserler hakkındaki düşüncelerinizi paylaşın... *" required class="cursor-hover"></textarea>
             <button type="submit" class="cursor-hover" style="padding: 15px 20px; font-size: 9px;">DEFTERE YAZ</button>
@@ -417,7 +407,6 @@
       cursorOutline.animate({ left: `${posX}px`, top: `${posY}px` }, { duration: 500, fill: "forwards" });
     });
 
-    // Tıklanabilir alanlarda imleç efekti
     function setupCursorHover() {
       document.querySelectorAll('a, button, .card, .cursor-hover, input, textarea').forEach(el => {
         el.addEventListener('mouseenter', () => document.documentElement.classList.add('hover-active'));
@@ -433,7 +422,6 @@
     const BASE_RAW_URL = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/`;
 
     let globalProjects = [];
-
     async function fetchData(path) {
       try {
         const response = await fetch(`${BASE_RAW_URL}${path}?_=${Date.now()}`);
@@ -444,39 +432,34 @@
 
     async function initSite() {
       // Loader Animasyonu
-      let progress = 0; const bar = document.getElementById('l-bar'); const pct = document.getElementById('l-pct');
+      let progress = 0;
+      const bar = document.getElementById('l-bar'); const pct = document.getElementById('l-pct');
       const iv = setInterval(() => { 
         progress += Math.floor(Math.random() * 15) + 5; 
         if(progress > 95) progress = 95;
         bar.style.width = progress + '%'; pct.innerText = progress;
       }, 150);
-
       await Promise.all([ loadSettings(), loadPortfolio(), loadWorkshops(), loadNewsAndGuestbook() ]);
       
       clearInterval(iv); bar.style.width = '100%'; pct.innerText = '100';
-      
       setTimeout(() => {
         document.getElementById('loader').style.opacity = '0';
         document.getElementById('loader').style.visibility = 'hidden';
-        setupCursorHover(); // Dinamik içerik yüklendikten sonra cursor'ı ayarla
-        revealOnScroll(); // İlk görünüm animasyonları
+        setupCursorHover();
+        revealOnScroll();
       }, 800);
-
-      // Scroll Eventleri (Header, Reveal, Parallax)
+      
       let lastScroll = 0;
       window.addEventListener('scroll', () => {
         const currentScroll = window.pageYOffset;
         const header = document.getElementById('header');
         
-        // Header gizle/göster/arkaplan
         if (currentScroll > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
         if (currentScroll > 300 && currentScroll > lastScroll) header.classList.add('hidden'); else header.classList.remove('hidden');
         lastScroll = currentScroll;
 
-        // Reveal Animasyonu
         revealOnScroll();
 
-        // Parallax Efekti (Hero Text)
         const heroContent = document.getElementById('hero-content');
         if (currentScroll < window.innerHeight) {
           heroContent.style.transform = `translateY(${currentScroll * 0.3}px)`;
@@ -504,7 +487,6 @@
       if (data.footer) document.getElementById('site-footer').innerText = data.footer;
       if (data.menuPortfolio) document.getElementById('nav-works').innerText = data.menuPortfolio;
       if (data.menuContact) document.getElementById('nav-contact').innerText = data.menuContact;
-
       document.getElementById('contact-info').innerHTML = `
         ${data.address ? `<div style="margin-bottom:5px;"><strong style="color:#fff;">KONUM /</strong> <span class="uppercase">${data.address}</span></div>` : ''}
         ${data.email ? `<div style="margin-bottom:5px;"><strong style="color:#fff;">E-POSTA /</strong> ${data.email}</div>` : ''}
@@ -521,7 +503,6 @@
       const data = await fetchData('content/portfolio.json');
       if (!data || !data.projects) return;
       globalProjects = data.projects.filter(p => !p.isDeleted && !p.isDraft && !p.isHidden);
-      
       const categories = [...new Set(globalProjects.map(p => p.category).filter(Boolean))];
       document.getElementById('category-filters').innerHTML = `<button class="filter-btn active cursor-hover" onclick="filterWorks('all', this)">TÜMÜ</button>` + 
         categories.map(c => `<button class="filter-btn cursor-hover" onclick="filterWorks('${c}', this)">${c}</button>`).join('');
@@ -531,7 +512,7 @@
     function filterWorks(cat, btn) {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
       renderGrid(cat === 'all' ? globalProjects : globalProjects.filter(p => p.category === cat));
-      setTimeout(setupCursorHover, 100); // Yeni butonlar için cursor yenile
+      setTimeout(setupCursorHover, 100);
     }
 
     function renderGrid(projects) {
@@ -556,7 +537,6 @@
       const data = await fetchData('content/workshops.json');
       if (!data || !data.workshops) return;
       const activeWorkshops = data.workshops.filter(w => !w.archived);
-      
       document.getElementById('workshops-list').innerHTML = activeWorkshops.map(w => {
         const parts = (w.date || '').split(' '); const day = parts[0] || '-'; const month = parts.slice(1).join(' ');
         return `
@@ -632,7 +612,7 @@
         document.getElementById('m-img').src = p.image ? `${BASE_RAW_URL}${p.image.split(',')[0].trim()}` : '';
       }
       document.getElementById(id).classList.add('active');
-      document.documentElement.style.overflow = 'hidden'; // Arka plan kaymasını engelle
+      document.documentElement.style.overflow = 'hidden'; 
     }
     
     function openRegModal(wsName) {
@@ -642,11 +622,87 @@
     }
 
     function closeModal(id) { 
-      document.getElementById(id).classList.remove('active'); 
+      document.getElementById(id).classList.remove('active');
       document.documentElement.style.overflow = 'auto';
     }
 
     document.addEventListener('DOMContentLoaded', initSite);
+
+    // ══════════════════════════════════════════════
+    // GOOGLE SCRIPT GÖNDERİM FONKSİYONLARI (YENİ SİSTEM)
+    // ══════════════════════════════════════════════
+    
+    // NOT: Buradaki URL'leri Google Script üzerinden aldığın "Web Uygulaması" URL'leri ile değiştirmeyi unutma!
+    const SCRIPT_URL_GUESTBOOK = "BURAYA_ZIYARETCI_DEFTERI_URL_YAPISTIR"; 
+    const SCRIPT_URL_PRIVATE   = "BURAYA_OZEL_DERS_URL_YAPISTIR";       
+
+    // Genel Fetch/Gönderim Motoru (JSON hatalarını text/plain ile çözer, sayfa yenilenmez)
+    async function submitFormToScript(event, url, payload, successMessage) {
+      event.preventDefault(); 
+      
+      const form = event.target;
+      const btn = form.querySelector('button[type="submit"]');
+      const originalText = btn.innerText;
+      
+      btn.disabled = true;
+      btn.innerText = "İLETİLİYOR...";
+      btn.style.color = "#000";
+      btn.style.backgroundColor = "var(--accent)";
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: { "Content-Type": "text/plain;charset=utf-8" }
+        });
+        
+        alert(successMessage);
+        form.reset();
+        
+        if (form.closest('.modal')) {
+          closeModal(form.closest('.modal').id);
+        }
+      } catch (error) {
+        alert("Sistemsel bir hata oluştu, mesajınız iletilemedi. Lütfen doğrudan e-posta ile ulaşın.");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = originalText;
+        btn.style.backgroundColor = "transparent";
+        btn.style.color = "#fff";
+      }
+    }
+
+    // 1. ZİYARETÇİ DEFTERİ
+    document.getElementById('guestbook-form')?.addEventListener('submit', function(e) {
+      const data = {
+        name: this.querySelector('input[name="Ziyaretci_Adi"]').value,
+        message: this.querySelector('textarea[name="Ziyaretci_Mesaji"]').value
+      };
+      submitFormToScript(e, SCRIPT_URL_GUESTBOOK, data, "Deftere notunuz eklendi. Stüdyo onayından sonra yayında olacaktır.");
+    });
+
+    // 2. DİREKT MESAJ / İLETİŞİM
+    document.getElementById('contact-form')?.addEventListener('submit', function(e) {
+      const data = {
+        type: "private_lesson", 
+        name: this.querySelector('input[name="Ad_Soyad"]').value,
+        email: this.querySelector('input[name="Email"]').value,
+        message: `Konu: ${this.querySelector('input[name="Konu"]').value}\n\nMesaj: ${this.querySelector('textarea[name="Mesaj"]').value}`
+      };
+      submitFormToScript(e, SCRIPT_URL_PRIVATE, data, "Mesajınız stüdyoya iletildi.");
+    });
+
+    // 3. ATÖLYE KAYIT TALEBİ
+    document.getElementById('workshop-form')?.addEventListener('submit', function(e) {
+      const data = {
+        type: "private_lesson", 
+        name: this.querySelector('input[name="Ad_Soyad"]').value,
+        email: this.querySelector('input[name="Email"]').value,
+        phone: this.querySelector('input[name="Telefon"]').value,
+        message: `Kayıt Talebi: ${this.querySelector('input[name="Talep_Edilen_Atolye"]').value}\n\nNotlar: ${this.querySelector('textarea[name="Notlar"]').value}`
+      };
+      submitFormToScript(e, SCRIPT_URL_PRIVATE, data, "Ön kayıt talebiniz alındı. Detaylar için sizinle iletişime geçeceğiz.");
+    });
   </script>
 </body>
 </html>
