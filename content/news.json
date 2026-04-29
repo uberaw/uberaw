@@ -10,5 +10,13 @@
       "pinned": true,
       "published": true
     }
+  ],
+  "guestbook": [
+    {
+      "name": "dfgd",
+      "message": "fgdfg",
+      "date": "29.04.2026",
+      "approved": true
+    }
   ]
 }
