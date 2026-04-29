@@ -674,15 +674,11 @@ const URL_ATOLYE_KAYIT   = "https://script.google.com/macros/s/AKfycbwwrqIqtgvgK
     document.getElementById('guestbook-form')?.addEventListener('submit', async function(e) {
       e.preventDefault();
       const payload = {
-       formType: "Ziyaretçi Defteri",
-    // Input name="Ziyaretci_Ad" olan değeri alıyoruz
-    adSoyad: this.querySelector('input[name="Ziyaretci_Ad"]').value,
-    email: this.querySelector('input[name="Ziyaretci_Email"]').value,
-    // Textarea name="Ziyaretci_Mesaji" olan değeri alıyoruz
-    mesaj: this.querySelector('textarea[name="Ziyaretci_Mesaji"]').value,
-    tarih: new Date().toLocaleString('tr-TR'),
-    status: "ONAY BEKLİYOR"
-  };
+        type: "guestbook_entry",
+        isim: this.querySelector('input[name="Ziyaretci_Adi"]').value,
+        mesaj: this.querySelector('textarea[name="Ziyaretci_Mesaji"]').value,
+        tarih: new Date().toLocaleString('tr-TR')
+      };
       await silentSubmit(this, URL_ZIYARETCI_DEF, payload, "Notunuz deftere eklendi, teşekkürler.");
     });
 
