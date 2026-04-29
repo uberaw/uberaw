@@ -1,9 +1,9 @@
 {
   "announcements": [
     {
-      "title": "UBE RAW Studio Açıldı",
-      "summary": "Stüdyo resmi olarak faaliyete geçti — eserler ve atölyeler için takipte kalın.",
-      "content": "UBE RAW Art & Design Studio, Rize'de Ubeydullah Bayrak'ın liderliğinde faaliyete geçmiştir. Heykel, karakalem ve ahşap rölyef alanlarında özgün eserler üretilmekte, aynı zamanda atölye eğitimleri düzenlenmektedir.",
+      "title": "UBE RAW Studio A??ld?",
+      "summary": "St?dyo resmi olarak faaliyete ge?ti ? eserler ve at?lyeler i?in takipte kal?n.",
+      "content": "UBE RAW Art & Design Studio, Rize'de Ubeydullah Bayrak'?n liderli?inde faaliyete ge?mi?tir. Heykel, karakalem ve ah?ap r?lyef alanlar?nda ?zg?n eserler ?retilmekte, ayn? zamanda at?lye e?itimleri d?zenlenmektedir.",
       "date": "28 Nisan 2026",
       "tag": "HABER",
       "pinned": true,
@@ -12,7 +12,7 @@
     },
     {
       "id": "post_1777456774748",
-      "title": "Farkındalık Rotası",
+      "title": "Fark?ndal?k Rotas?",
       "summary": "",
       "content": "",
       "date": "30 Nisan 2026",
@@ -21,5 +21,15 @@
       "published": true
     }
   ],
-  "guestbook": []
+  "guestbook": [],
+  "news": [
+    {
+      "id": "guest_1777471426576",
+      "title": "hasan",
+      "content": "aaaaa",
+      "date": "29.04.2026 17:03:46",
+      "category": "GUESTBOOK",
+      "approved": false
+    }
+  ]
 }
