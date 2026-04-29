@@ -4,7 +4,7 @@
       "name": "Resim ve Heykel",
       "date": "28.04.2026 / 12:00",
       "capacity": 20,
-      "enrolled": 1,
+      "enrolled": 0,
       "location": "Stüdyo",
       "materials": "Kil, Palet, Spatula",
       "price": "",
@@ -12,16 +12,5 @@
       "archived": false
     }
   ],
-  "students": [
-    {
-      "name": "ffff",
-      "phone": "ff",
-      "email": "ff",
-      "workshop": "Resim ve Heykel",
-      "paymentStatus": "full",
-      "amount": "ff",
-      "note": "ff",
-      "addedDate": "29.04.2026 21:07:23"
-    }
-  ]
+  "students": []
 }
