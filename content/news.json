@@ -24,6 +24,14 @@
   "guestbook": [],
   "news": [
     {
+      "id": "guest_1777471528669",
+      "title": "czxcz",
+      "content": "dfgdh",
+      "date": "29.04.2026 17:05:28",
+      "category": "GUESTBOOK",
+      "approved": false
+    },
+    {
       "id": "guest_1777471504264",
       "title": "hasan",
       "content": "hjhjh",
