@@ -1,14 +1,3 @@
 {
-  "collectors": [
-    {
-      "name": "kkk",
-      "phone": "",
-      "email": "",
-      "address": "",
-      "bday": "",
-      "notes": "",
-      "isVip": false,
-      "addedDate": "29.04.2026 18:54:34"
-    }
-  ]
+  "collectors": []
 }
