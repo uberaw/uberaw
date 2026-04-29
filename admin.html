@@ -1556,25 +1556,16 @@ function exportFinanceCSV(){
   const a=document.createElement('a');a.href=encodeURI(csv);a.download='ube_finans.csv';document.body.appendChild(a);a.click();a.remove();
 }
 
-// ══ NEWS & BLOG (Duyurular ve Blog Yazıları) ══
-async function fetchNews() {
-  try {
-    const d = await ghAction('content/news.json');
-    const data = JSON.parse(b2u(d.content));
-    // Sadece duyuruları alıyoruz
-    currentNews = { announcements: data.announcements || [] };
-    currentNews.sha = d.sha;
-  } catch (e) {
-    console.error("News çekilemedi:", e);
-    currentNews = { announcements: [] };
-  }
+// ══ NEWS & BLOG ══
+async function fetchNews(){
+  try{const d=await ghAction('content/news.json');currentNews=JSON.parse(b2u(d.content));currentNews.sha=d.sha;}
+  catch(e){currentNews={announcements:[],guestbook:[]};}
+}
+async function saveNews(){
+  const sha=await getSHA('content/news.json');
+  await ghAction('content/news.json','PUT',{announcements:currentNews.announcements,guestbook:currentNews.guestbook||[]},sha);
 }
 
-async function saveNews() {
-  const sha = await getSHA('content/news.json');
-  const payload = { announcements: currentNews.announcements };
-  await ghAction('content/news.json', 'PUT', payload, sha);
-}
 async function refreshBlog(){
   await fetchNews();
   const list=currentNews.announcements||[];
@@ -1653,171 +1644,108 @@ async function deleteBlog(i){
   showLoad(false);
 }
 
-// ══ GUESTBOOK (Yönetim & Senkronizasyon) ══
+// ══ GUESTBOOK ══
+// Mesajlar guestbook.json'a kaydedilir.
+// Onaylananlar news.json → guestbook dizisine de eklenir (sitede görünür).
+async function refreshGuest(){
+  try{
+    const d=await ghAction('content/guestbook.json');
+    const all=JSON.parse(b2u(d.content)).messages||[];
+    const pending=all.filter(m=>!m.approved);
+    const approved=all.filter(m=>m.approved);
 
-// UI Yenileme ve Listeleme
-async function refreshGuest() {
-  try {
-    const d = await ghAction('content/guestbook.json');
-    const content = JSON.parse(b2u(d.content));
-    const all = content.messages || []; // Ana arşivdeki tüm mesajlar
-    
-    const pending = all.filter(m => !m.approved);
-    const approved = all.filter(m => m.approved);
+    // Badge
+    const badge=document.getElementById('badge-msg');
+    if(badge){badge.innerText=pending.length;badge.style.display=pending.length>0?'inline':'none';}
+    document.getElementById('stat-msg').innerText=pending.length;
+    const ic=document.getElementById('inbox-count');if(ic)ic.innerText=pending.length?`(${pending.length})`:'';
 
-    // Sayaçlar ve Badge Güncelleme
-    const badge = document.getElementById('badge-msg');
-    if (badge) {
-      badge.innerText = pending.length;
-      badge.style.display = pending.length > 0 ? 'inline' : 'none';
-    }
-    const statMsg = document.getElementById('stat-msg');
-    if (statMsg) statMsg.innerText = pending.length;
-    
-    const ic = document.getElementById('inbox-count');
-    if (ic) ic.innerText = pending.length ? `(${pending.length})` : '';
+    // Bekleyen
+    const pel=document.getElementById('guest-pending');
+    if(pel)pel.innerHTML=pending.length?pending.map((m,ri)=>{
+      const realIdx=all.indexOf(m);
+      const isSpam=!m.message||m.message.trim().length<4;
+      return `<div class="ir" style="${isSpam?'opacity:.4;':''}">
+        <div class="ii"><b>${esc(m.name)} ${isSpam?'<span class="badge draft">SPAM?</span>':'<span class="badge pending">ONAY BEKLİYOR</span>'}</b>
+        <small>"${esc(m.message)}" — ${m.date||''}</small></div>
+        <div class="bg">
+          ${!isSpam?`<button class="success sm" onclick="approveMsg(${realIdx})">✓ ONAYLA & YAYINLA</button>`:''}
+          <button class="danger sm" onclick="deleteMsg(${realIdx})">SİL</button>
+        </div>
+      </div>`;
+    }).join(''):"<p style='color:#333;font-size:9px;padding:16px;'>Bekleyen mesaj yok.</p>";
 
-    // Bekleyen Mesajlar Listesi
-    const pel = document.getElementById('guest-pending');
-    if (pel) {
-      pel.innerHTML = pending.length ? pending.map((m) => {
-        const realIdx = all.indexOf(m);
-        const isSpam = !m.message || m.message.trim().length < 4;
-        return `<div class="ir" style="${isSpam ? 'opacity:.4;' : ''}">
-          <div class="ii"><b>${esc(m.name)} ${isSpam ? '<span class="badge draft">SPAM?</span>' : '<span class="badge pending">ONAY BEKLİYOR</span>'}</b>
-          <small>"${esc(m.message)}" — ${m.date || ''}</small></div>
-          <div class="bg">
-            ${!isSpam ? `<button class="success sm" onclick="approveMsg(${realIdx})">✓ ONAYLA & YAYINLA</button>` : ''}
-            <button class="danger sm" onclick="deleteMsg(${realIdx})">SİL</button>
-          </div>
-        </div>`;
-      }).join('') : "<p style='color:#333;font-size:9px;padding:16px;'>Bekleyen mesaj yok.</p>";
-    }
-
-    // Onaylı Mesajlar Listesi
-    const ael = document.getElementById('guest-approved-list');
-    if (ael) {
-      ael.innerHTML = approved.length ? approved.map((m) => {
-        const realIdx = all.indexOf(m);
-        return `<div class="ir"><div class="ii"><b>${esc(m.name)} <span class="badge sold">✓ ONAYLANMIŞ</span></b>
-          <small>"${esc(m.message)}" — ${m.date || ''}</small></div>
-          <div class="bg"><button class="danger sm" onclick="deleteMsg(${realIdx})">SİL</button></div>
-        </div>`;
-      }).join('') : "<p style='color:#333;font-size:9px;padding:16px;'>Onaylı mesaj yok.</p>";
-    }
-  } catch (e) {
-    console.error("Refresh hatası:", e);
-    const el = document.getElementById('guest-pending');
-    if (el) el.innerHTML = "<p style='color:#333;'>Mesajlar yüklenemedi (JSON bulunamadı veya bozuk).</p>";
-  }
+    // Onaylı
+    const ael=document.getElementById('guest-approved-list');
+    if(ael)ael.innerHTML=approved.length?approved.map((m,ri)=>{
+      const realIdx=all.indexOf(m);
+      return `<div class="ir"><div class="ii"><b>${esc(m.name)} <span class="badge sold">✓ ONAYLANMIŞ</span></b>
+        <small>"${esc(m.message)}" — ${m.date||''}</small></div>
+        <div class="bg"><button class="danger sm" onclick="deleteMsg(${realIdx})">SİL</button></div>
+      </div>`;
+    }).join(''):"<p style='color:#333;font-size:9px;padding:16px;'>Onaylı mesaj yok.</p>";
+  }catch(e){const el=document.getElementById('guest-pending');if(el)el.innerHTML="<p style='color:#333;'>Veri okunamadı.</p>";}
 }
 
-// Mesaj Onaylama ve News.json'a Aktarma
-async function approveMsg(realIdx) {
-  showLoad(true, 'ONAYLANIP YAYINLANIYOR...');
-  try {
-    // 1. Guestbook.json Güncelle
-    const d = await ghAction('content/guestbook.json');
-    const data = JSON.parse(b2u(d.content));
-    data.messages[realIdx].approved = true;
-    const m = data.messages[realIdx];
-    await ghAction('content/guestbook.json', 'PUT', data, d.sha);
-
-    // 2. News.json Senkronizasyonu
-    await fetchNews(); // En güncel haber verisini çek
-    if (!currentNews.guestbook) currentNews.guestbook = [];
-    
-    // Çift kayıt kontrolü
-    const already = currentNews.guestbook.find(g => g.name === m.name && g.message === m.message);
-    if (!already) {
-      currentNews.guestbook.push({ name: m.name, message: m.message, date: m.date, approved: true });
-      await saveNews(); // News.json'u kaydet (SHA çakışmasını saveNews içindeki getSHA çözer)
-    }
-
-    addLog('MESAJ ONAY', m.name);
-    showToast('Mesaj onaylandı ve sitede yayınlandı.', false, true);
-    await refreshGuest();
-  } catch (e) {
-    console.error("Onay hatası:", e);
-    showToast('Onaylanırken hata oluştu.', true);
-  }
-  showLoad(false);
-}
-
-// MANUEL MESAJ EKLEME (Senin istediğin kritik kısım)
-async function addGuestMsg() {
-  const nameInput = document.getElementById('new-g-name');
-  const msgInput = document.getElementById('new-g-msg');
-  const name = (nameInput.value || '').trim();
-  const msg = (msgInput.value || '').trim();
-
-  if (!name || !msg) return showToast('İsim ve mesaj boş olamaz.', true);
-
-  showLoad(true, 'KAYDEDİLİYOR...');
-  try {
-    const today = new Date().toLocaleDateString('tr-TR');
-    
-    // 1. Guestbook.json'a ekle
-    let d, data;
-    try {
-      d = await ghAction('content/guestbook.json');
-      data = JSON.parse(b2u(d.content));
-    } catch (e) {
-      data = { messages: [] };
-    }
-    
-    const newEntry = { name, message: msg, date: today, approved: true };
-    if(!data.messages) data.messages = [];
-    data.messages.push(newEntry);
-    await ghAction('content/guestbook.json', 'PUT', data, d ? d.sha : null);
-
-    // 2. News.json'a eşzamanlı ekle (Sitede hemen görünmesi için)
+async function approveMsg(realIdx){
+  showLoad(true,'ONAYLANIP YAYINLANIYOR...');
+  try{
+    const d=await ghAction('content/guestbook.json');
+    const data=JSON.parse(b2u(d.content));
+    data.messages[realIdx].approved=true;
+    await ghAction('content/guestbook.json','PUT',data,d.sha);
+    // Aynı anda news.json'a ekle (sitede görünmesi için)
+    const m=data.messages[realIdx];
     await fetchNews();
-    if (!currentNews.guestbook) currentNews.guestbook = [];
-    currentNews.guestbook.push({ ...newEntry });
-    await saveNews();
-
-    // Formu temizle
-    nameInput.value = '';
-    msgInput.value = '';
-    
-    addLog('MANUEL MESAJ', name);
-    showToast('Mesaj arşive eklendi ve yayınlandı.', false, true);
-    await refreshGuest();
-  } catch (e) {
-    console.error("Ekleme hatası:", e);
-    showToast('Kayıt yapılamadı, API bağlantısını kontrol edin.', true);
-  }
-  showLoad(false);
-}
-
-// Mesaj Silme (Her iki dosyadan)
-async function deleteMsg(i) {
-  if (!confirm('Bu mesaj her iki dosyadan da kalıcı olarak silinecek. Onaylıyor musunuz?')) return;
-  showLoad(true, 'SİLİNİYOR...');
-  try {
-    // 1. Guestbook.json'dan sil
-    const d = await ghAction('content/guestbook.json');
-    const data = JSON.parse(b2u(d.content));
-    const target = data.messages[i];
-    data.messages.splice(i, 1);
-    await ghAction('content/guestbook.json', 'PUT', data, d.sha);
-
-    // 2. News.json'dan sil
-    await fetchNews();
-    if (currentNews.guestbook) {
-      currentNews.guestbook = currentNews.guestbook.filter(g => 
-        !(g.name === target?.name && g.message === target?.message)
-      );
+    if(!currentNews.guestbook)currentNews.guestbook=[];
+    const already=currentNews.guestbook.find(g=>g.name===m.name&&g.message===m.message);
+    if(!already){
+      currentNews.guestbook.push({name:m.name,message:m.message,date:m.date,approved:true});
       await saveNews();
     }
+    addLog('MESAJ ONAY',m.name);showToast('Mesaj onaylandı ve sitede yayınlandı.',false,true);await refreshGuest();
+  }catch(e){showToast('Hata',true);}
+  showLoad(false);
+}
 
-    showToast('Mesaj tamamen silindi.', false, true);
+async function addGuestMsg(){
+  const name=(document.getElementById('new-g-name').value||'').trim();
+  const msg=(document.getElementById('new-g-msg').value||'').trim();
+  if(!name||!msg)return showToast('Zorunlu alanları doldurun.',true);
+  showLoad(true);
+  try{
+    let d,data;
+    try{d=await ghAction('content/guestbook.json');data=JSON.parse(b2u(d.content));}
+    catch(e){data={messages:[]};}
+    const newMsg={name,message:msg,date:new Date().toLocaleDateString('tr-TR'),approved:true};
+    data.messages.push(newMsg);
+    await ghAction('content/guestbook.json','PUT',data,d?d.sha:null);
+    // news.json'a da ekle
+    await fetchNews();
+    if(!currentNews.guestbook)currentNews.guestbook=[];
+    currentNews.guestbook.push({name,message:msg,date:new Date().toLocaleDateString('tr-TR'),approved:true});
+    await saveNews();
+    document.getElementById('new-g-name').value='';document.getElementById('new-g-msg').value='';
+    addLog('MESAJ EKLE',name);showToast('Mesaj kaydedildi ve sitede yayınlandı.',false,true);await refreshGuest();
+  }catch(e){showToast('Hata',true);}
+  showLoad(false);
+}
+
+async function deleteMsg(i){
+  if(!confirm('Mesaj silinsin mi?'))return;
+  showLoad(true);
+  try{
+    const d=await ghAction('content/guestbook.json');
+    const data=JSON.parse(b2u(d.content));
+    const m=data.messages[i];
+    data.messages.splice(i,1);
+    await ghAction('content/guestbook.json','PUT',data,d.sha);
+    // news.json'dan da kaldır
+    await fetchNews();
+    currentNews.guestbook=(currentNews.guestbook||[]).filter(g=>!(g.name===m?.name&&g.message===m?.message));
+    await saveNews();
     await refreshGuest();
-  } catch (e) {
-    console.error("Silme hatası:", e);
-    showToast('Silme işlemi başarısız.', true);
-  }
+  }catch(e){showToast('Hata',true);}
   showLoad(false);
 }
 
