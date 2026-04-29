@@ -1,4 +1,11 @@
 {
   "guestbook": [],
-  "messages": []
+  "messages": [
+    {
+      "name": "İsimsiz",
+      "message": "Mesaj içeriği yok",
+      "date": "29.04.2026",
+      "approved": false
+    }
+  ]
 }
