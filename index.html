@@ -675,7 +675,7 @@
       e.preventDefault();
       const payload = {
         type: "guestbook_entry",
-        isim: this.querySelector('input[name="Ziyaretci_Adi"]').value,
+        ad_soyad: this.querySelector('input[name="Ziyaretci_Adi"]').value,
         mesaj: this.querySelector('textarea[name="Ziyaretci_Mesaji"]').value,
         tarih: new Date().toLocaleString('tr-TR')
       };
