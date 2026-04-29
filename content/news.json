@@ -1,3 +1,14 @@
 {
-  "announcements": []
+  "announcements": [
+    {
+      "id": "post_1777479585838",
+      "title": "fgdfgdfg",
+      "summary": "dfgdfg",
+      "content": "dfgdf",
+      "date": "29 Nisan 2026",
+      "tag": "dfg",
+      "pinned": true,
+      "published": true
+    }
+  ]
 }
