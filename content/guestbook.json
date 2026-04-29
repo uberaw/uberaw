@@ -30,6 +30,12 @@
       "message": "ddfd",
       "date": "29.04.2026",
       "approved": true
+    },
+    {
+      "name": "İsimsiz",
+      "message": "Mesaj içeriği yok",
+      "date": "29.04.2026",
+      "approved": false
     }
   ]
 }
