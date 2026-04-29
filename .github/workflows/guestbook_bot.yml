@@ -8,10 +8,10 @@ jobs:
     if: contains(github.event.issue.labels.*.name, 'guestbook')
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Depoyu Çek
         uses: actions/checkout@v3
 
-      - name: Parse Issue and Update JSON
+      - name: Veriyi İşle
         run: |
           node -e "
             const fs = require('fs');
@@ -19,32 +19,31 @@ jobs:
             const data = JSON.parse(fs.readFileSync(file, 'utf8'));
             if (!data.messages) data.messages = [];
             
-            // Issue gövdesinden (body) veriyi al
             const body = \`${{ github.event.issue.body }}\`;
-            const nameMatch = body.match(/Adı:\s*(.*)/);
-            const msgMatch = body.match(/Mesaj:\s*(.*)/);
+            // Formdan gelen 'Name:' ve 'Message:' satırlarını ayıkla
+            const name = body.split('Name:')[1]?.split('\n')[0]?.trim();
+            const message = body.split('Message:')[1]?.split('\n')[0]?.trim();
             
-            if (nameMatch && msgMatch) {
-              const newMsg = {
-                name: nameMatch[1].trim(),
-                message: msgMatch[1].trim(),
+            if (name && message) {
+              data.messages.push({
+                name: name,
+                message: message,
                 date: new Date().toLocaleDateString('tr-TR'),
                 approved: false
-              };
-              data.messages.push(newMsg);
+              });
               fs.writeFileSync(file, JSON.stringify(data, null, 2));
             }
           "
 
-      - name: Close Issue
-        run: gh issue close ${{ github.event.issue.number }} --comment "İşlendi ve arşive eklendi."
+      - name: Konuyu Kapat
+        run: gh issue close ${{ github.event.issue.number }} --comment "İşlendi ve panele eklendi."
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Commit & Push
+      - name: Kaydet ve Gönder
         run: |
           git config user.name "Studio Bot"
           git config user.email "bot@uberaw.com"
           git add content/guestbook.json
-          git commit -m "Otomatik: Yeni mesaj eklendi"
+          git commit -m "Otomatik: Yeni mesaj arşive eklendi"
           git push
