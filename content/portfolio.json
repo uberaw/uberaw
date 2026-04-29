@@ -406,7 +406,7 @@
       "certCode": "UBE-RAW-3430",
       "owner": "",
       "isSale": false,
-      "isHidden": false,
+      "isHidden": true,
       "isDraft": false,
       "isDeleted": false,
       "isReserved": false,
