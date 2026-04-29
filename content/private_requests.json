@@ -15,7 +15,8 @@
       "phone": "",
       "message": "Konu: Eser Talebi: Erkek Büst\n\nMesaj: sdfsdf",
       "date": "29.04.2026",
-      "approved": false
+      "approved": false,
+      "status": "read"
     }
   ]
 }
