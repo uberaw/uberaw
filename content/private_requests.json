@@ -1,3 +1,13 @@
 {
-  "requests": []
+  "requests": [
+    {
+      "id": "req_1714210000",
+      "name": "Sistem Testi",
+      "email": "test@example.com",
+      "phone": "0500 000 00 00",
+      "message": "Bu bir test talebidir. Admin paneli bağlantısını kontrol etmek için oluşturuldu.",
+      "date": "2026-04-27",
+      "status": "new"
+    }
+  ]
 }
