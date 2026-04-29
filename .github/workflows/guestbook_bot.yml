@@ -1,0 +1,34 @@
+name: Secure Guestbook Bot
+on:
+  repository_dispatch:
+    types: [new_submission]
+
+jobs:
+  update_json:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Append Message to JSON
+        run: |
+          node -e "
+            const fs = require('fs');
+            const file = './content/guestbook.json';
+            const rawData = fs.readFileSync(file, 'utf8');
+            const data = JSON.parse(rawData);
+            if (!data.messages) data.messages = [];
+            
+            const newMsg = ${{ JSON.stringify(github.event.client_payload.data) }};
+            data.messages.push(newMsg);
+            
+            fs.writeFileSync(file, JSON.stringify(data, null, 2));
+          "
+
+      - name: Commit & Push Changes
+        run: |
+          git config user.name "Studio Bot"
+          git config user.email "bot@uberaw.com"
+          git add content/guestbook.json
+          git commit -m "Otomatik: Yeni ziyaretçi mesajı eklendi"
+          git push
