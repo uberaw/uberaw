@@ -633,76 +633,89 @@
     // ══════════════════════════════════════════════
     
     // NOT: Buradaki URL'leri Google Script üzerinden aldığın "Web Uygulaması" URL'leri ile değiştirmeyi unutma!
-    const SCRIPT_URL_GUESTBOOK = "https://script.google.com/macros/s/AKfycby903YbnznRxjL1-JnQJAok7GsAwGa80NmAuXvbzkowEFfxLccJ2D3rs9P9M-fa_Ne8/exec"; 
-    const SCRIPT_URL_PRIVATE   = "https://script.google.com/macros/s/AKfycbwxKDlcZ3-1Q_izU5QWRxArnKDFMdZxkkfSx-pnLRp3hAp3KH2JfQkWRbcZ9QS14tjalA/exec";       
+const URL_ATOLYE_KAYIT   = "BURAYA_ATOLYE_KAYIT_URL_YAPISTIR"; 
+    const URL_DIREKT_MESAJ   = "BURAYA_DIREKT_MESAJ_URL_YAPISTIR"; // Sadece genel iletişim için
+    const URL_ZIYARETCI_DEF  = "BURAYA_ZIYARETCI_DEFTERI_URL_YAPISTIR";
 
-    // Genel Fetch/Gönderim Motoru (JSON hatalarını text/plain ile çözer, sayfa yenilenmez)
-    async function submitFormToScript(event, url, payload, successMessage) {
-      event.preventDefault(); 
+    // ══════════════════════════════════════════════
+    // FORM MOTORU (GELİŞMİŞ & AYRIŞTIRILMIŞ)
+    // ══════════════════════════════════════════════
+
+    // 1. ATÖLYE KAYIT FORMU (Sadece Atölye Sayfasına Gider)
+    document.getElementById('workshop-form')?.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const payload = {
+        type: "workshop_registration",
+        atolye: this.querySelector('input[name="Talep_Edilen_Atolye"]').value,
+        ad_soyad: this.querySelector('input[name="Ad_Soyad"]').value,
+        email: this.querySelector('input[name="Email"]').value,
+        telefon: this.querySelector('input[name="Telefon"]').value,
+        notlar: this.querySelector('textarea[name="Notlar"]').value,
+        tarih: new Date().toLocaleString('tr-TR')
+      };
+      await silentSubmit(this, URL_ATOLYE_KAYIT, payload, "Kayıt talebiniz atölye birimine iletildi.");
+    });
+
+    // 2. DİREKT MESAJ FORMU (Sadece İletişim/Gelen Kutusu Sayfasına Gider)
+    document.getElementById('contact-form')?.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const payload = {
+        type: "direct_message",
+        konu: this.querySelector('input[name="Konu"]').value,
+        ad_soyad: this.querySelector('input[name="Ad_Soyad"]').value,
+        email: this.querySelector('input[name="Email"]').value,
+        mesaj: this.querySelector('textarea[name="Mesaj"]').value,
+        tarih: new Date().toLocaleString('tr-TR')
+      };
+      await silentSubmit(this, URL_DIREKT_MESAJ, payload, "Mesajınız başarıyla gönderildi.");
+    });
+
+    // 3. ZİYARETÇİ DEFTERİ (Sadece Defter Sayfasına Gider)
+    document.getElementById('guestbook-form')?.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const payload = {
+        type: "guestbook_entry",
+        isim: this.querySelector('input[name="Ziyaretci_Adi"]').value,
+        mesaj: this.querySelector('textarea[name="Ziyaretci_Mesaji"]').value,
+        tarih: new Date().toLocaleString('tr-TR')
+      };
+      await silentSubmit(this, URL_ZIYARETCI_DEF, payload, "Notunuz deftere eklendi, teşekkürler.");
+    });
+
+    // ════ YARDIMCI FONKSİYONLAR ════
+
+    async function silentSubmit(formElement, url, data, successText) {
+      const btn = formElement.querySelector('button[type="submit"]');
+      const originalBtnText = btn.innerText;
       
-      const form = event.target;
-      const btn = form.querySelector('button[type="submit"]');
-      const originalText = btn.innerText;
-      
+      // Arayüzü Kilitle
       btn.disabled = true;
-      btn.innerText = "İLETİLİYOR...";
-      btn.style.color = "#000";
-      btn.style.backgroundColor = "var(--accent)";
+      btn.innerText = "GÖNDERİLİYOR...";
+      btn.style.opacity = "0.7";
 
       try {
         const response = await fetch(url, {
           method: "POST",
-          body: JSON.stringify(payload),
-          headers: { "Content-Type": "text/plain;charset=utf-8" }
+          mode: "no-cors", // Google Script için gerekli güvenlik modu
+          cache: "no-cache",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
         });
+
+        // no-cors modu yanıt içeriğini okumaya izin vermez ama istek gider.
+        alert(successText);
+        formElement.reset();
+        if (formElement.closest('.modal')) closeModal(formElement.closest('.modal').id);
         
-        alert(successMessage);
-        form.reset();
-        
-        if (form.closest('.modal')) {
-          closeModal(form.closest('.modal').id);
-        }
-      } catch (error) {
-        alert("Sistemsel bir hata oluştu, mesajınız iletilemedi. Lütfen doğrudan e-posta ile ulaşın.");
+      } catch (err) {
+        console.error("Form Hatası:", err);
+        alert("Bir hata oluştu. Lütfen tekrar deneyin veya bize e-posta ile ulaşın.");
       } finally {
         btn.disabled = false;
-        btn.innerText = originalText;
-        btn.style.backgroundColor = "transparent";
-        btn.style.color = "#fff";
+        btn.innerText = originalBtnText;
+        btn.style.opacity = "1";
       }
     }
-
-    // 1. ZİYARETÇİ DEFTERİ
-    document.getElementById('guestbook-form')?.addEventListener('submit', function(e) {
-      const data = {
-        name: this.querySelector('input[name="Ziyaretci_Adi"]').value,
-        message: this.querySelector('textarea[name="Ziyaretci_Mesaji"]').value
-      };
-      submitFormToScript(e, SCRIPT_URL_GUESTBOOK, data, "Deftere notunuz eklendi. Stüdyo onayından sonra yayında olacaktır.");
-    });
-
-    // 2. DİREKT MESAJ / İLETİŞİM
-    document.getElementById('contact-form')?.addEventListener('submit', function(e) {
-      const data = {
-        type: "private_lesson", 
-        name: this.querySelector('input[name="Ad_Soyad"]').value,
-        email: this.querySelector('input[name="Email"]').value,
-        message: `Konu: ${this.querySelector('input[name="Konu"]').value}\n\nMesaj: ${this.querySelector('textarea[name="Mesaj"]').value}`
-      };
-      submitFormToScript(e, SCRIPT_URL_PRIVATE, data, "Mesajınız stüdyoya iletildi.");
-    });
-
-    // 3. ATÖLYE KAYIT TALEBİ
-    document.getElementById('workshop-form')?.addEventListener('submit', function(e) {
-      const data = {
-        type: "private_lesson", 
-        name: this.querySelector('input[name="Ad_Soyad"]').value,
-        email: this.querySelector('input[name="Email"]').value,
-        phone: this.querySelector('input[name="Telefon"]').value,
-        message: `Kayıt Talebi: ${this.querySelector('input[name="Talep_Edilen_Atolye"]').value}\n\nNotlar: ${this.querySelector('textarea[name="Notlar"]').value}`
-      };
-      submitFormToScript(e, SCRIPT_URL_PRIVATE, data, "Ön kayıt talebiniz alındı. Detaylar için sizinle iletişime geçeceğiz.");
-    });
-  </script>
+</script>
 </body>
 </html>
