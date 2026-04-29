@@ -1,0 +1,35 @@
+{
+  "system_logs": [
+    {
+      "id": "LOG_001",
+      "type": "YEDEK",
+      "message": "Tam yedek indirildi.",
+      "timestamp": "2026-04-29T22:45:00Z"
+    }
+  ],
+  "notifications": {
+    "save_success": "Veriler başarıyla GitHub'a aktarıldı.",
+    "save_error": "Hata: Veri güncellenemedi. GitHub Token kontrol edin.",
+    "auth_success": "Studio OS v5.0 giriş başarılı.",
+    "auth_error": "Hatalı şifre veya yetkisiz erişim.",
+    "backup_ready": "Yedek dosyası hazır, indirme başlıyor.",
+    "restore_confirm": "DİKKAT: Mevcut veriler değiştirilecek. Emin misiniz?"
+  },
+  "site_strings": {
+    "brand_name": "UBE RAW",
+    "tagline": "Contemporary Art & Design",
+    "curator_note": "Küratörce eser açıklaması...",
+    "price_info": "FİYAT BİLGİSİ İÇİN İLETİŞİME GEÇİN",
+    "sold_out": "SOLD / ÖZEL KOLEKSİYON",
+    "contact_prompt": "Atölye ve iş birlikleri için mesaj bırakın."
+  },
+  "categories": [
+    "Kil Heykel",
+    "Karakalem",
+    "Ahşap Rölyef",
+    "Bronz Döküm",
+    "Duvar Rölyefi",
+    "Seramik",
+    "Karma Teknik"
+  ]
+}
