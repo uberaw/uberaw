@@ -1,15 +1,4 @@
 {
-  "announcements": [
-    {
-      "id": "post_1777473409245",
-      "title": "fff",
-      "summary": "fff",
-      "content": "fff",
-      "date": "29 Nisan 2026",
-      "tag": "fff",
-      "pinned": false,
-      "published": true
-    }
-  ],
+  "announcements": [],
   "guestbook": []
 }
