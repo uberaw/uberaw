@@ -1,3 +1,10 @@
 {
-  "messages": []
+  "guestbook": [
+    {
+      "name": "hasan",
+      "message": "aaaa",
+      "date": "29.04.2026 16:41:51",
+      "approved": false
+    }
+  ]
 }
