@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "type": "guestbook_entry",
+    "isim": "edd",
+    "mesaj": "ddd",
+    "tarih": "30.04.2026 00:55:23",
+    "id": "ID-1777499724218",
+    "status": "unread"
+  }
+]
