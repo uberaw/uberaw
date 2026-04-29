@@ -54,7 +54,7 @@
       "costNote": "",
       "certCode": "UBE-26-002",
       "owner": "",
-      "isSale": false,
+      "isSale": true,
       "isHidden": false,
       "isDraft": false,
       "isDeleted": false,
@@ -78,7 +78,7 @@
       "awards": [],
       "addedDate": "2026-04-27",
       "createdDate": "",
-      "saleDate": ""
+      "saleDate": "29.04.2026 18:54:04"
     },
     {
       "title": "Erkek Büst 6",
