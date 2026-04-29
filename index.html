@@ -15,7 +15,6 @@
       --accent: #a87f4a; 
       --bg: #030303;
       --surface: #0a0a0a;
-      --surface-hover: #111;
       --border: #1a1a1a;
       --text: #e0e0e0;
       --text-dim: #777;
@@ -26,21 +25,13 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: var(--font-mono);
-      overflow-x: hidden;
-      font-size: 13px;
-      line-height: 1.7;
+      background-color: var(--bg); color: var(--text);
+      font-family: var(--font-mono); overflow-x: hidden;
+      font-size: 13px; line-height: 1.7;
     }
 
     /* ══ TYPOGRAPHY ══ */
-    h1, h2, h3, h4, .serif {
-      font-family: var(--font-serif);
-      font-weight: 300;
-      color: #fff;
-    }
-    .text-accent { color: var(--accent); }
+    h1, h2, h3, h4, .serif { font-family: var(--font-serif); font-weight: 300; color: #fff; }
     .uppercase { text-transform: uppercase; letter-spacing: 2px; }
 
     /* ══ LOADER ══ */
@@ -69,17 +60,9 @@
     nav { display: flex; gap: 40px; }
     nav a {
       color: var(--text-dim); text-decoration: none; font-size: 10px;
-      text-transform: uppercase; letter-spacing: 3px; transition: 0.3s;
-      position: relative;
+      text-transform: uppercase; letter-spacing: 3px; transition: 0.3s; position: relative;
     }
     nav a:hover, nav a.active { color: var(--accent); }
-    nav a::after {
-      content: ''; position: absolute; width: 0; height: 1px;
-      bottom: -4px; left: 0; background: var(--accent); transition: 0.3s;
-    }
-    nav a:hover::after { width: 100%; }
-
-    /* Mobil Menü Butonu */
     .menu-toggle { display: none; background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
 
     /* ══ LAYOUT ══ */
@@ -90,21 +73,10 @@
     .section-divider { width: 1px; height: 60px; background: var(--border); margin: 0 auto 40px; }
 
     /* ══ HERO SECTION ══ */
-    #home {
-      display: flex; align-items: center; justify-content: center; text-align: center;
-      min-height: 100vh; padding-top: 0; position: relative;
-    }
+    #home { display: flex; align-items: center; justify-content: center; text-align: center; min-height: 100vh; padding-top: 0; position: relative; }
     .hero-content { max-width: 900px; z-index: 2; }
     #hero-title { font-size: clamp(40px, 8vw, 90px); margin-bottom: 30px; line-height: 1.1; letter-spacing: 2px; }
     #bio-text { font-size: 15px; color: var(--text-dim); line-height: 2; max-width: 600px; margin: 0 auto 40px; font-weight: 300; }
-    .scroll-indicator {
-      position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
-      display: flex; flex-direction: column; align-items: center; gap: 10px;
-      font-size: 9px; color: var(--text-dim); letter-spacing: 3px; text-transform: uppercase;
-      animation: bounce 2s infinite;
-    }
-    .scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--accent), transparent); }
-    @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0) translateX(-50%);} 40% {transform: translateY(-10px) translateX(-50%);} 60% {transform: translateY(-5px) translateX(-50%);} }
 
     /* ══ PORTFOLIO (WORKS) ══ */
     .filter-container { display: flex; justify-content: center; gap: 20px; margin-bottom: 50px; flex-wrap: wrap; }
@@ -115,62 +87,43 @@
     }
     .filter-btn:hover, .filter-btn.active { color: var(--accent); border-color: var(--accent); }
 
-    .grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 3px;
-      background: var(--border); border: 1px solid var(--border);
-    }
-    .card {
-      background: var(--bg); position: relative; overflow: hidden; cursor: pointer;
-      aspect-ratio: 4/5; group;
-    }
-    .card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.7s; filter: grayscale(20%); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 3px; background: var(--border); border: 1px solid var(--border); }
+    .card { background: var(--bg); position: relative; overflow: hidden; cursor: pointer; aspect-ratio: 4/5; }
+    .card-img { width: 100%; height: 100%; object-fit: cover; transition: 0.7s; filter: grayscale(20%); }
     .card:hover .card-img { transform: scale(1.05); filter: grayscale(0%); }
-    
     .card-overlay {
       position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
-      padding: 30px; display: flex; flex-direction: column; justify-content: flex-end;
-      opacity: 0; transition: opacity 0.4s;
+      padding: 30px; display: flex; flex-direction: column; justify-content: flex-end; opacity: 0; transition: 0.4s;
     }
     .card:hover .card-overlay { opacity: 1; }
-    .card-title { font-size: 26px; margin: 0 0 5px; transform: translateY(15px); transition: transform 0.4s; }
+    .card-title { font-size: 26px; margin: 0 0 5px; transform: translateY(15px); transition: 0.4s; }
     .card:hover .card-title { transform: translateY(0); }
-    .card-meta { font-size: 10px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; transform: translateY(15px); transition: transform 0.4s; transition-delay: 0.05s;}
-    .card:hover .card-meta { transform: translateY(0); }
-    
     .badge-sold { position: absolute; top: 20px; right: 20px; background: var(--surface); color: var(--text-dim); border: 1px solid var(--border); padding: 6px 12px; font-size: 9px; letter-spacing: 2px; z-index: 2; backdrop-filter: blur(5px);}
 
-    /* ══ LIGHTBOX MODAL ══ */
+    /* ══ MODALS (Eser & Atölye Kayıt) ══ */
     .modal {
       position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px);
       z-index: 10000; display: none; opacity: 0; transition: opacity 0.4s;
       align-items: center; justify-content: center; padding: 40px;
     }
     .modal.active { display: flex; opacity: 1; }
-    .modal-close {
-      position: absolute; top: 30px; right: 40px; background: none; border: none;
-      color: #fff; font-size: 40px; cursor: pointer; font-weight: 100; transition: color 0.3s;
-    }
+    .modal-close { position: absolute; top: 30px; right: 40px; background: none; border: none; color: #fff; font-size: 40px; cursor: pointer; transition: 0.3s; }
     .modal-close:hover { color: var(--accent); }
-    .modal-content {
-      display: flex; width: 100%; max-width: 1200px; height: 80vh; gap: 60px;
-    }
+    
+    /* Eser Modal İçeriği */
+    .modal-content { display: flex; width: 100%; max-width: 1200px; height: 80vh; gap: 60px; }
     .modal-img-container { flex: 1.5; height: 100%; display: flex; align-items: center; justify-content: center; background: #050505; border: 1px solid var(--border); }
     .modal-img { max-width: 100%; max-height: 100%; object-fit: contain; }
     .modal-info { flex: 1; display: flex; flex-direction: column; justify-content: center; color: var(--text); }
     .modal-title { font-size: 42px; color: var(--accent); margin-bottom: 10px; line-height: 1.1; }
-    .modal-sku { font-size: 10px; color: var(--text-dim); letter-spacing: 3px; margin-bottom: 30px; display: block;}
     .modal-detail-row { display: flex; border-bottom: 1px solid var(--border); padding: 15px 0; font-size: 11px; justify-content: space-between; }
-    .modal-detail-label { color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
-    .modal-desc { margin-top: 30px; font-size: 12px; color: #999; line-height: 1.8; }
-    .modal-btn { margin-top: 40px; background: var(--accent); color: #000; text-align: center; padding: 15px; text-decoration: none; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; font-size: 10px; transition: 0.3s; border: 1px solid var(--accent); }
-    .modal-btn:hover { background: transparent; color: var(--accent); }
+    
+    /* Kayıt Modal İçeriği */
+    .reg-content { background: var(--surface); border: 1px solid var(--border); padding: 50px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
 
     /* ══ LISTELER (Atölye & Haberler) ══ */
     .list-container { max-width: 900px; margin: 0 auto; }
-    .list-item { 
-      border-top: 1px solid var(--border); padding: 40px 0; display: flex; gap: 40px;
-      transition: background 0.3s; 
-    }
+    .list-item { border-top: 1px solid var(--border); padding: 40px 0; display: flex; gap: 40px; transition: 0.3s; }
     .list-item:hover { background: rgba(255,255,255,0.01); }
     .list-date { flex-shrink: 0; width: 120px; font-size: 10px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; padding-top: 10px;}
     .list-content { flex: 1; }
@@ -178,56 +131,42 @@
     .list-meta { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 20px; text-transform: uppercase; }
 
     /* ══ FORMS & CONTACT ══ */
-    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; max-width: 1200px; margin: 0 auto; }
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; max-width: 1400px; margin: 0 auto; }
     .contact-box { background: var(--surface); border: 1px solid var(--border); padding: 50px; }
     form { display: flex; flex-direction: column; gap: 25px; }
-    .input-group { position: relative; }
     input, textarea {
       width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border);
       color: #fff; padding: 10px 0; font-family: var(--font-mono); font-size: 13px; transition: 0.3s;
     }
     input:focus, textarea:focus { outline: none; border-bottom-color: var(--accent); }
-    input::placeholder, textarea::placeholder { color: #444; }
-    button[type="submit"] {
-      background: #fff; color: #000; border: none; padding: 18px 30px; margin-top: 10px;
+    button[type="submit"], .action-btn {
+      background: #fff; color: #000; border: 1px solid #fff; padding: 18px 30px; margin-top: 10px;
       font-family: var(--font-mono); font-weight: 600; letter-spacing: 3px; font-size: 11px;
-      cursor: pointer; text-transform: uppercase; transition: 0.3s;
+      cursor: pointer; text-transform: uppercase; transition: 0.3s; text-align: center; text-decoration: none; display: inline-block;
     }
-    button[type="submit"]:hover { background: var(--accent); }
-
+    button[type="submit"]:hover, .action-btn:hover { background: transparent; color: #fff; }
+    
+    .gb-form { background: #070707; padding: 30px; border: 1px solid var(--border); margin-bottom: 40px; }
     .gb-msg { border-left: 2px solid var(--border); padding-left: 20px; margin-bottom: 30px; transition: 0.3s; }
     .gb-msg:hover { border-left-color: var(--accent); }
 
     /* ══ FOOTER ══ */
     footer { text-align: center; padding: 60px 20px; border-top: 1px solid var(--border); font-size: 10px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; }
-    
-    #announcement-bar { background: var(--accent); color: #000; text-align: center; padding: 12px; font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; display: none; position: relative; z-index: 1001; }
-
-    /* ══ UTILITIES ══ */
-    .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-    .reveal.active { opacity: 1; transform: translateY(0); }
+    #announcement-bar { background: var(--accent); color: #000; text-align: center; padding: 12px; font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; display: none; }
 
     /* ══ RESPONSIVE ══ */
     @media (max-width: 992px) {
       .modal-content { flex-direction: column; height: 90vh; overflow-y: auto; gap: 30px; }
-      .modal-img-container { height: 50vh; flex: none; }
-      .contact-grid { grid-template-columns: 1fr; gap: 40px; }
+      .modal-img-container { height: 40vh; flex: none; }
+      .contact-grid { grid-template-columns: 1fr; }
       .list-item { flex-direction: column; gap: 15px; padding: 30px 0; }
-      .list-date { padding-top: 0; }
     }
     @media (max-width: 768px) {
       .menu-toggle { display: block; }
-      nav { 
-        position: fixed; top: 0; right: -100%; width: 100vw; height: 100vh; 
-        background: var(--bg); flex-direction: column; align-items: center; justify-content: center;
-        transition: 0.4s; gap: 30px; z-index: -1;
-      }
+      nav { position: fixed; top: 0; right: -100%; width: 100vw; height: 100vh; background: var(--bg); flex-direction: column; align-items: center; justify-content: center; transition: 0.4s; z-index: -1;}
       nav.open { right: 0; }
-      nav a { font-size: 18px; }
-      section { padding: 100px 5vw 60px; }
-      .section-title { font-size: 36px; }
-      .contact-box { padding: 30px 20px; }
       #hero-title { font-size: 12vw; }
+      .contact-box, .reg-content { padding: 30px 20px; }
     }
   </style>
 </head>
@@ -242,201 +181,169 @@
 
   <header id="header">
     <a href="#" class="brand serif" id="site-logo">UBE RAW</a>
-    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <button class="menu-toggle" onclick="document.getElementById('main-nav').classList.toggle('open')">☰</button>
     <nav id="main-nav">
-      <a href="#home" onclick="toggleMenu()">STÜDYO</a>
-      <a href="#works" id="nav-works" onclick="toggleMenu()">WORKS</a>
-      <a href="#workshops" onclick="toggleMenu()">ATÖLYE</a>
-      <a href="#news" onclick="toggleMenu()">GÜNCEL</a>
-      <a href="#contact" id="nav-contact" onclick="toggleMenu()">İLETİŞİM</a>
+      <a href="#home" onclick="this.parentNode.classList.remove('open')">STÜDYO</a>
+      <a href="#works" id="nav-works" onclick="this.parentNode.classList.remove('open')">WORKS</a>
+      <a href="#workshops" onclick="this.parentNode.classList.remove('open')">ATÖLYE</a>
+      <a href="#news" onclick="this.parentNode.classList.remove('open')">GÜNCEL</a>
+      <a href="#contact" id="nav-contact" onclick="this.parentNode.classList.remove('open')">İLETİŞİM</a>
     </nav>
   </header>
 
   <section id="home">
-    <div class="hero-content reveal">
+    <div class="hero-content">
       <div class="section-subtitle" style="margin-bottom: 20px;">Art & Design Studio</div>
       <h1 id="hero-title">SHAPING THE RAW</h1>
-      <p id="bio-text">Pürüzsüz formların ve yanmış dokuların, modern mimariyle bütünleşen çağdaş duvar rölyefleri ve heykelsi objelere dönüştüğü kreatif üretim ve tasarım atölyesi.</p>
-    </div>
-    <div class="scroll-indicator">
-      <span>Keşfet</span>
-      <div class="scroll-line"></div>
+      <p id="bio-text">Rize kıyılarından ilham alan; pürüzsüz formların ve yanmış dokuların, modern mimariyle bütünleşen çağdaş duvar rölyefleri ve heykelsi objelere dönüştüğü kreatif üretim ve tasarım atölyesi.</p>
     </div>
   </section>
 
   <section id="works">
-    <div class="section-header reveal">
+    <div class="section-header">
       <div class="section-divider"></div>
       <div class="section-subtitle">Envanter</div>
       <h2 class="section-title">SEÇKİ ESERLER</h2>
     </div>
-    
-    <div class="filter-container reveal" id="category-filters">
-      </div>
-
-    <div class="grid reveal" id="portfolio-grid">
-      </div>
+    <div class="filter-container" id="category-filters"></div>
+    <div class="grid" id="portfolio-grid"></div>
   </section>
 
   <div class="modal" id="artwork-modal">
-    <button class="modal-close" onclick="closeModal()">×</button>
+    <button class="modal-close" onclick="closeModal('artwork-modal')">×</button>
     <div class="modal-content">
-      <div class="modal-img-container">
-        <img src="" id="m-img" class="modal-img" alt="Artwork">
-      </div>
+      <div class="modal-img-container"><img src="" id="m-img" class="modal-img" alt="Artwork"></div>
       <div class="modal-info">
-        <span class="modal-sku" id="m-sku">SKU: ---</span>
+        <span style="font-size: 10px; color: var(--text-dim); letter-spacing: 3px;" id="m-sku">SKU: ---</span>
         <h3 class="modal-title serif" id="m-title">Eser Adı</h3>
         <div style="font-size: 14px; color: #fff; margin-bottom: 30px; letter-spacing: 1px;" id="m-price">Fiyat</div>
-        
-        <div class="modal-detail-row">
-          <span class="modal-detail-label">Kategori</span>
-          <span id="m-cat">---</span>
-        </div>
-        <div class="modal-detail-row">
-          <span class="modal-detail-label">Materyal</span>
-          <span id="m-mat">---</span>
-        </div>
-        <div class="modal-detail-row">
-          <span class="modal-detail-label">Boyut & Ağırlık</span>
-          <span id="m-dim">---</span>
-        </div>
-        <div class="modal-detail-row">
-          <span class="modal-detail-label">Durum</span>
-          <span id="m-status" style="color: var(--accent);">---</span>
-        </div>
-        
-        <p class="modal-desc" id="m-desc"></p>
-        
-        <a href="#contact" class="modal-btn" onclick="closeModal(); document.getElementById('contact-subject').value='Eser Talebi: ' + document.getElementById('m-title').innerText;">BU ESER İÇİN İLETİŞİME GEÇ</a>
+        <div class="modal-detail-row"><span style="color: var(--text-dim);">Kategori</span><span id="m-cat">---</span></div>
+        <div class="modal-detail-row"><span style="color: var(--text-dim);">Materyal</span><span id="m-mat">---</span></div>
+        <div class="modal-detail-row"><span style="color: var(--text-dim);">Boyut</span><span id="m-dim">---</span></div>
+        <div class="modal-detail-row"><span style="color: var(--text-dim);">Durum</span><span id="m-status" style="color: var(--accent);">---</span></div>
+        <p style="margin-top: 30px; font-size: 12px; color: #999; line-height: 1.8;" id="m-desc"></p>
+        <a href="#contact" class="action-btn" style="margin-top: 40px;" onclick="closeModal('artwork-modal'); document.getElementById('iletisim-konu').value='Eser Talebi: ' + document.getElementById('m-title').innerText;">BU ESER İÇİN İLETİŞİME GEÇ</a>
       </div>
     </div>
   </div>
 
   <section id="workshops" style="background: var(--surface);">
-    <div class="section-header reveal">
+    <div class="section-header">
       <div class="section-divider"></div>
       <div class="section-subtitle">Eğitim & Deneyim</div>
       <h2 class="section-title">ATÖLYELER</h2>
     </div>
-    <div class="list-container reveal" id="workshops-list">
-      </div>
+    <div class="list-container" id="workshops-list"></div>
   </section>
+
+  <div class="modal" id="reg-modal">
+    <button class="modal-close" onclick="closeModal('reg-modal')">×</button>
+    <div class="reg-content">
+      <h3 class="serif" style="font-size: 32px; color: var(--accent); margin-bottom: 10px;">Atölye Kayıt Talebi</h3>
+      <p style="font-size: 11px; color: var(--text-dim); margin-bottom: 30px;">Kayıt işlemini tamamlamak için formu doldurun. Sizinle en kısa sürede iletişime geçeceğiz.</p>
+      
+      <form action="https://formsubmit.co/senin-epostan@mail.com" method="POST">
+        <input type="hidden" name="_subject" value="[UBE RAW] Yeni Atölye Kayıt Talebi!">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_template" value="table">
+        
+        <input type="text" id="reg-ws-name" name="Talep_Edilen_Atolye" readonly style="color: var(--accent); font-weight: 600;">
+        <input type="text" name="Ad_Soyad" placeholder="Adınız Soyadınız *" required>
+        <input type="email" name="Email" placeholder="E-posta Adresiniz *" required>
+        <input type="text" name="Telefon" placeholder="Telefon Numaranız *" required>
+        <textarea name="Notlar" rows="2" placeholder="Eklemek istedikleriniz... (Örn: Daha önce eğitim aldım)"></textarea>
+        <button type="submit">KAYIT TALEBİNİ GÖNDER</button>
+      </form>
+    </div>
+  </div>
 
   <section id="news">
-    <div class="section-header reveal">
+    <div class="section-header">
       <div class="section-divider"></div>
       <div class="section-subtitle">Duyurular & Yayınlar</div>
-      <h2 class="section-title">DUYURU</h2>
+      <h2 class="section-title">STÜDYODAN HABERLER</h2>
     </div>
-    <div class="list-container reveal" id="news-list">
-      </div>
+    <div class="list-container" id="news-list"></div>
   </section>
 
-  <section id="contact" style="background: var(--surface);">
-    <div class="section-header reveal">
+  <section id="contact" style="background: var(--bg);">
+    <div class="section-header">
       <div class="section-divider"></div>
       <div class="section-subtitle">Ağ & İletişim</div>
       <h2 class="section-title">BAĞLANTI KURUN</h2>
     </div>
     
-    <div class="contact-grid reveal">
+    <div class="contact-grid">
       
       <div class="contact-box">
         <h3 class="serif" style="font-size: 28px; margin-bottom: 10px; color: var(--accent);">Direkt Mesaj</h3>
-        <p style="font-size: 11px; color: var(--text-dim); margin-bottom: 40px;">Atölye kayıtları ve portfolyo talepleri için formu doldurabilirsiniz.</p>
+        <p style="font-size: 11px; color: var(--text-dim); margin-bottom: 40px;">Komisyon işler, portfolyo sunumu veya genel bilgi talepleri için.</p>
         
-        <form action="https://formsubmit.co/ubeybayrak@gmail.com" method="POST">
-          <input type="hidden" name="_subject" value="UBE RAW - Web Sitesinden Yeni Talep">
+        <form action="https://formsubmit.co/senin-epostan@mail.com" method="POST">
+          <input type="hidden" name="_subject" value="[UBE RAW] Yeni İletişim Mesajı!">
           <input type="hidden" name="_captcha" value="false">
-          <input type="hidden" id="contact-subject" name="Konu" value="Genel Bilgi">
           
-          <div class="input-group">
-            <input type="text" name="Ad_Soyad" placeholder="Adı Soyadı *" required>
-          </div>
-          <div class="input-group">
-            <input type="email" name="Email" placeholder="E-posta Adresi *" required>
-          </div>
-          <div class="input-group">
-            <input type="text" name="Telefon" placeholder="Telefon Numarası">
-          </div>
-          <div class="input-group">
-            <textarea name="Mesaj" rows="4" placeholder="Mesaj veya Talep *" required></textarea>
-          </div>
-          <button type="submit">GÖNDER</button>
+          <input type="text" id="iletisim-konu" name="Konu" placeholder="Konu (Örn: Özel Sipariş, Eser Bilgisi)" required>
+          <input type="text" name="Ad_Soyad" placeholder="Adınız Soyadınız *" required>
+          <input type="email" name="Email" placeholder="E-posta Adresiniz *" required>
+          <textarea name="Mesaj" rows="4" placeholder="Mesajınız... *" required></textarea>
+          <button type="submit">MESAJI GÖNDER</button>
         </form>
 
-        <div id="contact-info" style="margin-top: 50px; font-size: 11px; color: var(--text-dim); line-height: 2.2;">
-          </div>
+        <div id="contact-info" style="margin-top: 50px; font-size: 11px; color: var(--text-dim); line-height: 2.2;"></div>
       </div>
 
       <div>
-        <h3 class="serif" style="font-size: 28px; margin-bottom: 40px;">Ziyaretçi Defteri</h3>
-        <div id="guestbook-list">
-          </div>
+        <h3 class="serif" style="font-size: 28px; margin-bottom: 20px;">Ziyaretçi Defteri</h3>
+        
+        <div class="gb-form">
+          <p style="font-size: 11px; color: var(--text-dim); margin-bottom: 20px;">Stüdyo ve eserler hakkındaki düşüncelerinizi paylaşın. (Mesajınız onaylandıktan sonra burada yayınlanır.)</p>
+          <form action="https://formsubmit.co/senin-epostan@mail.com" method="POST">
+            <input type="hidden" name="_subject" value="[UBE RAW] Ziyaretçi Defterine Yeni Mesaj!">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="text" name="Ziyaretci_Adi" placeholder="İsminiz *" required>
+            <textarea name="Ziyaretci_Mesaji" rows="2" placeholder="Düşünceleriniz... *" required></textarea>
+            <button type="submit" style="padding: 12px 20px; font-size: 10px;">DEFTERE YAZ</button>
+          </form>
+        </div>
+
+        <div id="guestbook-list" style="max-height: 500px; overflow-y: auto; padding-right: 15px;"></div>
       </div>
 
     </div>
   </section>
 
-  <footer id="site-footer">
-    UBE RAW STUDIO © 2026
-  </footer>
+  <footer id="site-footer">UBE RAW STUDIO © 2026</footer>
 
   <script>
     // ══════════════════════════════════════════════
-    // SİSTEM BAĞLANTISI (ADMIN OS V5.0) [cite: 56, 161]
+    // SİSTEM BAĞLANTISI
     // ══════════════════════════════════════════════
-    
-    // GITHUB REPO BİLGİSİ (Kendi reponla değiştir)
-    const REPO = 'uberaw/uberaw'; 
+    const REPO = 'uberaw/uberaw'; // GITHUB REPO ADIN
     const BRANCH = 'main';
     const BASE_RAW_URL = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/`;
 
     let globalProjects = [];
 
-    // Veri Çekme Motoru
     async function fetchData(path) {
       try {
         const response = await fetch(`${BASE_RAW_URL}${path}?_=${Date.now()}`);
         if (!response.ok) throw new Error('Veri yok');
         return await response.json();
-      } catch (error) {
-        console.warn(`${path} atlandı.`);
-        return null;
-      }
+      } catch (error) { return null; }
     }
 
-    // ══════════════════════════════════════════════
-    // BAŞLATMA VE ARAYÜZ (UI) MANTIKLARI
-    // ══════════════════════════════════════════════
     async function initSite() {
-      // Yükleme animasyonu
-      let progress = 0;
-      const bar = document.getElementById('l-bar');
-      const iv = setInterval(() => { progress += Math.random() * 15; if(progress > 85) clearInterval(iv); bar.style.width = progress + '%'; }, 100);
+      let progress = 0; const bar = document.getElementById('l-bar');
+      const iv = setInterval(() => { progress += 15; bar.style.width = progress + '%'; if(progress >= 100) clearInterval(iv); }, 100);
 
-      await Promise.all([
-        loadSettings(),
-        loadPortfolio(),
-        loadWorkshops(),
-        loadNewsAndGuestbook()
-      ]);
-      
-      clearInterval(iv);
-      bar.style.width = '100%';
+      await Promise.all([ loadSettings(), loadPortfolio(), loadWorkshops(), loadNewsAndGuestbook() ]);
       
       setTimeout(() => {
-        const loader = document.getElementById('loader');
-        loader.style.opacity = '0';
-        setTimeout(() => loader.remove(), 600);
+        document.getElementById('loader').style.opacity = '0';
+        setTimeout(() => document.getElementById('loader').remove(), 600);
       }, 500);
 
-      // Scroll Reveal
-      window.addEventListener('scroll', revealOnScroll);
-      revealOnScroll();
-
-      // Header Scroll Efekti
       let lastScroll = 0;
       window.addEventListener('scroll', () => {
         const header = document.getElementById('header');
@@ -448,84 +355,51 @@
       });
     }
 
-    function revealOnScroll() {
-      const reveals = document.querySelectorAll('.reveal');
-      const windowHeight = window.innerHeight;
-      reveals.forEach(el => {
-        const elementTop = el.getBoundingClientRect().top;
-        if (elementTop < windowHeight - 50) el.classList.add('active');
-      });
-    }
-
-    function toggleMenu() {
-      document.getElementById('main-nav').classList.toggle('open');
-    }
-
-    // ══════════════════════════════════════════════
-    // 1. AYARLAR (settings.json) [cite: 161]
-    // ══════════════════════════════════════════════
+    // 1. AYARLAR
     async function loadSettings() {
       const data = await fetchData('content/settings.json');
       if (!data) return;
-
       if (data.theme) document.documentElement.style.setProperty('--accent', data.theme);
-      
-      if (data.title) {
-        document.title = data.title;
-        document.getElementById('site-logo').innerText = data.title.split('|')[0].trim();
-      }
+      if (data.title) { document.title = data.title; document.getElementById('site-logo').innerText = data.title.split('|')[0].trim(); }
       if (data.bio) document.getElementById('bio-text').innerText = data.bio;
       if (data.footer) document.getElementById('site-footer').innerText = data.footer;
-      
       if (data.menuPortfolio) document.getElementById('nav-works').innerText = data.menuPortfolio;
       if (data.menuContact) document.getElementById('nav-contact').innerText = data.menuContact;
 
-      const contactHtml = `
+      document.getElementById('contact-info').innerHTML = `
         ${data.address ? `<div style="margin-bottom:8px;"><strong style="color:#fff;">KONUM:</strong> <span class="uppercase">${data.address}</span></div>` : ''}
         ${data.email ? `<div style="margin-bottom:8px;"><strong style="color:#fff;">E-POSTA:</strong> ${data.email}</div>` : ''}
         ${data.phone ? `<div style="margin-bottom:16px;"><strong style="color:#fff;">TEL:</strong> ${data.phone}</div>` : ''}
         <div style="display:flex; gap:15px; margin-top:20px;">
-          ${data.instagram ? `<a href="https://instagram.com/${data.instagram.replace('@','')}" target="_blank" style="color:var(--accent); text-decoration:none; border-bottom:1px solid var(--border); padding-bottom:3px;">INSTAGRAM</a>` : ''}
-          ${data.behance ? `<a href="${data.behance}" target="_blank" style="color:var(--accent); text-decoration:none; border-bottom:1px solid var(--border); padding-bottom:3px;">BEHANCE</a>` : ''}
+          ${data.instagram ? `<a href="https://instagram.com/${data.instagram.replace('@','')}" target="_blank" style="color:var(--accent); text-decoration:none;">INSTAGRAM</a>` : ''}
+          ${data.behance ? `<a href="${data.behance}" target="_blank" style="color:var(--accent); text-decoration:none;">BEHANCE</a>` : ''}
         </div>
       `;
-      document.getElementById('contact-info').innerHTML = contactHtml;
     }
 
-    // ══════════════════════════════════════════════
-    // 2. ENVANTER & ESERLER (portfolio.json) 
-    // ══════════════════════════════════════════════
+    // 2. ENVANTER
     async function loadPortfolio() {
       const data = await fetchData('content/portfolio.json');
       if (!data || !data.projects) return;
-
       globalProjects = data.projects.filter(p => !p.isDeleted && !p.isDraft && !p.isHidden);
       
-      // Kategori Filtrelerini Oluştur
       const categories = [...new Set(globalProjects.map(p => p.category).filter(Boolean))];
-      const filterDiv = document.getElementById('category-filters');
-      filterDiv.innerHTML = `<button class="filter-btn active" onclick="filterWorks('all', this)">TÜMÜ</button>` + 
+      document.getElementById('category-filters').innerHTML = `<button class="filter-btn active" onclick="filterWorks('all', this)">TÜMÜ</button>` + 
         categories.map(c => `<button class="filter-btn" onclick="filterWorks('${c}', this)">${c}</button>`).join('');
-
       renderGrid(globalProjects);
     }
 
-    function filterWorks(cat, btnElement) {
-      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-      btnElement.classList.add('active');
-
-      const filtered = cat === 'all' ? globalProjects : globalProjects.filter(p => p.category === cat);
-      renderGrid(filtered);
+    function filterWorks(cat, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
+      renderGrid(cat === 'all' ? globalProjects : globalProjects.filter(p => p.category === cat));
     }
 
     function renderGrid(projects) {
-      const grid = document.getElementById('portfolio-grid');
-      grid.innerHTML = projects.map((p, i) => {
+      document.getElementById('portfolio-grid').innerHTML = projects.map((p) => {
         const imgPath = p.image ? `${BASE_RAW_URL}${p.image.split(',')[0].trim()}` : '';
         const realIndex = globalProjects.indexOf(p);
-        
         return `
-          <div class="card" onclick="openModal(${realIndex})">
+          <div class="card" onclick="openModal('artwork-modal', ${realIndex})">
             ${p.isSale ? `<div class="badge-sold">ÖZEL KOLEKSİYON</div>` : ''}
             <img src="${imgPath}" alt="${p.title}" class="card-img" loading="lazy">
             <div class="card-overlay">
@@ -537,72 +411,39 @@
       }).join('') || '<p style="padding:40px; text-align:center; color:#555;">Eser bulunamadı.</p>';
     }
 
-    // Modal İşlemleri
-    function openModal(idx) {
-      const p = globalProjects[idx];
-      document.getElementById('m-title').innerText = p.title || 'İsimsiz';
-      document.getElementById('m-sku').innerText = `SKU: ${p.certCode || '---'}`;
-      document.getElementById('m-cat').innerText = p.category || '---';
-      document.getElementById('m-mat').innerText = p.material || '---';
-      document.getElementById('m-dim').innerText = `${p.dimensions || '-'} ${p.weight ? `(${p.weight}kg)` : ''}`;
-      document.getElementById('m-status').innerText = p.isSale ? 'Koleksiyonda (Satıldı)' : (p.isReserved ? 'Rezerve' : 'Müsait');
-      document.getElementById('m-status').style.color = p.isSale ? '#777' : 'var(--accent)';
-      document.getElementById('m-price').innerText = p.isSale ? '' : (p.price ? `${p.price} ${p.currency || 'TRY'}` : 'Fiyat Sorunuz');
-      document.getElementById('m-desc').innerText = p.description || '';
-      
-      const imgPath = p.image ? `${BASE_RAW_URL}${p.image.split(',')[0].trim()}` : '';
-      document.getElementById('m-img').src = imgPath;
-
-      document.getElementById('artwork-modal').classList.add('active');
-    }
-    function closeModal() { document.getElementById('artwork-modal').classList.remove('active'); }
-
-    // ══════════════════════════════════════════════
-    // 3. ATÖLYELER (workshops.json) [cite: 165]
-    // ══════════════════════════════════════════════
+    // 3. ATÖLYELER
     async function loadWorkshops() {
       const data = await fetchData('content/workshops.json');
       if (!data || !data.workshops) return;
-
-      const list = document.getElementById('workshops-list');
       const activeWorkshops = data.workshops.filter(w => !w.archived);
-
-      list.innerHTML = activeWorkshops.map(w => `
+      
+      document.getElementById('workshops-list').innerHTML = activeWorkshops.map(w => `
         <div class="list-item">
-          <div class="list-date">
-            <div style="font-size:24px; color:#fff;" class="serif">${(w.date || '').split(' ')[0] || '-'}</div>
-            <div>${(w.date || '').split(' ').slice(1).join(' ')}</div>
-          </div>
+          <div class="list-date"><div style="font-size:24px; color:#fff;" class="serif">${(w.date || '').split(' ')[0] || '-'}</div><div>${(w.date || '').split(' ').slice(1).join(' ')}</div></div>
           <div class="list-content">
             <h3 class="list-title serif">${w.name}</h3>
-            <div class="list-meta">📍 ${w.location || 'Stüdyo'} &nbsp;|&nbsp; 👥 Kontenjan: ${w.enrolled || 0}/${w.capacity || 10} &nbsp;|&nbsp; 💰 ${w.price || 'Ücretsiz'}</div>
+            <div class="list-meta">📍 ${w.location || 'Stüdyo'} &nbsp;|&nbsp; 👥 ${w.enrolled || 0}/${w.capacity || 10} &nbsp;|&nbsp; 💰 ${w.price || 'Ücretsiz'}</div>
             <p style="font-size: 13px; color: var(--text-dim); margin-bottom: 20px;">${w.description || ''}</p>
-            <a href="#contact" class="filter-btn" style="text-decoration:none; padding:10px 25px;" onclick="document.getElementById('contact-subject').value='Kayıt Talebi: ${w.name}';">KAYIT TALEBİ OLUŞTUR</a>
+            <button class="action-btn" onclick="openRegModal('${w.name}')">KAYIT TALEBİ OLUŞTUR</button>
           </div>
         </div>
-      `).join('') || '<p style="text-align:center; color:#555;">Şu an planlanmış bir atölye bulunmuyor.</p>';
+      `).join('') || '<p style="text-align:center; color:#555;">Aktif atölye bulunmuyor.</p>';
     }
 
-    // ══════════════════════════════════════════════
-    // 4. HABERLER & GUESTBOOK (news.json) [cite: 138, 146]
-    // ══════════════════════════════════════════════
+    // 4. HABERLER & GUESTBOOK
     async function loadNewsAndGuestbook() {
       const data = await fetchData('content/news.json');
       if (!data) return;
 
-      // Blog
       if (data.announcements) {
-        const newsList = document.getElementById('news-list');
         const publishedNews = data.announcements.filter(n => n.published !== false);
-        
         const pinned = publishedNews.find(n => n.pinned);
         if (pinned) {
           const bar = document.getElementById('announcement-bar');
           bar.innerHTML = `📌 ${pinned.summary || pinned.title}`;
           bar.style.display = 'block';
         }
-
-        newsList.innerHTML = publishedNews.map(n => `
+        document.getElementById('news-list').innerHTML = publishedNews.map(n => `
           <div class="list-item" style="border-top:1px solid rgba(255,255,255,0.05);">
             <div class="list-date" style="color:var(--text-dim);">${n.date || ''}</div>
             <div class="list-content">
@@ -614,12 +455,9 @@
         `).join('') || '<p style="text-align:center; color:#555;">Henüz bir yayın yok.</p>';
       }
 
-      // Guestbook
       if (data.guestbook) {
-        const gbList = document.getElementById('guestbook-list');
         const approvedMsgs = data.guestbook.filter(m => m.approved);
-
-        gbList.innerHTML = approvedMsgs.map(m => `
+        document.getElementById('guestbook-list').innerHTML = approvedMsgs.map(m => `
           <div class="gb-msg">
             <p style="font-style: italic; color: #ccc; margin-bottom: 10px;">"${m.message}"</p>
             <div style="font-size: 9px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase;">
@@ -630,7 +468,31 @@
       }
     }
 
-    // Sistemin Ateşlenmesi
+    // Modal Yönetimi
+    function openModal(id, idx) {
+      if(id === 'artwork-modal') {
+        const p = globalProjects[idx];
+        document.getElementById('m-title').innerText = p.title || 'İsimsiz';
+        document.getElementById('m-sku').innerText = `SKU: ${p.certCode || '---'}`;
+        document.getElementById('m-cat').innerText = p.category || '---';
+        document.getElementById('m-mat').innerText = p.material || '---';
+        document.getElementById('m-dim').innerText = `${p.dimensions || '-'} ${p.weight ? `(${p.weight}kg)` : ''}`;
+        document.getElementById('m-status').innerText = p.isSale ? 'Koleksiyonda (Satıldı)' : (p.isReserved ? 'Rezerve' : 'Müsait');
+        document.getElementById('m-status').style.color = p.isSale ? '#777' : 'var(--accent)';
+        document.getElementById('m-price').innerText = p.isSale ? '' : (p.price ? `${p.price} ${p.currency || 'TRY'}` : 'Fiyat Sorunuz');
+        document.getElementById('m-desc').innerText = p.description || '';
+        document.getElementById('m-img').src = p.image ? `${BASE_RAW_URL}${p.image.split(',')[0].trim()}` : '';
+      }
+      document.getElementById(id).classList.add('active');
+    }
+    
+    function openRegModal(wsName) {
+      document.getElementById('reg-ws-name').value = wsName;
+      document.getElementById('reg-modal').classList.add('active');
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
     document.addEventListener('DOMContentLoaded', initSite);
   </script>
 </body>
