@@ -412,7 +412,7 @@
       "isReserved": false,
       "isConsignment": false,
       "isAnonSale": false,
-      "isFeatured": false,
+      "isFeatured": true,
       "incShipping": true,
       "incVat": true,
       "deposit": "",
