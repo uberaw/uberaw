@@ -6,7 +6,8 @@
       "phone": "aaa",
       "message": "Kayıt Talebi: Resim ve Heykel\n\nNotlar: aaa",
       "date": "29.04.2026",
-      "approved": false
+      "approved": false,
+      "status": "read"
     }
   ]
 }
