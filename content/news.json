@@ -21,5 +21,12 @@
       "published": true
     }
   ],
-  "guestbook": []
+  "guestbook": [
+    {
+      "name": "hasan",
+      "message": "selam",
+      "date": "28.04.2026",
+      "approved": true
+    }
+  ]
 }
