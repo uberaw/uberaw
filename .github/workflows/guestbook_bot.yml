@@ -1,48 +1,35 @@
-name: Secure Guestbook Bot
+name: Guestbook Bot
 on:
-  issues:
-    types: [opened]
+  repository_dispatch:
+    types: [incoming_message]
 
 jobs:
-  update_json:
-    if: contains(github.event.issue.labels.*.name, 'guestbook')
+  add_entry:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Process Issue Body
+      - uses: actions/checkout@v3
+      - name: Update JSON
         run: |
           node -e "
             const fs = require('fs');
             const file = './content/guestbook.json';
-            const data = JSON.parse(fs.readFileSync(file, 'utf8'));
-            const body = \`${{ github.event.issue.body }}\`;
-            
-            // Satırları ayıkla
-            const name = body.split('Ad Soyad:')[1]?.split('\n')[0]?.trim();
-            const message = body.split('Mesaj:')[1]?.split('\n')[0]?.trim();
-            
-            if (name && message) {
-              data.messages.push({
-                name,
-                message,
-                date: new Date().toLocaleDateString('tr-TR'),
-                approved: false // BURASI ÖNEMLİ: Onay bekliyor olarak düşer
-              });
-              fs.writeFileSync(file, JSON.stringify(data, null, 2));
+            let data = { messages: [] };
+            if (fs.existsSync(file)) {
+              data = JSON.parse(fs.readFileSync(file, 'utf8'));
             }
+            const newMsg = ${{ JSON.stringify(github.event.client_payload.data) }};
+            // Onay bekliyor olarak (false) ekliyoruz
+            data.messages.push({ 
+              ...newMsg, 
+              approved: false, 
+              date: new Date().toLocaleDateString('tr-TR') 
+            });
+            fs.writeFileSync(file, JSON.stringify(data, null, 2));
           "
-
-      - name: Close Issue
-        run: gh issue close ${{ github.event.issue.number }} --comment "İşlendi."
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Commit
+      - name: Commit & Push
         run: |
           git config user.name "Studio Bot"
           git config user.email "bot@uberaw.com"
           git add content/guestbook.json
-          git commit -m "Yeni mesaj onay bekliyor"
+          git commit -m "Yeni mesaj onay bekliyor (Otomatik)"
           git push
