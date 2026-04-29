@@ -1,15 +1,4 @@
 {
-  "announcements": [
-    {
-      "id": "post_1777456774748",
-      "title": "Fark?ndal?k Rotas?",
-      "summary": "",
-      "content": "",
-      "date": "30 Nisan 2026",
-      "tag": "Sergi",
-      "pinned": false,
-      "published": true
-    }
-  ],
+  "announcements": [],
   "guestbook": []
 }
