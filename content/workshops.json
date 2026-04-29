@@ -10,18 +10,6 @@
       "price": "",
       "description": "",
       "archived": false
-    },
-    {
-      "name": "gg",
-      "date": "ggg",
-      "location": "gggg",
-      "capacity": 10,
-      "price": "",
-      "type": "Karakalem",
-      "materials": "",
-      "description": "",
-      "enrolled": 0,
-      "archived": false
     }
   ],
   "students": []
