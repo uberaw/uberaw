@@ -1273,6 +1273,80 @@ function openEditModal(i){
   document.getElementById('edit-modal').classList.add('open');
 }
 
+// ══════════════════════════════════════════════
+// GELEN MESAJLARI YÖNETME SİSTEMİ (YENİ EKLENEN KISIM)
+// ══════════════════════════════════════════════
+let currentMessages = { messages: [] };
+
+async function loadMessagesFromSource() {
+  if (typeof showLoad === "function") showLoad(true, 'MESAJLAR YÜKLENİYOR...');
+  try {
+    const d = await ghAction('content/messages.json');
+    currentMessages = JSON.parse(b2u(d.content));
+    currentMessages.sha = d.sha;
+  } catch (e) {
+    currentMessages = { messages: [] };
+  }
+  filterAdminMessages('direct_message');
+  if (typeof showLoad === "function") showLoad(false);
+}
+
+function filterAdminMessages(type) {
+  const el = document.getElementById('inbox-list');
+  if (!el) return;
+
+  const list = currentMessages.messages || [];
+  const unreadCount = list.filter(m => !m.isRead).length;
+  
+  const badgeMsgEl = document.getElementById('badge-msg');
+  if (badgeMsgEl) {
+    badgeMsgEl.innerText = unreadCount;
+    badgeMsgEl.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+  }
+
+  if (list.length === 0) {
+    el.innerHTML = '<p style="color:#666;font-size:11px;padding:16px;">Gelen kutusu boş.</p>';
+    return;
+  }
+
+  el.innerHTML = list.map((m, i) => `
+    <div class="card" style="margin-bottom: 12px; border-left: 3px solid ${m.isRead ? '#333' : '#e67e22'}; background: #1a1a1a; padding: 10px; border-radius: 4px;">
+      <div style="display:flex; justify-content: space-between; margin-bottom: 6px;">
+        <b style="color:#eee; font-size:12px;">${m.name || 'İsimsiz'}</b>
+        <small style="color:#666; font-size:9px;">${m.date || ''}</small>
+      </div>
+      <div style="color:#999; font-size:10px; margin-bottom:10px;">${m.contact || ''}</div>
+      <p style="font-size:11px; color:#bbb; line-height:1.5; margin-bottom: 10px;">${m.message || ''}</p>
+      <div style="display: flex; gap: 5px;">
+        ${!m.isRead ? `<button onclick="markMessageRead(${i})" style="background:#27ae60; color:white; border:none; padding:4px 8px; font-size:10px; cursor:pointer; border-radius:3px;">Okundu</button>` : ''}
+        <button onclick="deleteMessage(${i})" style="background:#c0392b; color:white; border:none; padding:4px 8px; font-size:10px; cursor:pointer; border-radius:3px;">Sil</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function markMessageRead(i) {
+  currentMessages.messages[i].isRead = true;
+  await saveMessages();
+}
+
+async function deleteMessage(i) {
+  if(!confirm('Mesajı silmek istiyor musunuz?')) return;
+  currentMessages.messages.splice(i, 1);
+  await saveMessages();
+}
+
+async function saveMessages() {
+  if (typeof showLoad === "function") showLoad(true, 'GÜNCELLENİYOR...');
+  try {
+    await ghAction('content/messages.json', 'PUT', { messages: currentMessages.messages }, currentMessages.sha);
+    await loadMessagesFromSource();
+  } catch (e) {
+    alert('Hata: ' + e.message);
+  }
+  if (typeof showLoad === "function") showLoad(false);
+}
+
 async function saveProjectEdit(){
   showLoad(true,'KAYDEDİLİYOR...');
   const i=document.getElementById('edit-idx').value;
