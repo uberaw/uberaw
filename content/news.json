@@ -1,4 +1,15 @@
 {
-  "guestbook": [],
-  "announcements": []
+  "announcements": [
+    {
+      "id": "post_1777511470868",
+      "title": "UBE RAW Studio Açıldı",
+      "summary": "Stüdyo resmi olarak faaliyete geçti — eserler ve atölyeler için takipte kalın.",
+      "content": "",
+      "date": "30 Nisan 2026",
+      "tag": "HABER",
+      "pinned": true,
+      "published": true
+    }
+  ],
+  "guestbook": []
 }
