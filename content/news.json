@@ -13,12 +13,6 @@
   ],
   "guestbook": [
     {
-      "name": "Emir",
-      "message": "Merhaba",
-      "date": "30.04.2026",
-      "approved": true
-    },
-    {
       "name": "hasan",
       "message": "yıyıyı",
       "date": "30.04.2026 04:41:32",
