@@ -1,3 +1,15 @@
 {
-  "requests": []
+  "requests": [
+    {
+      "id": "REQ-1777515458774",
+      "type": "workshop_registration",
+      "name": "ubey",
+      "email": "ubey@gmail.com",
+      "phone": "sdfsdgsdg",
+      "atolye": "Resim ve Heykel",
+      "message": "iiiiğğğ",
+      "date": "30.04.2026 05:17:37",
+      "status": "new"
+    }
+  ]
 }
