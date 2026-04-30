@@ -432,8 +432,8 @@
     // GOOGLE SCRIPT URL'LERİ
     // → Her birini Google Apps Script'ten aldığın "Web Uygulaması" URL'si ile değiştir
     // ════════════════════════════════════════════════════
-    const URL_ATOLYE_KAYIT  = "https://script.google.com/macros/s/AKfycbxdaZJ_LU1WlI5N-52kmC4BX1Yg-i9G4BoPzcWtWDGm7dnW97nAWZRwYm3_4J7GO5HO/exec";   // 2_talep_script.gs
-    const URL_DIREKT_MESAJ  = "https://script.google.com/macros/s/AKfycbxh0C5zAgHhR-eO69Lk91HNuG_gitKqgKrUeELVyDPztULmB1mpbwPx7YN5afzICslr/exec";   // 1_mesaj_script.gs
+    const URL_ATOLYE_KAYIT  = "https://script.google.com/macros/s/AKfycbzqyTaQx5IsUUckXiU4t6XbX2G0jZvMe0B_1PALKVjAHT29WN4Gh6Ucq2nwBgRldkJ_/exec";   // 2_talep_script.gs
+    const URL_DIREKT_MESAJ  = "https://script.google.com/macros/s/AKfycbxwOO1ugQbAlaghBQeLo2u-6Nz05Lac2Yb53-qmwoqCZCin1P7EkwAPG5S502fchmU3/exec";   // 1_mesaj_script.gs
     const URL_ZIYARETCI_DEF = "https://script.google.com/macros/s/AKfycbyCVqLhZrw6eMrnY49y8xDzSF3B_f6COAYojMNNyuQmaBlS52ags9uJF7NThvuXQTv1/exec"; // 3_ziyaretci_script.gs
 
     // ════════════════════════════════════════════════════
@@ -791,7 +791,6 @@
       btn.disabled   = true;
       btn.textContent = 'GÖNDERİLİYOR...';
 
-      // URL henüz ayarlanmamışsa uyar
       if (!url || url.startsWith('BURAYA')) {
         showToast('Form henüz yapılandırılmadı. Lütfen Google Script URL\'sini ekleyin.', 'error');
         btn.disabled   = false;
@@ -802,12 +801,11 @@
       try {
         await fetch(url, {
           method:  'POST',
-          mode:    'no-cors', // Google Apps Script için zorunlu
+          mode:    'no-cors',
           cache:   'no-cache',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // application/json yerine text/plain ile gönderim
           body:    JSON.stringify(payload)
         });
-        // no-cors modunda yanıt okunamaz ama istek ulaşır
         showToast(successMsg, 'success');
         formEl.reset();
         if (formEl.closest('.modal')) closeModal(formEl.closest('.modal').id);
