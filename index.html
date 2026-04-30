@@ -303,7 +303,7 @@
     <div class="section-header reveal">
       <div class="section-divider"></div>
       <div class="section-subtitle">Envanter</div>
-      <h2 class="section-title">SEÇKİ ESERLER</h2>
+      <h2 class="section-title">SEÇKİN ESERLER</h2>
     </div>
     <div class="filter-container reveal" id="category-filters" style="transition-delay: 0.1s;"></div>
     <div class="grid reveal" id="portfolio-grid" style="transition-delay: 0.2s;"></div>
@@ -378,7 +378,7 @@
     <div class="section-header reveal">
       <div class="section-divider"></div>
       <div class="section-subtitle">Duyurular & Yayınlar</div>
-      <h2 class="section-title">STÜDYODAN HABERLER</h2>
+      <h2 class="section-title">HABERLER</h2>
     </div>
     <div class="list-container reveal" id="news-list"></div>
   </section>
@@ -396,7 +396,7 @@
         <!-- Sol: Direkt Mesaj -->
         <div>
           <h3 class="serif" style="font-size: 32px; margin-bottom: 15px; color: #fff;">Direkt Mesaj</h3>
-          <p style="font-size: 11px; color: var(--text-dim); margin-bottom: 40px; letter-spacing: 1px;">Komisyon işler, portfolyo sunumu veya genel bilgi talepleri için form üzerinden iletişime geçebilirsiniz.</p>
+          <p style="font-size: 11px; color: var(--text-dim); margin-bottom: 40px; letter-spacing: 1px;">Portfolyo sunumu ve genel bilgi talepleri için form üzerinden iletişime geçebilirsiniz.</p>
           <form id="contact-form">
             <input type="text" id="iletisim-konu" name="Konu" placeholder="Konu (Örn: Sipariş, Bilgi)" class="cursor-hover">
             <input type="text" name="Ad_Soyad" placeholder="Adınız Soyadınız *" required class="cursor-hover">
@@ -832,7 +832,7 @@
         notlar:   this.querySelector('[name="Notlar"]').value,
         tarih:    new Date().toLocaleString('tr-TR')
       };
-      await silentSubmit(this, URL_ATOLYE_KAYIT, payload, 'Kayıt talebiniz atölye birimine iletildi.');
+      await silentSubmit(this, URL_ATOLYE_KAYIT, payload, 'Kayıt talebiniz iletildi.');
     });
 
     // ── 2. İletişim / Direkt Mesaj Formu ──
@@ -858,7 +858,7 @@
         mesaj:    this.querySelector('[name="Ziyaretci_Mesaji"]').value,
         tarih:    new Date().toLocaleString('tr-TR')
       };
-      await silentSubmit(this, URL_ZIYARETCI_DEF, payload, 'Notunuz deftere eklendi, teşekkürler. Onaylandıktan sonra yayınlanacaktır.');
+      await silentSubmit(this, URL_ZIYARETCI_DEF, payload, 'Notunuz deftere eklendi, onaylandıktan sonra yayınlanacaktır.');
     });
 
     // ════════════════════════════════════════════════════
