@@ -785,27 +785,29 @@
     // ════════════════════════════════════════════════════
     // FORM GÖNDERİM MOTORU
     // ════════════════════════════════════════════════════
-    async function silentSubmit(formEl, url, payload, successMsg) {
+        async function silentSubmit(formEl, url, payload, successMsg) {
       const btn = formEl.querySelector('button[type="submit"]');
       const orig = btn.textContent;
       btn.disabled   = true;
       btn.textContent = 'GÖNDERİLİYOR...';
-
+ 
+      // URL henüz ayarlanmamışsa uyar
       if (!url || url.startsWith('BURAYA')) {
         showToast('Form henüz yapılandırılmadı. Lütfen Google Script URL\'sini ekleyin.', 'error');
         btn.disabled   = false;
         btn.textContent = orig;
         return;
       }
-
+ 
       try {
         await fetch(url, {
           method:  'POST',
-          mode:    'no-cors',
+          mode:    'no-cors', // Google Apps Script için zorunlu
           cache:   'no-cache',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // application/json yerine text/plain ile gönderim
+          headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify(payload)
         });
+        // no-cors modunda yanıt okunamaz ama istek ulaşır
         showToast(successMsg, 'success');
         formEl.reset();
         if (formEl.closest('.modal')) closeModal(formEl.closest('.modal').id);
