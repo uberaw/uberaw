@@ -1310,16 +1310,23 @@ function filterAdminMessages(type) {
   }
 
   el.innerHTML = list.map((m, i) => `
-    <div class="card" style="margin-bottom: 12px; border-left: 3px solid ${m.isRead ? '#333' : '#e67e22'}; background: #1a1a1a; padding: 10px; border-radius: 4px;">
-      <div style="display:flex; justify-content: space-between; margin-bottom: 6px;">
-        <b style="color:#eee; font-size:12px;">${m.name || 'İsimsiz'}</b>
-        <small style="color:#666; font-size:9px;">${m.date || ''}</small>
+    <div class="card" style="margin-bottom:12px; border-left:3px solid ${m.isRead ? '#333' : 'var(--accent)'}; padding:16px; border-radius:4px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px; align-items:flex-start;">
+        <div>
+          <b style="color:#eee; font-size:13px;">${esc(m.ad_soyad || m.name || 'İsimsiz')}</b>
+          ${!m.isRead ? '<span class="badge pending" style="margin-left:6px;">YENİ</span>' : ''}
+        </div>
+        <small style="color:#555; font-size:9px; white-space:nowrap;">${esc(m.tarih || m.date || '')}</small>
       </div>
-      <div style="color:#999; font-size:10px; margin-bottom:10px;">${m.contact || ''}</div>
-      <p style="font-size:11px; color:#bbb; line-height:1.5; margin-bottom: 10px;">${m.message || ''}</p>
-      <div style="display: flex; gap: 5px;">
-        ${!m.isRead ? `<button onclick="markMessageRead(${i})" style="background:#27ae60; color:white; border:none; padding:4px 8px; font-size:10px; cursor:pointer; border-radius:3px;">Okundu</button>` : ''}
-        <button onclick="deleteMessage(${i})" style="background:#c0392b; color:white; border:none; padding:4px 8px; font-size:10px; cursor:pointer; border-radius:3px;">Sil</button>
+      ${m.konu ? `<div style="color:var(--accent); font-size:10px; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">${esc(m.konu)}</div>` : ''}
+      <p style="font-size:12px; color:#aaa; line-height:1.7; margin-bottom:12px; background:#0a0a0a; padding:10px; border-radius:3px;">"${esc(m.mesaj || m.message || 'Mesaj içeriği yok.')}"</p>
+      <div style="font-size:10px; color:var(--dim); line-height:1.8; margin-bottom:10px;">
+        <div>✉ ${esc(m.email || '-')}</div>
+        ${m.telefon || m.phone ? `<div>📞 ${esc(m.telefon || m.phone || '')}</div>` : ''}
+      </div>
+      <div class="bg" style="margin:0;">
+        ${!m.isRead ? `<button class="success sm" onclick="markMessageRead(${i})">OKUNDU</button>` : '<span style="font-size:9px;color:#444;letter-spacing:1px;">✓ OKUNDU</span>'}
+        <button class="danger sm" onclick="deleteMessage(${i})">SİL</button>
       </div>
     </div>
   `).join('');
@@ -1801,78 +1808,7 @@ async function deleteMsg(i){
   showLoad(false);
 }
 
-// ══ GELEN KUTUSU MOTORU (YENİ SİSTEM) ══
-let allMessages = [];
-
-async function loadMessagesFromSource() {
-  showLoad(true, 'MESAJLAR YÜKLENİYOR...');
-  try {
-    const data = await ghAction('content/messages.json', 'GET');
-    allMessages = data && data.messages ? data.messages : [];
-    filterAdminMessages('direct_message');
-  } catch(e) {
-    allMessages = [];
-    filterAdminMessages('direct_message');
-  }
-  showLoad(false);
-}
-
-function filterAdminMessages(type) {
-  const t1 = document.getElementById('tab-inbox-direct');
-  const t2 = document.getElementById('tab-inbox-workshop');
-  if(t1) t1.classList.toggle('active', type === 'direct_message');
-  if(t2) t2.classList.toggle('active', type === 'workshop_registration');
-
-  const list = document.getElementById('inbox-list');
-  if(!list) return;
-
-  let html = '';
-  for (let i = 0; i < allMessages.length; i++) {
-    const m = allMessages[i];
-    if (m.type !== type) continue;
-    
-    html += `
-    <div class="card" style="border-left: 2px solid var(--accent); padding:20px; position:relative;">
-      <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-        <strong style="color:#fff; font-size:14px;">${esc(m.ad_soyad || m.name || 'İsimsiz')}</strong>
-        <span style="font-size:10px; color:var(--dim);">${esc(m.tarih || m.date || '')}</span>
-      </div>
-      <div style="color:var(--accent); font-size:11px; margin-bottom:12px; text-transform:uppercase; font-weight:600;">
-        ${esc(m.konu || m.atolye || 'BİLGİ TALEBİ')}
-      </div>
-      <p style="font-size:12px; color:#aaa; line-height:1.7; margin-bottom:15px; background:#0f0f0f; padding:10px; border-radius:4px;">
-        "${esc(m.mesaj || m.notlar || m.message || 'Mesaj içeriği bulunmuyor.')}"
-      </p>
-      <div style="font-size:10px; border-top:1px solid var(--border); padding-top:12px; color:var(--dim); line-height:1.8; display:flex; justify-content:space-between; align-items:flex-end;">
-        <div>
-          <div>✉ ${esc(m.email || '-')}</div>
-          ${m.telefon || m.phone ? `<div>📞 ${esc(m.telefon || m.phone)}</div>` : ''}
-        </div>
-        <button class="danger sm" onclick="deleteInboxMsg(${i})">SİL</button>
-      </div>
-    </div>`;
-  }
-  
-  list.innerHTML = html || '<p style="padding:20px; color:var(--dim);">Bu kategoride mesaj bulunmuyor.</p>';
-}
-
-async function deleteInboxMsg(i) {
-  if(!confirm('Mesaj kalıcı olarak silinecek, emin misiniz?')) return;
-  showLoad(true, 'SİLİNİYOR...');
-  try {
-    const d = await ghAction('content/messages.json', 'GET');
-    if(d && d.messages) {
-        d.messages.splice(i, 1);
-        await ghAction('content/messages.json', 'PUT', d, d.sha);
-        addLog('MESAJ SİLİNDİ', 'Gelen kutusundan bir mesaj silindi.');
-    }
-    showToast('Mesaj silindi.', false, true);
-    await loadMessagesFromSource();
-  } catch(e) {
-    showToast('Silme başarısız.', true);
-  }
-  showLoad(false);
-}
+// ══ GELEN KUTUSU: duplicate blok kaldırıldı, yukarıdaki sistem kullanılıyor ══
 
 // ══ SETTINGS ══
 async function loadSettings(){
