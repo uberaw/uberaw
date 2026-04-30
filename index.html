@@ -429,12 +429,10 @@
 
   <script>
     // ════════════════════════════════════════════════════
-    // GOOGLE SCRIPT URL'LERİ
-    // → Her birini Google Apps Script'ten aldığın "Web Uygulaması" URL'si ile değiştir
+    // GOOGLE SCRIPT URL (MASTER SCRIPT)
+    // → Google Apps Script'ten aldığın YENİ tek URL'yi buraya yapıştır
     // ════════════════════════════════════════════════════
-    const URL_ATOLYE_KAYIT  = "https://script.google.com/macros/s/AKfycbzqyTaQx5IsUUckXiU4t6XbX2G0jZvMe0B_1PALKVjAHT29WN4Gh6Ucq2nwBgRldkJ_/exec";   // 2_talep_script.gs
-    const URL_DIREKT_MESAJ  = "https://script.google.com/macros/s/AKfycbx2kcraaLdvjfxF_rwzRGroVHsOPahQdrHgGsxA_OQ_Jfet_iXIphzO3aLojaH_sGdr/exec";   // 1_mesaj_script.gs
-    const URL_ZIYARETCI_DEF = "https://script.google.com/macros/s/AKfycbyCVqLhZrw6eMrnY49y8xDzSF3B_f6COAYojMNNyuQmaBlS52ags9uJF7NThvuXQTv1/exec"; // 3_ziyaretci_script.gs
+    const URL_MASTER_SCRIPT  = "https://script.google.com/macros/s/AKfycbycqYM0zx8FtZtSusT2Z_dc2DKiJUS9fgmQ5Yj1enIxKHfCAoTTU8Wy9YXScRzZK2tf/exec";
 
     // ════════════════════════════════════════════════════
     // GITHUB REPO BAĞLANTISI
@@ -675,7 +673,6 @@
       const data = await fetchData('content/news.json');
       if (!data) return;
 
-      // Duyurular
       if (data.announcements) {
         const published = data.announcements.filter(n => n.published !== false);
         const pinned    = published.find(n => n.pinned);
@@ -705,7 +702,6 @@
           : '<p style="text-align:center;color:#555;padding:40px;letter-spacing:3px;font-size:10px;">Henüz yayın yok.</p>';
       }
 
-      // Ziyaretçi Defteri — news.json → guestbook[] → approved:true olanları göster
       if (data.guestbook) {
         const approved = data.guestbook.filter(m => m.approved);
         document.getElementById('guestbook-list').innerHTML = approved.length
@@ -741,7 +737,6 @@
         document.getElementById('m-desc').textContent   = p.description || '';
         document.getElementById('m-img').src            = p.image ? `${BASE_RAW_URL}${p.image.split(',')[0].trim()}` : '';
 
-        // İletişim butonuna eser adını aktar
         const contactBtn = document.getElementById('m-contact-btn');
         contactBtn.href = '#contact';
         contactBtn.onclick = () => {
@@ -765,7 +760,6 @@
       document.documentElement.style.overflow = 'auto';
     }
 
-    // ESC ile modal kapat
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
         ['artwork-modal', 'reg-modal'].forEach(closeModal);
@@ -783,31 +777,29 @@
     });
 
     // ════════════════════════════════════════════════════
-    // FORM GÖNDERİM MOTORU
+    // FORM GÖNDERİM MOTORU (TEK URL, CORS DÜZELTMESİYLE)
     // ════════════════════════════════════════════════════
-        async function silentSubmit(formEl, url, payload, successMsg) {
+    async function silentSubmit(formEl, payload, successMsg) {
       const btn = formEl.querySelector('button[type="submit"]');
       const orig = btn.textContent;
       btn.disabled   = true;
       btn.textContent = 'GÖNDERİLİYOR...';
- 
-      // URL henüz ayarlanmamışsa uyar
-      if (!url || url.startsWith('BURAYA')) {
+
+      if (!URL_MASTER_SCRIPT || URL_MASTER_SCRIPT.startsWith('BURAYA')) {
         showToast('Form henüz yapılandırılmadı. Lütfen Google Script URL\'sini ekleyin.', 'error');
         btn.disabled   = false;
         btn.textContent = orig;
         return;
       }
- 
+
       try {
-        await fetch(url, {
+        await fetch(URL_MASTER_SCRIPT, {
           method:  'POST',
-          mode:    'no-cors', // Google Apps Script için zorunlu
+          mode:    'no-cors', 
           cache:   'no-cache',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Tarayıcı engelini geçmek için text/plain
           body:    JSON.stringify(payload)
         });
-        // no-cors modunda yanıt okunamaz ama istek ulaşır
         showToast(successMsg, 'success');
         formEl.reset();
         if (formEl.closest('.modal')) closeModal(formEl.closest('.modal').id);
@@ -832,7 +824,7 @@
         notlar:   this.querySelector('[name="Notlar"]').value,
         tarih:    new Date().toLocaleString('tr-TR')
       };
-      await silentSubmit(this, URL_ATOLYE_KAYIT, payload, 'Kayıt talebiniz atölye birimine iletildi.');
+      await silentSubmit(this, payload, 'Kayıt talebiniz atölye birimine iletildi.');
     });
 
     // ── 2. İletişim / Direkt Mesaj Formu ──
@@ -846,7 +838,7 @@
         mesaj:    this.querySelector('[name="Mesaj"]').value,
         tarih:    new Date().toLocaleString('tr-TR')
       };
-      await silentSubmit(this, URL_DIREKT_MESAJ, payload, 'Mesajınız başarıyla gönderildi.');
+      await silentSubmit(this, payload, 'Mesajınız başarıyla gönderildi.');
     });
 
     // ── 3. Ziyaretçi Defteri Formu ──
@@ -858,7 +850,7 @@
         mesaj:    this.querySelector('[name="Ziyaretci_Mesaji"]').value,
         tarih:    new Date().toLocaleString('tr-TR')
       };
-      await silentSubmit(this, URL_ZIYARETCI_DEF, payload, 'Notunuz deftere eklendi, teşekkürler. Onaylandıktan sonra yayınlanacaktır.');
+      await silentSubmit(this, payload, 'Notunuz deftere eklendi, teşekkürler. Onaylandıktan sonra yayınlanacaktır.');
     });
 
     // ════════════════════════════════════════════════════
