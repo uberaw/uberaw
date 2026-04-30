@@ -11,5 +11,12 @@
       "published": true
     }
   ],
-  "guestbook": []
+  "guestbook": [
+    {
+      "name": "sdfs",
+      "message": "sdfsdf",
+      "date": "30.04.2026 15:58:39",
+      "approved": true
+    }
+  ]
 }
