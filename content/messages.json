@@ -1,3 +1,14 @@
 {
-  "messages": []
+  "messages": [
+    {
+      "id": "MSG-1777553801330",
+      "type": "direct_message",
+      "ad_soyad": "ubey",
+      "email": "ubey@gmail.com",
+      "konu": "Eser Talebi: Erkek Büst",
+      "mesaj": "aaaa",
+      "tarih": "30.04.2026 15:56:41",
+      "status": "unread"
+    }
+  ]
 }
