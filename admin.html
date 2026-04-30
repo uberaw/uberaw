@@ -299,7 +299,7 @@ button.full{width:100%;margin-top:10px;padding:13px;}
     <div class="g2">
       <div><label>Mekan</label><input type="text" id="ws-loc" placeholder="Stüdyo"></div>
       <div><label>Tür</label>
-        <select id="ws-type"><option>Karakalem</option><option>Kil Heykel</option><option>Ahşap Rölyef</option><option>Karma</option><option>Birebir Özel Ders</option></select>
+        <select id="ws-type"><option>Karakalem</option><option>Heykel</option><option>Rölyef</option><option>Karma</option><option>Atölye Çalışmaları</option></select>
       </div>
     </div>
     <div class="g2">
@@ -592,7 +592,7 @@ button.full{width:100%;margin-top:10px;padding:13px;}
     <button class="itb active" onclick="sit('ws','active')">Aktif Atölyeler</button>
     <button class="itb" onclick="sit('ws','student')">Kursiyer Ekle & Listele</button>
     <button class="itb" onclick="sit('ws','cal')">Takvim</button>
-    <button class="itb" onclick="sit('ws','private')">Özel Ders Talepleri</button>
+    <button class="itb" onclick="sit('ws','private')">Atölye Talepleri</button>
   </div>
   <div id="ws-active" class="itp2 active">
     <div id="ws-list"><p style="color:#333;font-size:10px;padding:16px;">Atölye kaydı yok. "Yeni Atölye" butonunu kullanın.</p></div>
@@ -626,7 +626,7 @@ button.full{width:100%;margin-top:10px;padding:13px;}
     <div class="card"><div class="st" style="margin-top:0;">Atölye Takvimi</div><div id="ws-cal-list"></div></div>
   </div>
   <div id="ws-private" class="itp2">
-    <div class="ib">Siteden gelen "Özel Ders Talebi" formları burada görünür (<b>content/private_requests.json</b>). Sitede de FormSubmit ile e-postanıza gelir.</div>
+    <div class="ib">Siteden gelen "Atölye Talebi" formları burada görünür (<b>content/private_requests.json</b>). </div>
     <div id="private-list" class="card" style="padding:8px 12px;"><p style="color:#333;font-size:10px;">Talep yok.</p></div>
   </div>
 </div>
@@ -638,7 +638,7 @@ button.full{width:100%;margin-top:10px;padding:13px;}
       <button onclick="loadMessagesFromSource()" class="secondary sm">Yenile</button>
     </div>
   </div>
-  <div class="ib">📧 Siteden gelen Özel Ders ve İletişim mesajları otomatik olarak burada listelenir.</div>
+  <div class="ib">Mesajlar otomatik olarak burada listelenir.</div>
   <div class="itabs">
     <button id="tab-inbox-direct" class="itb active" onclick="filterAdminMessages('direct_message')">Direkt Mesajlar</button>
     <button id="tab-inbox-workshop" class="itb" onclick="filterAdminMessages('workshop_registration')">Atölye Talepleri</button>
@@ -2035,7 +2035,7 @@ async function loadPrivateRequests(){
         <button class="success sm" onclick="markReqRead(${i},'${d.sha}')">OKUNDU</button>
         <button class="danger sm" onclick="deleteReq(${i},'${d.sha}')">SİL</button>
       </div>
-    </div>`).join(''):"<p style='color:#333;font-size:9px;padding:16px;'>Özel ders talebi yok. Sitedeki form doldurunca burada görünür.</p>";
+    </div>`).join(''):"<p style='color:#333;font-size:9px;padding:16px;'>Atölye talebi yok. Sitedeki form doldurunca burada görünür.</p>";
   }catch(e){el.innerHTML="<p style='color:#333;font-size:9px;padding:16px;'>Veri yüklenemedi.</p>";}
 }
 async function markReqRead(i,sha){
