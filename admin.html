@@ -626,7 +626,6 @@ button.full{width:100%;margin-top:10px;padding:13px;}
     <div class="card"><div class="st" style="margin-top:0;">Atölye Takvimi</div><div id="ws-cal-list"></div></div>
   </div>
   <div id="ws-private" class="itp2">
-    <div class="ib">Siteden gelen "Atölye Talebi" formları burada görünür (<b>content/private_requests.json</b>). </div>
     <div id="private-list" class="card" style="padding:8px 12px;"><p style="color:#333;font-size:10px;">Talep yok.</p></div>
   </div>
 </div>
@@ -638,7 +637,6 @@ button.full{width:100%;margin-top:10px;padding:13px;}
       <button onclick="loadMessagesFromSource()" class="secondary sm">Yenile</button>
     </div>
   </div>
-  <div class="ib">Mesajlar otomatik olarak burada listelenir.</div>
   <div class="itabs">
     <button id="tab-inbox-direct" class="itb active" onclick="filterAdminMessages('direct_message')">Direkt Mesajlar</button>
     <button id="tab-inbox-workshop" class="itb" onclick="filterAdminMessages('workshop_registration')">Atölye Talepleri</button>
@@ -650,7 +648,6 @@ button.full{width:100%;margin-top:10px;padding:13px;}
 
 <div id="tab-guest" class="tab">
   <div class="ph"><div><h2>Ziyaretçi Defteri</h2><small>ONAY SİSTEMİ · GUESTBOOK</small></div></div>
-  <div class="ib">📧 Siteden gelen mesajlar <b>FormSubmit</b> aracılığıyla e-postanıza gelir. Buradan onayladığınızda sitede yayınlanır (<b>news.json → guestbook</b>).</div>
   <div class="itabs">
     <button class="itb active" onclick="sit('guest','inbox')">Bekleyen Onay <span id="inbox-count" style="color:#ffb300;"></span></button>
     <button class="itb" onclick="sit('guest','approved')">Onaylı Mesajlar</button>
@@ -679,7 +676,6 @@ button.full{width:100%;margin-top:10px;padding:13px;}
     <div><h2>Blog & Haberler</h2><small>MODÜL 9.3 — CMS</small></div>
     <button onclick="openBlogModal()" class="success sm">+ Yeni Yazı</button>
   </div>
-  <div class="ib">Yazılar <b>content/news.json → announcements</b> dizisine kaydedilir. 📌 Sabitlenen duyuru barında görünür. 🌐 Yayınlanan sitede blog bölümünde listelenir.</div>
   <div class="sg" style="grid-template-columns:repeat(3,1fr);margin-top:12px;">
     <div class="sb"><h3 id="blog-total">0</h3><p>Toplam Yazı</p></div>
     <div class="sb"><h3 id="blog-pub">0</h3><p>Yayında</p></div>
